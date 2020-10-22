@@ -71,11 +71,10 @@ export default {
     },
 
     async go() {
-      //https://stackoverflow.com/questions/40355660/how-to-use-dropbox-sdk-js-in-the-browser
-
       const files = await this.remote.list();
       console.log(files);
       this.json = JSON.stringify(files);
+      await Storage.queueIn.create(files);
     },
   }
 }

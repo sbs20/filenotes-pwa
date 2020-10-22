@@ -1,15 +1,3 @@
-/*
-tables:
-  settings {key, value}
-    accessToken
-    localCursor
-    remoteCursor
-  fs.metadata
-
-  fs.data
-  actions
-*/
-
 import { openDB } from 'idb';
 
 const DB_NAME = 'filenotes.app';
@@ -19,45 +7,88 @@ const STORE_FS = 'fs';
 const STORE_QOUT = 'qout';
 const STORE_QIN = 'qin';
 
-const useDb = async (consumer) => {
-  const idb = await openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      db.createObjectStore(STORE_SETTINGS);
-      db.createObjectStore(STORE_FS, { keyPath: 'key' });
-      db.createObjectStore(STORE_QOUT, { keyPath: 'key' });
-      db.createObjectStore(STORE_QIN, { keyPath: 'key' });
-    },
-    blocked() {
-      console.log('blocked');
-    },
-    blocking() {
-      console.log('blocking');
-    }
-  });
-  const response = consumer(idb);
-  idb.close();
-  return response;
-};
+class Storage {
+  constructor() {
+    this.db = null;
+  }
 
+  async open() {
+    this.db = await openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        db.createObjectStore(STORE_SETTINGS);
+        db.createObjectStore(STORE_FS, { keyPath: 'key' });
+        db.createObjectStore(STORE_QOUT, { keyPath: 'key' });
+        db.createObjectStore(STORE_QIN, { keyPath: 'key' });
+      },
+      blocked() {
+        console.log('blocked');
+      },
+      blocking() {
+        console.log('blocking');
+      }
+    });  
+  }
+
+  close() {
+    this.db.close();
+    this.db = null;
+  }
+
+  static async use(dbConsumer) {
+    const storage = new Storage();
+    await storage.open();
+    let response = null;
+    try {
+      response = await dbConsumer(storage.db);
+    } catch { /*Nothing*/ }
+    storage.close();
+    return response;  
+  }
+}
+
+class FileStore {
+  constructor(store) {
+    this.store = store;
+  }
+
+  async list() {
+    return await Storage.use(idb => idb.getAllKeys(this.store));
+  }
+
+  async delete(item) {
+    await Storage.use(idb => idb.delete(this.store, item));
+  }
+
+  async create(items) {
+    await Storage.use(async idb => {
+      const tx = idb.transaction(this.store, 'readwrite');
+      const transactions = items.map(item => tx.store.put(item));
+      transactions.push(tx.done);
+      await Promise.all(transactions);
+    });
+  }
+}
 
 export default {
   settings: {
     async get(key) {
-      return await useDb(idb => idb.get(STORE_SETTINGS, key));
+      return await Storage.use(idb => idb.get(STORE_SETTINGS, key));
     },
     async set(key, val) {
-      await useDb(idb => idb.put(STORE_SETTINGS, val, key));
-      // return (await instance()).put(STORE_SETTINGS, val, key);
+      await Storage.use(idb => idb.put(STORE_SETTINGS, val, key));
     },
     async delete(key) {
-      await useDb(idb => idb.delete(STORE_SETTINGS, key));
-      // return (await instance()).delete(STORE_SETTINGS, key);
+      await Storage.use(idb => idb.delete(STORE_SETTINGS, key));
     },
     async clear() {
-      // return (await instance()).clear(STORE_SETTINGS);
+      await Storage.use(idb => idb.clear(STORE_SETTINGS));
     },
     async keys() {
-      // return (await instance()).getAllKeys(STORE_SETTINGS);
+      return await Storage.use(idb => idb.getAllKeys(STORE_SETTINGS));
     },  
-  }
+  },
+
+  queueIn: new FileStore(STORE_QIN),
+  queueOut: new FileStore(STORE_QOUT),
+  fs: new FileStore(STORE_FS),
 };

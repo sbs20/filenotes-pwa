@@ -27,27 +27,28 @@ MAPPING.TO_REMOTE = Object.keys(MAPPING.TO_LOCAL).reduce((acc, key) => {
 export default class DropboxService extends CloudService {
   constructor(options) {
     super();
+    this._dbx = null;
     this.options = options || {};
-    this.dbx = null;
     this.cursor = null;
   }
 
-  _create() {
-    return new Dropbox({
-      accessToken: this.options.accessToken,
-      clientId: this.options.clientId,
-      fetch: (url, options) => fetch(url, options) });
+  dbx() {
+    if (this._dbx === null) {
+      this._dbx = new Dropbox({
+        accessToken: this.options.accessToken,
+        clientId: this.options.clientId,
+        fetch: (url, options) => fetch(url, options) });  
+    }
+    return this._dbx;
   }
 
   authenticationUrl() {
-    this.dbx = this._create();
-    return this.dbx.auth.getAuthenticationUrl(this.options.authUrl);
+    return this.dbx().auth.getAuthenticationUrl(this.options.authUrl);
   }
 
   async connect() {
-    this.dbx = this._create();
     try {
-      const account = await this.dbx.usersGetCurrentAccount();
+      const account = await this.dbx().usersGetCurrentAccount();
       this.isAuthorised = true;
       this.currentAccountEmail = account.currentAccountEmail;
     } catch (error) {
@@ -84,7 +85,7 @@ export default class DropboxService extends CloudService {
     };
 
     if (this.cursor == null) {
-      const response = await this.dbx.filesListFolder({
+      const response = await this.dbx().filesListFolder({
         path: '',
         recursive: true,
         include_deleted: true });
@@ -93,7 +94,7 @@ export default class DropboxService extends CloudService {
     }
 
     while (hasMore) {
-      const response = await this.dbx.filesListFolderContinue({ cursor: this.cursor });
+      const response = await this.dbx().filesListFolderContinue({ cursor: this.cursor });
       handleResult(response.result);
     }
 
