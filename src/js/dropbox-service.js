@@ -1,6 +1,29 @@
 import CloudService from './cloud-service';
 import { Dropbox } from 'dropbox';
 
+const MAPPING = {
+  TO_LOCAL: {
+    '.tag': 'tag',
+    'name': 'name',
+    'path_lower': 'key',
+    'path_display': 'path',
+    'id': 'id',
+    'client_modified': 'clientModified',
+    'server_modified': 'serverModified',
+    'rev': 'rev',
+    'size': 'size',
+    'is_downloadable': 'downloadable',
+    'content_hash': 'hash'
+  },
+
+  TO_REMOTE: {}
+};
+
+MAPPING.TO_REMOTE = Object.keys(MAPPING.TO_LOCAL).reduce((acc, key) => {
+  acc[MAPPING.TO_LOCAL[key]] = key
+  return acc;
+}, {});
+
 export default class DropboxService extends CloudService {
   constructor(options) {
     super();
@@ -34,24 +57,17 @@ export default class DropboxService extends CloudService {
   }
 
   asLocal(metadata) {
-    const map = {
-      '.tag': 'type',
-      'name': 'name',
-      'path_lower': 'key',
-      'path_display': 'path',
-      'id': 'id',
-      'client_modified': 'clientModified',
-      'server_modified': 'serverModified',
-      'rev': 'rev',
-      'size': 'size',
-      'is_downloadable': 'downloadable',
-      'content_hash': 'hash'
-    };
-    let file = {};
-    for (let property in metadata) {
-      file[map[property]] = metadata[property];
-    }
-    return file;
+    return Object.keys(metadata).reduce((file, key) => {
+      file[MAPPING.TO_LOCAL[key]] = metadata[key];
+      return file;
+    }, {});
+  }
+
+  asRemote(file) {
+    return Object.keys(file).reduce((metadata, key) => {
+      metadata[MAPPING.TO_REMOTE[key]] = file[key];
+      return metadata;
+    }, {});
   }
 
   async list() {
