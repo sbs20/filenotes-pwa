@@ -31,31 +31,41 @@ export default {
 
   methods: {
     async connect() {
-      const accessToken = await Storage.setting('accessToken');
+      const accessToken = await Storage.settings.get('accessToken');
+      if (accessToken === undefined) {
+        return false;
+      }
+
       this.remote = new DropboxService({
         clientId: Constants.APP_ID,
         accessToken: accessToken });
 
       const connected = await this.remote.connect();
       if (!connected) {
-        await Storage.setting('accessToken', null);
+        await Storage.settings.delete('accessToken');
       }
 
       return connected;
+    },
+
+    startAuthentication() {
+      const dbs = new DropboxService({
+        clientId: Constants.APP_ID,
+        authUrl: Constants.HOST_URL });
+      const uri = dbs.authenticationUrl();
+      window.location.href = uri;
     },
 
     async init() {
       if (!(await this.connect())) {
         const accessToken = Common.parseQueryString(window.location.hash).access_token;
         if (accessToken) {
-          await Storage.setting('accessToken', accessToken);
+          await Storage.settings.set('accessToken', accessToken);
           if (!(await this.connect())) {
-            const dbs = new DropboxService({
-              clientId: Constants.APP_ID,
-              authUrl: 'http://localhost:8080' });
-            const uri = dbs.startAuthorisation();
-            window.location.href = uri;
+            this.startAuthentication();
           }
+        } else {
+          this.startAuthentication();
         }
       }
     },

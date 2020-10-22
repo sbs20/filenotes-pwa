@@ -16,7 +16,7 @@ export default class DropboxService extends CloudService {
       fetch: (url, options) => fetch(url, options) });
   }
 
-  startAuthorisation() {
+  authenticationUrl() {
     this.dbx = this._create();
     return this.dbx.auth.getAuthenticationUrl(this.options.authUrl);
   }

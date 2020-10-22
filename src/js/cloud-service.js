@@ -17,7 +17,7 @@ export default class CloudService extends FileProvider {
     return metadata;
   }
 
-  startAuthorisation() {}
+  authenticationUrl() {}
 
   finishAuthorisation(uri) {}
 }
