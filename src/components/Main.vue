@@ -2,7 +2,7 @@
   <div class="hello">
     <h1>Filenotes</h1>
     <input type="button" value="Init" @click="init">
-    <div v-if="remote">
+    <div v-if="remote.connected">
       <input type="button" value="Go" @click="go">
       <textarea v-model="json"></textarea>
     </div>
@@ -10,9 +10,7 @@
 </template>
 
 <script>
-import DropboxService from '../js/dropbox-service';
-import Constants from '../js/constants';
-import Common from '../js/common';
+import Remote from '../js/remote-service-manager';
 import Storage from '../js/storage';
 
 export default {
@@ -20,7 +18,7 @@ export default {
 
   data() {
     return {
-      remote: null,
+      remote: Remote.service,
       local: null,
       json: ''
     };
@@ -30,48 +28,12 @@ export default {
   },
 
   methods: {
-    async connect() {
-      const accessToken = await Storage.settings.get('accessToken');
-      if (accessToken === undefined) {
-        return false;
-      }
-
-      this.remote = new DropboxService({
-        clientId: Constants.APP_ID,
-        accessToken: accessToken });
-
-      const connected = await this.remote.connect();
-      if (!connected) {
-        await Storage.settings.delete('accessToken');
-      }
-
-      return connected;
-    },
-
-    startAuthentication() {
-      const dbs = new DropboxService({
-        clientId: Constants.APP_ID,
-        authUrl: Constants.HOST_URL });
-      const uri = dbs.authenticationUrl();
-      window.location.href = uri;
-    },
-
     async init() {
-      if (!(await this.connect())) {
-        const accessToken = Common.parseQueryString(window.location.hash).access_token;
-        if (accessToken) {
-          await Storage.settings.set('accessToken', accessToken);
-          if (!(await this.connect())) {
-            this.startAuthentication();
-          }
-        } else {
-          this.startAuthentication();
-        }
-      }
+      Remote.start(window);
     },
 
     async go() {
-      const files = await this.remote.list();
+      const files = await Remote.service.list();
       console.log(files);
       this.json = JSON.stringify(files);
       await Storage.queueIn.create(files);

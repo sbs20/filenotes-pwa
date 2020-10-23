@@ -1,5 +1,5 @@
 export default {
-  parseQueryString(str) {
+  parse(str) {
     const ret = Object.create(null);
 
     if (typeof str !== 'string') {

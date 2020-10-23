@@ -3,21 +3,20 @@ import FileProvider from './file-provider';
 export default class CloudService extends FileProvider {
   constructor() {
     super();
+    this.options = {
+      clientId: ''
+    };
     this.currentAccountEmail = '';
-    this.isAuthorised = false;    
+    this.connected = false;    
   }
 
-  async connect() {}
-
-  asRemote(metadata) {
-    return metadata;
+  configure(options) {
+    this.options = options;
   }
   
-  asLocal(metadata) {
-    return metadata;
-  }
+  async connect() {}
 
   authenticationUrl() {}
 
-  finishAuthorisation(uri) {}
+  authenticationToken(uriHash) {}
 }

@@ -1,74 +1,64 @@
 import CloudService from './cloud-service';
+import FieldAdapter from './field-adapter';
+import QueryString from './query-string';
 import { Dropbox } from 'dropbox';
 
-const MAPPING = {
-  TO_LOCAL: {
-    '.tag': 'tag',
-    'name': 'name',
-    'path_lower': 'key',
-    'path_display': 'path',
-    'id': 'id',
-    'client_modified': 'clientModified',
-    'server_modified': 'serverModified',
-    'rev': 'rev',
-    'size': 'size',
-    'is_downloadable': 'downloadable',
-    'content_hash': 'hash'
-  },
-
-  TO_REMOTE: {}
-};
-
-MAPPING.TO_REMOTE = Object.keys(MAPPING.TO_LOCAL).reduce((acc, key) => {
-  acc[MAPPING.TO_LOCAL[key]] = key
-  return acc;
-}, {});
+const MAP = {
+  '.tag': 'tag',
+  'name': 'name',
+  'path_lower': 'key',
+  'path_display': 'path',
+  'id': 'id',
+  'client_modified': 'clientModified',
+  'server_modified': 'serverModified',
+  'rev': 'rev',
+  'size': 'size',
+  'is_downloadable': 'downloadable',
+  'content_hash': 'hash'
+}
 
 export default class DropboxService extends CloudService {
-  constructor(options) {
+  constructor() {
     super();
-    this._dbx = null;
-    this.options = options || {};
+    this._client = null;
     this.cursor = null;
+    this.adapter = new FieldAdapter(MAP);
   }
 
-  dbx() {
-    if (this._dbx === null) {
-      this._dbx = new Dropbox({
+  client() {
+    if (this._client === null && this.options.clientId) {
+      this._client = new Dropbox({
         accessToken: this.options.accessToken,
         clientId: this.options.clientId,
         fetch: (url, options) => fetch(url, options) });  
     }
-    return this._dbx;
+    return this._client;
+  }
+
+  configure(options) {
+    this._client = null;
+    super.configure(options);
   }
 
   authenticationUrl() {
-    return this.dbx().auth.getAuthenticationUrl(this.options.authUrl);
+    return this.client().auth.getAuthenticationUrl(this.options.authUrl);
+  }
+
+  authenticationToken(uriHash) {
+    this._client = null;
+    this.options.accessToken = QueryString.parse(uriHash).access_token;
+    return this.options.accessToken;
   }
 
   async connect() {
     try {
-      const account = await this.dbx().usersGetCurrentAccount();
-      this.isAuthorised = true;
+      const account = await this.client().usersGetCurrentAccount();
+      this.connected = true;
       this.currentAccountEmail = account.currentAccountEmail;
     } catch (error) {
-      this.isAuthorised = false;
+      this.connected = false;
     }
-    return this.isAuthorised;
-  }
-
-  asLocal(metadata) {
-    return Object.keys(metadata).reduce((file, key) => {
-      file[MAPPING.TO_LOCAL[key]] = metadata[key];
-      return file;
-    }, {});
-  }
-
-  asRemote(file) {
-    return Object.keys(file).reduce((metadata, key) => {
-      metadata[MAPPING.TO_REMOTE[key]] = file[key];
-      return metadata;
-    }, {});
+    return this.connected;
   }
 
   async list() {
@@ -77,7 +67,7 @@ export default class DropboxService extends CloudService {
 
     const handleResult = (result) => {
       result.entries
-        .map(metadata => this.asLocal(metadata))
+        .map(metadata => this.adapter.asLocal(metadata))
         .forEach(file => files.push(file));
       
       this.cursor = result.cursor;
@@ -85,7 +75,7 @@ export default class DropboxService extends CloudService {
     };
 
     if (this.cursor == null) {
-      const response = await this.dbx().filesListFolder({
+      const response = await this.client().filesListFolder({
         path: '',
         recursive: true,
         include_deleted: true });
@@ -94,7 +84,7 @@ export default class DropboxService extends CloudService {
     }
 
     while (hasMore) {
-      const response = await this.dbx().filesListFolderContinue({ cursor: this.cursor });
+      const response = await this.client().filesListFolderContinue({ cursor: this.cursor });
       handleResult(response.result);
     }
 
