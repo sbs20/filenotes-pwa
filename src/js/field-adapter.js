@@ -7,18 +7,20 @@ export default class FieldAdapter {
     }, {});
   }
 
-  static _as(mapping, input) {
+  static _apply(mapping, input) {
     return Object.keys(input).reduce((output, key) => {
-      output[mapping[key]] = input[key];
+      if (key in mapping) {
+        output[mapping[key]] = input[key];
+      }
       return output;
     }, {});
   }
 
   asLocal(input) {
-    return FieldAdapter._as(this.toLocal, input);
+    return FieldAdapter._apply(this.toLocal, input);
   }
   
   asRemote(input) {
-    return FieldAdapter._as(this.toRemote, input);
+    return FieldAdapter._apply(this.toRemote, input);
   }
 }
