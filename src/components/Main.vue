@@ -2,7 +2,7 @@
   <div>
     <h1>Filenotes</h1>
     <input type="button" value="Init" @click="init">
-    <div v-if="remote.connected">
+    <div v-if="manager.remote.connected">
       <input type="button" value="Sync" @click="go">
       <List></List>
     </div>
@@ -11,7 +11,7 @@
 
 <script>
 import List from './List.vue'
-import Remote from '../js/remote-service-manager';
+import Manager from '../js/manager';
 import Sync from '../js/sync';
 
 export default {
@@ -23,8 +23,7 @@ export default {
 
   data() {
     return {
-      remote: Remote.service,
-      local: null
+      manager: Manager
     };
   },
 
@@ -33,7 +32,7 @@ export default {
 
   methods: {
     async init() {
-      Remote.start(window);
+      Manager.start(window);
     },
 
     async go() {

@@ -12,7 +12,7 @@ Handle conflict (strategy)
 Update content for all that need it
 */
 import Convert from './convert';
-import RemoteService from './remote-service-manager';
+import Manager from './manager';
 import Storage from './storage';
 
 class Sync {
@@ -32,9 +32,9 @@ class Sync {
 
   async execute() {
     // Reset cursor for testing
-    RemoteService.service.cursor = null;
-    const incoming = await RemoteService.service.list();
-    //const outgoing = [];
+    Manager.remote.cursor = null;
+
+    const incoming = await Manager.remote.list();
 
     this.fixConflicts();
     // upload all outbound
@@ -45,25 +45,40 @@ class Sync {
     //   else update, delete content data
     // for fs without data, download
 
-    const localIndex = (await Storage.fs.metadata.list())
+    const localIndex = (await Manager.local.list())
       .reduce((output, item) => {
         output[item.key] = item.hash;
         return output;
-      }, {});
+      }, {}
+    );
 
-    const deltas = incoming.filter(metadata => {
-      return !(metadata.key in localIndex) || metadata.hash !== localIndex[metadata.key];
+    const deletes = incoming.filter(metadata => {
+      return metadata.key in localIndex && metadata.tag === 'deleted';
     });
 
-    await Storage.fs.metadata.write(deltas);
-    deltas.forEach(async file => {
+    Manager.log.debug('deletes', deletes);
+    
+    await Promise.all(deletes.map(async metadata => {
+      await Storage.fs.metadata.delete(metadata.key);
+      await Storage.fs.content.delete(metadata.key);
+    }));
+
+    const updates = incoming.filter(metadata => {
+      return (!(metadata.key in localIndex) || metadata.hash !== localIndex[metadata.key])
+        && metadata.tag !== 'deleted';
+    });
+
+    Manager.log.debug('updates', updates);
+
+    await Storage.fs.metadata.write(updates);
+    await Promise.all(updates.map(async file => {
       await Storage.fs.content.delete(file.key);
-    });
+    }));
 
-    await this.downloadMissingContent();
+    await this.syncContent();
   }
 
-  async downloadMissingContent() {
+  async syncContent() {
     const content = (await Storage.fs.content.keys())
       .reduce((output, key) => {
         output[key] = true;
@@ -74,16 +89,21 @@ class Sync {
       .filter(metadata => metadata.tag === 'file' && !(metadata.key in content))
       .map(metadata => metadata.key);
 
-    queue.forEach(async key => {
+    Manager.log.debug('content queue', queue);
+
+    await Promise.all(queue.map(async key => {
       const content = {
         key: key,
-        data: await RemoteService.service.read(key)
+        data: await Manager.remote.read(key)
       };
       if (key.endsWith('.txt')) {
         content.preview = Convert.arrayBufferToString(content.data).substr(0, 64);
       }
       await Storage.fs.content.write([content]);
-    });
+      Manager.log.debug('downloaded', key);
+    }));
+
+    Manager.log.debug('finished sync');
   }
 }
 

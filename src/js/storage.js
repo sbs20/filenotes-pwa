@@ -79,8 +79,8 @@ class FileStore {
     this.store = store;
   }
 
-  async delete(item) {
-    await Storage.use(idb => idb.delete(this.store, item));
+  async delete(key) {
+    await Storage.use(idb => idb.delete(this.store, key));
   }
 
   async keys() {

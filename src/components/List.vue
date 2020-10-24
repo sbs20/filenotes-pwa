@@ -1,15 +1,17 @@
 <template>
   <div>
     <div v-for="file in files" v-bind:key="file.key">
+      <div>{{ file.tag }}</div>
       <div>{{ file.key }}</div>
       <div>{{ file.size }}</div>
       <div>{{ file.modified }}</div>
     </div>
+    <input type="button" value="refresh list" @click="refresh">
   </div>
 </template>
 
 <script>
-import LocalProvider from '../js/local-provider';
+import Manager from '../js/manager';
 
 export default {
   name: 'List',
@@ -17,15 +19,18 @@ export default {
   data() {
     this.refresh();
     return {
+      cwd: '/',
       files: []
     };
   },
 
   methods: {
     refresh() {
-      const local = new LocalProvider();
-      local.list().then(files => {
-        this.files = files;
+      Manager.local.list().then(files => {
+        this.files = files.filter(metadata => {
+          const key = metadata.key;
+          return key.startsWith(this.cwd) && key.indexOf('/', this.cwd.length) === -1;
+        }) ;
       });
     }
   }
