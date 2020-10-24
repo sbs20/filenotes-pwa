@@ -1,3 +1,4 @@
+import Convert from './convert';
 import CloudService from './cloud-service';
 import FieldAdapter from './field-adapter';
 import QueryString from './query-string';
@@ -89,5 +90,11 @@ export default class DropboxService extends CloudService {
     }
 
     return files;
+  }
+
+  async read(path) {
+    const response = await this.client().filesDownload({ path: path });
+    const buffer = await Convert.blobToArrayBuffer(response.result.fileBlob);
+    return buffer;
   }
 }

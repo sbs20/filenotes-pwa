@@ -9,11 +9,11 @@ export default class FileProvider {
     async select(/*string*/ path) {}
     
     async list() {}
+    async read(path) {}
 
-    /*Promise(void)*/ async move(/*file*/ file, /*string*/ desiredPath) {}
-    /*Promise(void)*/ async delete(/*string*/ path) {}
-    /*Promise(void)*/ async write(/*file*/ file) {}
-    /*Promise(Buffer)*/ async read(/*string*/ path) {}
+    async move(file, desiredPath) {}
+    async delete(path) {}
+    async write(file) {}
 
     /*void*/ progress(/*string*/ filepath, /*Number*/ filesize, /*Number*/ bytes, /*Date*/ start) {}
 }

@@ -1,26 +1,30 @@
 <template>
-  <div class="hello">
+  <div>
     <h1>Filenotes</h1>
     <input type="button" value="Init" @click="init">
     <div v-if="remote.connected">
-      <input type="button" value="Go" @click="go">
-      <textarea v-model="json"></textarea>
+      <input type="button" value="Sync" @click="go">
+      <List></List>
     </div>
   </div>
 </template>
 
 <script>
+import List from './List.vue'
 import Remote from '../js/remote-service-manager';
-import Storage from '../js/storage';
+import Sync from '../js/sync';
 
 export default {
   name: 'Main',
 
+  components: {
+    List
+  },
+
   data() {
     return {
       remote: Remote.service,
-      local: null,
-      json: ''
+      local: null
     };
   },
 
@@ -33,10 +37,7 @@ export default {
     },
 
     async go() {
-      const files = await Remote.service.list();
-      console.log(files);
-      this.json = JSON.stringify(files);
-      await Storage.queueIn.create(files);
+      await Sync.execute();
     },
   }
 }
