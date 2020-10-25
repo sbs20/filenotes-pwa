@@ -1,8 +1,8 @@
 export default class FieldAdapter {
   constructor(mapping) {
-    this.toLocal = mapping;
-    this.toRemote = Object.keys(this.toLocal).reduce((acc, key) => {
-      acc[this.toLocal[key]] = key
+    this.to = mapping;
+    this.from = Object.keys(this.to).reduce((acc, key) => {
+      acc[this.to[key]] = key
       return acc;
     }, {});
   }
@@ -16,11 +16,21 @@ export default class FieldAdapter {
     }, {});
   }
 
-  asLocal(input) {
-    return FieldAdapter._apply(this.toLocal, input);
+  /**
+   * Applies mapping
+   * @param {Object} input 
+   * @returns {Object} output
+   */
+  apply(input) {
+    return FieldAdapter._apply(this.to, input);
   }
   
-  asRemote(input) {
-    return FieldAdapter._apply(this.toRemote, input);
+  /**
+   * Unapplies mapping
+   * @param {Object} input 
+   * @returns {Object} output
+   */
+  unapply(input) {
+    return FieldAdapter._apply(this.from, input);
   }
 }

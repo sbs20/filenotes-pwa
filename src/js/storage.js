@@ -49,52 +49,104 @@ class Storage {
 }
 
 class KeyValuePair {
+  /**
+   * Creates a new KeyValuePair
+   * @param {string} store - The store name 
+   */
   constructor(store) {
     this.store = store;
   }
 
+  /**
+   * Gets a value
+   * @returns {Promise.<any>>}
+   */
   async get(key) {
     return await Storage.use(idb => idb.get(this.store, key));
   }
 
+  /**
+   * Sets a value
+   * @param {string} key 
+   * @param {any} val 
+   * @returns {Promise.<void>>}
+   */
   async set(key, val) {
     await Storage.use(idb => idb.put(this.store, val, key));
   }
 
+  /**
+   * Deletes a value
+   * @returns {Promise.<void>>}
+   */
   async delete(key) {
     await Storage.use(idb => idb.delete(this.store, key));
   }
 
+  /**
+   * Clears the store
+   * @returns {Promise.<void>>}
+   */
   async clear() {
     await Storage.use(idb => idb.clear(this.store));
   }
 
+  /**
+   * Returns a list of keys
+   * @returns {Promise.<Array.<string>>}
+   */
   async keys() {
     return await Storage.use(idb => idb.getAllKeys(this.store));
   }
 }
 
 class FileStore {
+  /**
+   * Creates a new FileStore
+   * @param {string} store - The store name 
+   */
   constructor(store) {
     this.store = store;
   }
 
+  /**
+   * Deletes a file metadata
+   * @param {string} key - The metadata.key
+   * @returns {Promise.<void>>}
+   */
   async delete(key) {
     await Storage.use(idb => idb.delete(this.store, key));
   }
 
+  /**
+   * Returns a list of file metadata keys
+   * @returns {Promise.<Array.<string>>}
+   */
   async keys() {
     return await Storage.use(idb => idb.getAllKeys(this.store));
   }
 
+  /**
+   * Returns a list of file metadata objects
+   * @returns {Promise.<Array.<Metadata>>}
+   */
   async list() {
     return await Storage.use(idb => idb.getAll(this.store));
   }
 
+  /**
+   * Returns a file metadata object
+   * @param {string} key - The metadata.key
+   * @returns {Promise.<Metadata>}
+   */
   async read(key) {
     return await Storage.use(idb => idb.get(this.store, key));
   }
 
+  /**
+   * Writes a list of metadata items
+   * @param {Array.<Metadata>} items 
+   */
   async write(items) {
     await Storage.use(async idb => {
       const tx = idb.transaction(this.store, 'readwrite');

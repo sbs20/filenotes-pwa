@@ -36,21 +36,38 @@ export default class DropboxService extends CloudService {
     return this._client;
   }
 
+  /**
+   * Configures the service. Can be called as many times as required.
+   * @param {ConfigureOptions} options 
+   */
   configure(options) {
     this._client = null;
     super.configure(options);
   }
 
+  /**
+   * Returns the authentication URL
+   * @returns {string} The authentication URL
+   */
   authenticationUrl() {
     return this.client().auth.getAuthenticationUrl(this.options.authUrl);
   }
 
+  /**
+   * Extracts the access token from the URI#hash
+   * @param {string} uriHash The uri hash component
+   * @returns {string} The access token
+   */
   authenticationToken(uriHash) {
     this._client = null;
     this.options.accessToken = QueryString.parse(uriHash).access_token;
     return this.options.accessToken;
   }
 
+  /**
+   * Attempts to connect and returns whether or not it was successful
+   * @returns {Promise.<bool>}
+   */
   async connect() {
     try {
       const account = await this.client().usersGetCurrentAccount();
@@ -62,13 +79,17 @@ export default class DropboxService extends CloudService {
     return this.connected;
   }
 
+  /**
+   * Returns a list of file metadata objects
+   * @returns {Promise.<Array.<Metadata>>}
+   */
   async list() {
     const files = [];
     let hasMore = true;
 
     const handleResult = (result) => {
       result.entries
-        .map(metadata => this.adapter.asLocal(metadata))
+        .map(metadata => this.adapter.apply(metadata))
         .forEach(file => files.push(file));
       
       this.cursor = result.cursor;
@@ -92,6 +113,11 @@ export default class DropboxService extends CloudService {
     return files;
   }
 
+  /**
+   * Returns the file data as an ArrayBuffer
+   * @param {string} path
+   * @returns {Promise.<ArrayBuffer>} 
+   */
   async read(path) {
     const response = await this.client().filesDownload({ path: path });
     const buffer = await Convert.blobToArrayBuffer(response.result.fileBlob);
