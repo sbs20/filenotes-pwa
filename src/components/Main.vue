@@ -4,12 +4,12 @@
     <input type="button" value="Init" @click="init">
     <input type="button" value="Sync" @click="go">
     <List></List>
-    <Console></Console>
+    <DevConsole></DevConsole>
   </div>
 </template>
 
 <script>
-import Console from './Console.vue'
+import DevConsole from './DevConsole.vue'
 import List from './List.vue'
 import Manager from '../js/manager';
 import Sync from '../js/sync';
@@ -18,7 +18,7 @@ export default {
   name: 'Main',
 
   components: {
-    Console,
+    DevConsole,
     List
   },
 
