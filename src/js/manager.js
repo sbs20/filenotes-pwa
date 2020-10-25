@@ -1,7 +1,7 @@
 import Constants from './constants';
 import DropboxService from './dropbox-service';
 import LocalProvider from './local-provider';
-import Storage from './storage';
+import StorageManager from './storage/storage-manager';
 
 class Manager {
   constructor() {
@@ -10,14 +10,14 @@ class Manager {
   }
 
   /**
-   * @returns {Storage}
+   * @returns {StorageManager}
    */
   get storage() {
-    return Storage;
+    return StorageManager;
   }
 
   /**
-   * @returns {LocalProvider}
+   * @returns {LocalProvider} - LocalProvider
    */
   get local() {
     return this._local;
@@ -41,7 +41,7 @@ class Manager {
     };
 
     // Try local storage first
-    let accessToken = await Storage.settings.get('accessToken');
+    let accessToken = await StorageManager.settings.get('accessToken');
     if (accessToken !== undefined && await connect(accessToken)) {
       return;
     }
@@ -53,7 +53,7 @@ class Manager {
     // If that didn't work, see if there's anything in the URL
     accessToken = this.remote.authenticationToken(window.location.hash);
     if (accessToken !== undefined && await connect(accessToken)) {
-      await Storage.settings.set('accessToken', accessToken);
+      await StorageManager.settings.set('accessToken', accessToken);
       return;
     }
 

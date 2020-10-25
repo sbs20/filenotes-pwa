@@ -1,3 +1,8 @@
+/**
+ * @typedef {import('../typedefs/types').Metadata} Metadata
+ * @typedef {import('../typedefs/types').ConfigureOptions} ConfigureOptions
+ */
+
 import Convert from './convert';
 import CloudService from './cloud-service';
 import FieldAdapter from './field-adapter';

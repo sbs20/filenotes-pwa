@@ -14,7 +14,6 @@ Update content for all that need it
 import Convert from './convert';
 import Log from './log';
 import Manager from './manager';
-import Storage from './storage';
 
 class Sync {
   constructor() {
@@ -60,8 +59,8 @@ class Sync {
     Log.debug('deletes', deletes);
     
     await Promise.all(deletes.map(async metadata => {
-      await Storage.fs.metadata.delete(metadata.key);
-      await Storage.fs.content.delete(metadata.key);
+      await Manager.storage.fs.metadata.delete(metadata.key);
+      await Manager.storage.fs.content.delete(metadata.key);
     }));
 
     const updates = incoming.filter(metadata => {
@@ -71,22 +70,22 @@ class Sync {
 
     Log.debug('updates', updates);
 
-    await Storage.fs.metadata.write(updates);
+    await Manager.storage.fs.metadata.write(updates);
     await Promise.all(updates.map(async file => {
-      await Storage.fs.content.delete(file.key);
+      await Manager.storage.fs.content.delete(file.key);
     }));
 
     await this.syncContent();
   }
 
   async syncContent() {
-    const content = (await Storage.fs.content.keys())
+    const content = (await Manager.storage.fs.content.keys())
       .reduce((output, key) => {
         output[key] = true;
         return output;
       }, {});
 
-    const queue = (await Storage.fs.metadata.list())
+    const queue = (await Manager.storage.fs.metadata.list())
       .filter(metadata => metadata.tag === 'file' && !(metadata.key in content))
       .map(metadata => metadata.key);
 
@@ -100,7 +99,7 @@ class Sync {
       if (key.endsWith('.txt')) {
         content.preview = Convert.arrayBufferToString(content.data).substr(0, 64);
       }
-      await Storage.fs.content.write([content]);
+      await Manager.storage.fs.content.write([content]);
       Log.debug('downloaded', key);
     }));
 

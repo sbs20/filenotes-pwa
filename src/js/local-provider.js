@@ -1,14 +1,18 @@
-import FileProvider from './file-provider';
-import Storage from './storage';
+/**
+ * @typedef {import('../typedefs/types').Metadata} Metadata
+ */
 
-export default class LocalProvider extends FileProvider {  
+import FileProvider from './file-provider';
+import StorageManager from './storage/storage-manager';
+
+export default class LocalProvider extends FileProvider {
 
   /**
    * Returns a list of file metadata objects
    * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
   async list() {
-    return await Storage.fs.metadata.list();
+    return await StorageManager.fs.metadata.list();
   }
 
   /**
@@ -17,6 +21,6 @@ export default class LocalProvider extends FileProvider {
    * @returns {Promise.<ArrayBuffer>} - Promise<ArrayBuffer>
    */
   async read(path) {
-    return await Storage.fs.content.read(path);
+    return await StorageManager.fs.content.read(path);
   }
 }
