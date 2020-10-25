@@ -12,6 +12,7 @@ Handle conflict (strategy)
 Update content for all that need it
 */
 import Convert from './convert';
+import Log from './log';
 import Manager from './manager';
 import Storage from './storage';
 
@@ -56,7 +57,7 @@ class Sync {
       return metadata.key in localIndex && metadata.tag === 'deleted';
     });
 
-    Manager.log.debug('deletes', deletes);
+    Log.debug('deletes', deletes);
     
     await Promise.all(deletes.map(async metadata => {
       await Storage.fs.metadata.delete(metadata.key);
@@ -68,7 +69,7 @@ class Sync {
         && metadata.tag !== 'deleted';
     });
 
-    Manager.log.debug('updates', updates);
+    Log.debug('updates', updates);
 
     await Storage.fs.metadata.write(updates);
     await Promise.all(updates.map(async file => {
@@ -89,7 +90,7 @@ class Sync {
       .filter(metadata => metadata.tag === 'file' && !(metadata.key in content))
       .map(metadata => metadata.key);
 
-    Manager.log.debug('content queue', queue);
+    Log.debug('content queue', queue);
 
     await Promise.all(queue.map(async key => {
       const content = {
@@ -100,10 +101,10 @@ class Sync {
         content.preview = Convert.arrayBufferToString(content.data).substr(0, 64);
       }
       await Storage.fs.content.write([content]);
-      Manager.log.debug('downloaded', key);
+      Log.debug('downloaded', key);
     }));
 
-    Manager.log.debug('finished sync');
+    Log.debug('finished sync');
   }
 }
 

@@ -1,17 +1,34 @@
 import Constants from './constants';
 import DropboxService from './dropbox-service';
 import LocalProvider from './local-provider';
-import Log from './log';
 import Storage from './storage';
 
-export default {
-  storage: Storage,
+class Manager {
+  constructor() {
+    this._local = new LocalProvider();
+    this._remote = new DropboxService();
+  }
 
-  local: new LocalProvider(),
+  /**
+   * @returns {Storage}
+   */
+  get storage() {
+    return Storage;
+  }
 
-  log: Log,
-  
-  remote: new DropboxService(),
+  /**
+   * @returns {LocalProvider}
+   */
+  get local() {
+    return this._local;
+  }
+
+  /**
+   * @returns {DropboxService}
+   */
+  get remote() {
+    return this._remote;
+  }
 
   // Goes in DropboxService
   async start(window) {
@@ -44,5 +61,9 @@ export default {
     this.remote.configure({ clientId: Constants.APP_ID, authUrl: Constants.HOST_URL });
     const uri = this.remote.authenticationUrl();
     window.location.href = uri;
-  },
-};
+  }
+}
+
+const manager = new Manager();
+
+export default manager;
