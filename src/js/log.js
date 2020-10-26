@@ -7,6 +7,8 @@ const LEVELS = {
   ERROR: 'ERROR'
 };
 
+const loggers = {};
+
 class Log {
   /**
    * Constructor
@@ -35,9 +37,13 @@ class Log {
   /**
    * Gets a new logger
    * @param {string} name 
+   * @returns {Log} - Log
    */
   get(name) {
-    return new Log(name, this.eventType);
+    if (!(name in loggers)) {
+      loggers[name] = new Log(name, this.eventType);
+    }
+    return loggers[name];
   }
 
   /**

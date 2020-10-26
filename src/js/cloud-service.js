@@ -10,8 +10,17 @@ export default class CloudService extends FileProvider {
     this.connected = false;    
   }
 
+  /**
+   * Apply options
+   * @param {Object} options 
+   */
   configure(options) {
-    this.options = options;
+    if (this.options === null) {
+      this.options = {};
+    }
+    for (const property in options) {
+      this.options[property] = options[property];
+    }
   }
   
   async connect() {}

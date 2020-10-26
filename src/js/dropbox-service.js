@@ -1,8 +1,3 @@
-/**
- * @typedef {import('../typedefs/types').Metadata} Metadata
- * @typedef {import('../typedefs/types').ConfigureOptions} ConfigureOptions
- */
-
 import Convert from './convert';
 import CloudService from './cloud-service';
 import FieldAdapter from './field-adapter';
@@ -23,30 +18,40 @@ const MAP = {
   'content_hash': 'hash'
 }
 
+const client = Symbol();
+
 export default class DropboxService extends CloudService {
   constructor() {
     super();
-    this._client = null;
+    this[client] = null;
+    /** @type {ConfigureOptions} */
+    this.options = null;
+    /** @type {string} */
     this.cursor = null;
     this.adapter = new FieldAdapter(MAP);
   }
 
+  /**
+   * Ensures a Dropbox client
+   * @returns {Dropbox} - Dropbox
+   */
   client() {
-    if (this._client === null && this.options.clientId) {
-      this._client = new Dropbox({
+    if (this[client] === null && this.options.clientId) {
+      this[client] = new Dropbox({
         accessToken: this.options.accessToken,
         clientId: this.options.clientId,
         fetch: (url, options) => fetch(url, options) });  
     }
-    return this._client;
+    return this[client];
   }
 
   /**
    * Configures the service. Can be called as many times as required.
-   * @param {ConfigureOptions} options 
+   * @param {ConfigureOptions} options - Options
    */
   configure(options) {
     this._client = null;
+    this.connected = false;
     super.configure(options);
   }
 
@@ -71,13 +76,19 @@ export default class DropboxService extends CloudService {
 
   /**
    * Attempts to connect and returns whether or not it was successful
+   * @param {ConfigureOptions} [options] - Options 
    * @returns {Promise.<bool>}
    */
-  async connect() {
+  async connect(options) {
     try {
-      const account = await this.client().usersGetCurrentAccount();
-      this.connected = true;
-      this.currentAccountEmail = account.currentAccountEmail;
+      if (options) {
+        this.configure(options);
+      }
+      if (this.options.accessToken) {
+        const account = await this.client().usersGetCurrentAccount();
+        this.connected = true;
+        this.currentAccountEmail = account.currentAccountEmail;  
+      }
     } catch (error) {
       this.connected = false;
     }

@@ -1,7 +1,6 @@
 <template>
   <div>
     <h1>Filenotes</h1>
-    <input type="button" value="Init" @click="init">
     <input type="button" value="Sync" @click="go">
     <List></List>
     <DevConsole></DevConsole>
@@ -27,11 +26,11 @@ export default {
     };
   },
 
-  methods: {
-    async init() {
-      Context.start(window);
-    },
+  mounted() {
+    Context.connect(window);
+  },
 
+  methods: {
     async go() {
       await Sync.execute();
     },
