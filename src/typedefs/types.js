@@ -8,7 +8,6 @@
 /**
  * @typedef {Object} Metadata
  * @property {('file'|'folder'|'deleted')} tag
- * @property {string} xtag - folder|file|deleted
  * @property {string} key - The lowercase path
  * @property {string} name - The filename
  * @property {string} [hash] - sha256 of the file content

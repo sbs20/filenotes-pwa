@@ -1,3 +1,7 @@
+/**
+ * @typedef {import('idb').IDBPDatabase} IDBPDatabase
+ */
+
 import { openDB } from 'idb';
 
 export const DB_NAME = 'filenotes.app';
@@ -13,7 +17,9 @@ export default class Database {
     this.db = null;
   }
 
-  // TODO : Typedefs
+  /**
+   * Opens the database
+   */
   async open() {
     this.db = await openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
@@ -32,17 +38,24 @@ export default class Database {
     });  
   }
 
+  /**
+   * Closes the underlying database
+   */
   close() {
     this.db.close();
     this.db = null;
   }
 
-  static async use(dbConsumer) {
+   /**
+    * Opens and closes a database using the callback in the middle
+    * @param {function(IDBPDatabase)} callback 
+    */
+   static async use(callback) {
     const database = new Database();
     await database.open();
     let response = null;
     try {
-      response = await dbConsumer(database.db);
+      response = await callback(database.db);
     } catch { /*Nothing*/ }
     database.close();
     return response;  

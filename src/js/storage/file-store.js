@@ -1,7 +1,3 @@
-/**
- * @typedef {import('../typedefs/types').Metadata} Metadata
- */
-
 import Database from './database';
 
 export default class FileStore {
@@ -58,6 +54,7 @@ export default class FileStore {
   /**
    * Writes a list of metadata items
    * @param {Array.<Metadata>} items - The items to write
+   * @returns {Promise.<void>} Promise<void>
    */
   async write(items) {
     await Database.use(async idb => {
