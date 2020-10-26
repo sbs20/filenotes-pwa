@@ -1,6 +1,6 @@
 import Database from './database';
 
-export default class AutoIncrement {
+export default class AutoIncrementStore {
   constructor(store) {
     this.store = store;
   }

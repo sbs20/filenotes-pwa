@@ -1,14 +1,15 @@
 <template>
   <div>
     <textarea rows="10" cols="80" v-model="text" readonly></textarea>
-    <input value="Clear cursor" @click="clearCursor">
-    <input value="Clear local actions" @click="clearLocalActions">
-    <input value="Clear local filesystem" @click="clearLocalFs">
-    <input value="Clear access token" @click="clearAccessToken">
+    <input type="button" value="Clear cursor" @click="clearCursor">
+    <input type="button" value="Clear local actions" @click="clearLocalActions">
+    <input type="button" value="Clear local filesystem" @click="clearLocalFs">
+    <input type="button" value="Clear access token" @click="clearAccessToken">
   </div>
 </template>
 
 <script>
+import Context from '../js/context';
 import EventBus from '../js/event-bus';
 let listener = null;
 
@@ -47,6 +48,8 @@ export default {
     },
 
     clearLocalFs() {
+      Context.storage.fs.metadata.clear();
+      Context.storage.fs.content.clear();
     },
 
     clearAccessToken() {

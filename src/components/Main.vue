@@ -11,7 +11,7 @@
 <script>
 import DevConsole from './DevConsole.vue'
 import List from './List.vue'
-import Manager from '../js/manager';
+import Context from '../js/context';
 import Sync from '../js/sync';
 
 export default {
@@ -29,7 +29,7 @@ export default {
 
   methods: {
     async init() {
-      Manager.start(window);
+      Context.start(window);
     },
 
     async go() {

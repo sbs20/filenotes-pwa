@@ -13,7 +13,7 @@ Update content for all that need it
 */
 import Convert from './convert';
 import Log from './log';
-import Manager from './manager';
+import Context from './context';
 
 class Sync {
   constructor() {
@@ -32,9 +32,9 @@ class Sync {
 
   async execute() {
     // Reset cursor for testing
-    Manager.remote.cursor = null;
+    Context.remote.cursor = null;
 
-    const incoming = await Manager.remote.list();
+    const incoming = await Context.remote.list();
 
     this.fixConflicts();
     // upload all outbound
@@ -45,7 +45,7 @@ class Sync {
     //   else update, delete content data
     // for fs without data, download
 
-    const localIndex = (await Manager.local.list())
+    const localIndex = (await Context.local.list())
       .reduce((output, item) => {
         output[item.key] = item.hash;
         return output;
@@ -59,8 +59,8 @@ class Sync {
     Log.debug('deletes', deletes);
     
     await Promise.all(deletes.map(async metadata => {
-      await Manager.storage.fs.metadata.delete(metadata.key);
-      await Manager.storage.fs.content.delete(metadata.key);
+      await Context.storage.fs.metadata.delete(metadata.key);
+      await Context.storage.fs.content.delete(metadata.key);
     }));
 
     const updates = incoming.filter(metadata => {
@@ -70,22 +70,22 @@ class Sync {
 
     Log.debug('updates', updates);
 
-    await Manager.storage.fs.metadata.write(updates);
+    await Context.storage.fs.metadata.write(updates);
     await Promise.all(updates.map(async file => {
-      await Manager.storage.fs.content.delete(file.key);
+      await Context.storage.fs.content.delete(file.key);
     }));
 
     await this.syncContent();
   }
 
   async syncContent() {
-    const content = (await Manager.storage.fs.content.keys())
+    const content = (await Context.storage.fs.content.keys())
       .reduce((output, key) => {
         output[key] = true;
         return output;
       }, {});
 
-    const queue = (await Manager.storage.fs.metadata.list())
+    const queue = (await Context.storage.fs.metadata.list())
       .filter(metadata => metadata.tag === 'file' && !(metadata.key in content))
       .map(metadata => metadata.key);
 
@@ -94,12 +94,12 @@ class Sync {
     await Promise.all(queue.map(async key => {
       const content = {
         key: key,
-        data: await Manager.remote.read(key)
+        data: await Context.remote.read(key)
       };
       if (key.endsWith('.txt')) {
         content.preview = Convert.arrayBufferToString(content.data).substr(0, 64);
       }
-      await Manager.storage.fs.content.write([content]);
+      await Context.storage.fs.content.write([content]);
       Log.debug('downloaded', key);
     }));
 

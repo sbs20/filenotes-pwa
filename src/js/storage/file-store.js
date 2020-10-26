@@ -14,6 +14,14 @@ export default class FileStore {
   }
 
   /**
+   * Clears the file store
+   * @returns {Promise.<void>>} Promise<void>
+   */
+  async clear() {
+    await Database.use(idb => idb.clear(this.store));
+  }
+
+  /**
    * Deletes a file metadata
    * @param {string} key - The metadata.key
    * @returns {Promise.<void>>} Promise<void>

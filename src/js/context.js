@@ -3,31 +3,36 @@ import DropboxService from './dropbox-service';
 import LocalProvider from './local-provider';
 import StorageManager from './storage/storage-manager';
 
-class Manager {
+const local = Symbol();
+const remote = Symbol();
+const storage = Symbol();
+
+class Context {
   constructor() {
-    this._local = new LocalProvider();
-    this._remote = new DropboxService();
+    this[local] = new LocalProvider();
+    this[remote] = new DropboxService();
+    this[storage] = StorageManager;
   }
 
   /**
-   * @returns {StorageManager}
+   * @returns {import('./storage/storage-manager').default StorageManager} - StorageManager
    */
   get storage() {
-    return StorageManager;
+    return this[storage];
   }
 
   /**
    * @returns {LocalProvider} - LocalProvider
    */
   get local() {
-    return this._local;
+    return this[local];
   }
 
   /**
-   * @returns {DropboxService}
+   * @returns {DropboxService} - RemoteProvider
    */
   get remote() {
-    return this._remote;
+    return this[remote];
   }
 
   // Goes in DropboxService
@@ -64,6 +69,6 @@ class Manager {
   }
 }
 
-const manager = new Manager();
+const context = new Context();
 
-export default manager;
+export default context;

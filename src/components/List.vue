@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import Manager from '../js/manager';
+import Context from '../js/context';
 
 export default {
   name: 'List',
@@ -26,7 +26,7 @@ export default {
 
   methods: {
     refresh() {
-      Manager.local.list().then(files => {
+      Context.local.list().then(files => {
         this.files = files.filter(metadata => {
           const key = metadata.key;
           return key.startsWith(this.cwd) && key.indexOf('/', this.cwd.length) === -1;

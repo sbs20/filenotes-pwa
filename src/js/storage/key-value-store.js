@@ -1,6 +1,6 @@
 import Database from './database';
 
-export default class KeyValuePair {
+export default class KeyValueStore {
   /**
    * Creates a new KeyValuePair
    * @param {string} store - The store name 

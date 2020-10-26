@@ -13,6 +13,7 @@ export default class Database {
     this.db = null;
   }
 
+  // TODO : Typedefs
   async open() {
     this.db = await openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
