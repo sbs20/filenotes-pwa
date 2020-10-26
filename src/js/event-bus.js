@@ -1,15 +1,19 @@
+/**
+ * @typedef {import('../typedefs/types').Event} Event
+ */
 class EventBus {
   constructor() {
     this.listeners = {};
     this.lastId = 0;
   }
 
-  _nextId() {
-    return ++this.lastId;
-  }
-
+  /**
+   * 
+   * @param {string} eventType - The event type
+   * @param {function(Event):void} callback - The event handler
+   */
   on(eventType, callback) {
-    const id = this._nextId();
+    const id = ++this.lastId;
     if (!this.listeners[eventType]) {
       this.listeners[eventType] = {}
     }
@@ -25,6 +29,11 @@ class EventBus {
     }
   }
 
+  /**
+   * Emits an event
+   * @param {string} eventType - The event type
+   * @param {Event} event - The event
+   */
   emit(eventType, event) {
     if (!this.listeners[eventType]) {
       return;

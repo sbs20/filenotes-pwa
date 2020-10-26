@@ -18,7 +18,7 @@ export default {
 
   created() {
     listener = EventBus.on('console', e => {
-      this.messages.push(e);
+      this.messages.push(e.data);
     });
   },
 
@@ -36,7 +36,7 @@ export default {
 
   computed: {
     text() {
-      return this.messages.map(o => JSON.stringify(o)).join('\n');
+      return this.messages.join('\n');
     }
   },
 

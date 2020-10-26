@@ -6,6 +6,11 @@
  */
 
 /**
+ * @typedef {Object} Event
+ * @property {any} data - The event data
+ */
+
+/**
  * @typedef {Object} Metadata
  * @property {('file'|'folder'|'deleted')} tag
  * @property {string} key - The lowercase path

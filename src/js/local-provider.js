@@ -1,7 +1,3 @@
-/**
- * @typedef {import('../typedefs/types').Metadata} Metadata
- */
-
 import FileProvider from './file-provider';
 import StorageManager from './storage/storage-manager';
 

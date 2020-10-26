@@ -1,32 +1,91 @@
 import EventBus from './event-bus';
 
+const LEVELS = {
+  DEBUG: 'DEBUG',
+  INFO: 'INFO',
+  WARNING: 'WARNING',
+  ERROR: 'ERROR'
+};
+
 class Log {
-  constructor() {
-    this.size = 20;
-    this.messages = []
+  /**
+   * Constructor
+   * @param {string} name 
+   */
+  constructor(name, eventType) {
+    this.name = name || 'root';
+    this.eventType = eventType || 'console';
   }
 
-  _write(level, msg, data) {
-    const o = {
-      level: level,
-      msg: msg
-    };
-
+  /**
+   * Formats a log line
+   * @param {string} level 
+   * @param {string} msg 
+   * @param {Object} data 
+   */
+  format(level, msg, data) {
+    const now = new Date().toISOString();
+    let output = `${now} ${level} ${this.name}: ${msg}`;
     if (data) {
-      o.data = JSON.parse(JSON.stringify(data));
+      output += ' ' + JSON.stringify(data);
     }
-    console.log(o);
-    //eslint-disable-next-line no-undef
-    //Vue.emit('console', o);
-    EventBus.emit('console', o);
-    this.messages.push(o);
-    if (this.messages.length > this.size) {
-      this.messages.shift();
-    }
+    return output;
   }
 
+  /**
+   * Gets a new logger
+   * @param {string} name 
+   */
+  get(name) {
+    return new Log(name, this.eventType);
+  }
+
+  /**
+   * Writes a log line
+   * @param {string} level 
+   * @param {string} msg 
+   * @param {Object} data 
+   */
+  write(level, msg, data) {
+    const output = this.format(level, msg, data)
+    console.log(output);
+    EventBus.emit(this.eventType, { data: output });
+  }
+
+  /**
+   * Debug
+   * @param {string} msg 
+   * @param {Object} data 
+   */
   debug(msg, data) {
-    this._write('DEBUG', msg, data);
+    this.write(LEVELS.DEBUG, msg, data);
+  }
+
+  /**
+   * Error
+   * @param {string} msg 
+   * @param {Object} data 
+   */
+  error(msg, data) {
+    this.write(LEVELS.ERROR, msg, data);
+  }
+
+  /**
+   * Info
+   * @param {string} msg 
+   * @param {Object} data 
+   */
+  info(msg, data) {
+    this.write(LEVELS.INFO, msg, data);
+  }
+
+  /**
+   * Warning
+   * @param {string} msg 
+   * @param {Object} data 
+   */
+  warn(msg, data) {
+    this.write(LEVELS.WARNING, msg, data);
   }
 }
 
