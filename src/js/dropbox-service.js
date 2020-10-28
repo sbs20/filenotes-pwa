@@ -50,7 +50,7 @@ export default class DropboxService extends CloudService {
    * @param {ConfigureOptions} options - Options
    */
   configure(options) {
-    this._client = null;
+    this[client] = null;
     this.connected = false;
     super.configure(options);
   }
@@ -69,7 +69,7 @@ export default class DropboxService extends CloudService {
    * @returns {string} The access token
    */
   authenticationToken(uriHash) {
-    this._client = null;
+    this[client] = null;
     this.options.accessToken = QueryString.parse(uriHash).access_token;
     return this.options.accessToken;
   }
