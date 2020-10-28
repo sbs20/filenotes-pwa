@@ -21,3 +21,10 @@
  * @property {number} [size] - The size in bytes
  * @property {bool} downloadable - True if downloadable
  */
+
+ /**
+ * @typedef {Object} Content
+ * @property {string} key - The lowercase path
+ * @property {string} [preview] - Preview data
+ * @property {ArrayBuffer} data - The data
+ */
