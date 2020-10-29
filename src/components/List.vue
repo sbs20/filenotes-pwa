@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div v-for="file in files" v-bind:key="file.key">
-      <div>{{ file.tag }}</div>
-      <div><router-link :to="'/f/' + file.key">{{ file.key }}</router-link></div>
-      <div>{{ file.size }}</div>
-      <div>{{ file.modified }}</div>
+    <div v-for="entry in entries" v-bind:key="entry.key">
+      <div>{{ entry.tag }}</div>
+      <div><router-link :to="'/f/' + entry.key">{{ entry.key }}</router-link></div>
+      <div>{{ entry.size }}</div>
+      <div>{{ entry.modified }}</div>
     </div>
     <div v-if="data">
       <input type="button" value="back" @click="$router.go(-1)">
@@ -30,8 +30,10 @@ export default {
     return {
       /** @type {Metadata} */
       current: null,
+
       /** @type {Array.<Metadata>} */
-      files: [],
+      entries: [],
+
       data: null
     };
   },
@@ -44,27 +46,23 @@ export default {
 
   methods: {
     refresh() {
-      this.files = []
+      this.entries = []
       this.data = null;
       Context.local.get(this.$route.params.pathMatch).then(current => {
-        if (current === undefined) {
-          current = {
-            tag: 'folder',
-            key: ''
-          }
-        }
+        this.current = current || {
+          tag: 'folder',
+          key: ''
+        };
 
-        this.current = current;
-
-        if (current.tag === 'folder') {
-          Context.local.list().then(files => {
-            this.files = files.filter(metadata => {
+        if (this.current.tag === 'folder') {
+          Context.local.list().then(entries => {
+            this.entries = entries.filter(metadata => {
               const key = metadata.key;
-              return key.startsWith(current.key) && key.indexOf('/', current.key.length + 2) === -1;
+              return key.startsWith(this.current.key) && key.indexOf('/', this.current.key.length + 1) === -1;
             });
           });
-        } else if (current.tag === 'file') {
-          Context.local.read(current.key).then(buffer => {
+        } else if (this.current.tag === 'file') {
+          Context.local.read(this.current.key).then(buffer => {
             this.data = Convert.arrayBufferToString(buffer);
           })
         }
