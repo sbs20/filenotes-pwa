@@ -45,5 +45,32 @@ export default {
   arrayBufferToString(buffer) {
     const decoder = new TextDecoder('utf-8');
     return decoder.decode(buffer);
-  }  
+  },
+
+  /**
+   * Converts an ArrayBuffer to a hex string
+   * @param {ArrayBuffer} buffer The ArrayBuffer to convert
+   * @returns {string} A hex encoded string
+   */
+  arrayBufferToHex(buffer) {
+    const array = Array.from(new Uint8Array(buffer));
+    const hex = array.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hex
+  },
+
+  /**
+   * Takes an array of ArrayBuffers and concenates them into a single buffer
+   * @param {Array.<ArrayBuffer>} buffers 
+   * @returns {ArrayBuffer} Concatenated ArrayBuffer
+   */
+  arrayBuffersConcat(buffers) {
+    let size = buffers.map(buffer => buffer.byteLength).reduce((a, b) => a + b, 0);
+    let result = new Uint8Array(size);
+    let offset = 0;
+    for (const buffer of buffers) {
+        result.set(new Uint8Array(buffer), offset);
+        offset += buffer.byteLength;
+    }
+    return result.buffer;
+  }
 }

@@ -63,7 +63,14 @@ export default {
           });
         } else if (this.current.tag === 'file') {
           Context.local.read(this.current.key).then(buffer => {
-            this.data = Convert.arrayBufferToString(buffer);
+            console.log('Stored', this.current.hash);
+            Context.remote.hash(buffer).then(hash => {
+              console.log('Calc', hash);
+            });
+            this.data = `{${this.current.name}}`;
+            if (this.current.name.endsWith('.txt')) {
+              this.data = Convert.arrayBufferToString(buffer);
+            }
           })
         }
       });

@@ -28,4 +28,6 @@ export default class CloudService extends FileProvider {
   authenticationUrl() {}
 
   authenticationToken(uriHash) {}
+
+  async hash(buffer) {}
 }
