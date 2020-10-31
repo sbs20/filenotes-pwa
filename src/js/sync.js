@@ -15,7 +15,7 @@ import Convert from './convert';
 import LocalProvider from './local-provider';
 import Log from './log';
 import RemoteProvider from './remote-provider';
-import Storage from './storage/storage-manager';
+import StorageManager from './storage/storage-manager';
 
 class Sync {
   constructor() {
@@ -59,8 +59,8 @@ class Sync {
     });
 
     Log.debug('deletes', deletes);
-    await Storage.fs.metadata.deleteAll(deletes.map(metadata => metadata.key));
-    await Storage.fs.content.deleteAll(deletes.map(metadata => metadata.key));
+    await StorageManager.fs.metadata.deleteAll(deletes.map(metadata => metadata.key));
+    await StorageManager.fs.content.deleteAll(deletes.map(metadata => metadata.key));
 
     const updates = incoming.filter(metadata => {
       return (!(metadata.key in localIndex) || metadata.hash !== localIndex[metadata.key])
@@ -68,20 +68,20 @@ class Sync {
     });
 
     Log.debug('updates', updates);
-    await Storage.fs.metadata.writeAll(updates);
-    await Storage.fs.content.deleteAll(updates.map(metadata => metadata.key));
+    await StorageManager.fs.metadata.writeAll(updates);
+    await StorageManager.fs.content.deleteAll(updates.map(metadata => metadata.key));
 
     await this.syncContent();
   }
 
   async syncContent() {
-    const content = (await Storage.fs.content.keys())
+    const content = (await StorageManager.fs.content.keys())
       .reduce((output, key) => {
         output[key] = true;
         return output;
       }, {});
 
-    const queue = (await Storage.fs.metadata.list())
+    const queue = (await StorageManager.fs.metadata.list())
       .filter(metadata => metadata.tag === 'file' && !(metadata.key in content))
       .map(metadata => metadata.key);
 
@@ -95,7 +95,7 @@ class Sync {
       if (key.endsWith('.txt')) {
         content.preview = Convert.arrayBufferToString(content.data).substr(0, 64);
       }
-      await Storage.fs.content.writeAll([content]);
+      await StorageManager.fs.content.writeAll([content]);
       Log.debug('downloaded', key);
     }));
 

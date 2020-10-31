@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import Storage from '../js/storage/storage-manager';
+import StorageManager from '../js/storage/storage-manager';
 import EventBus from '../js/event-bus';
 let listener = null;
 
@@ -48,8 +48,8 @@ export default {
     },
 
     clearLocalFs() {
-      Storage.fs.metadata.clear();
-      Storage.fs.content.clear();
+      StorageManager.fs.metadata.clear();
+      StorageManager.fs.content.clear();
     },
 
     clearAccessToken() {
