@@ -16,9 +16,10 @@
 </template>
 
 <script>
-import Context from '../js/context';
 import Convert from '../js/convert';
+import LocalProvider from '../js/local-provider';
 import Log from '../js/log';
+import RemoteProvider from '../js/remote-provider';
 
 const log = Log.get('List');
 
@@ -48,23 +49,23 @@ export default {
     refresh() {
       this.entries = []
       this.data = null;
-      Context.local.get(this.$route.params.pathMatch).then(current => {
+      LocalProvider.get(this.$route.params.pathMatch).then(current => {
         this.current = current || {
           tag: 'folder',
           key: ''
         };
 
         if (this.current.tag === 'folder') {
-          Context.local.list().then(entries => {
+          LocalProvider.list().then(entries => {
             this.entries = entries.filter(metadata => {
               const key = metadata.key;
               return key.startsWith(this.current.key) && key.indexOf('/', this.current.key.length + 1) === -1;
             });
           });
         } else if (this.current.tag === 'file') {
-          Context.local.read(this.current.key).then(buffer => {
+          LocalProvider.read(this.current.key).then(buffer => {
             console.log('Stored', this.current.hash);
-            Context.remote.hash(buffer).then(hash => {
+            RemoteProvider.hash(buffer).then(hash => {
               console.log('Calc', hash);
             });
             this.data = `{${this.current.name}}`;
@@ -78,7 +79,7 @@ export default {
   
     save() {
       const buffer = Convert.stringToArrayBuffer(this.data);
-      Context.local.write(this.current.path, buffer);
+      LocalProvider.write(this.current.path, buffer);
       log.debug('Save', this.current);
     }
   }

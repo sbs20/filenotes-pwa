@@ -12,8 +12,10 @@ Handle conflict (strategy)
 Update content for all that need it
 */
 import Convert from './convert';
+import LocalProvider from './local-provider';
 import Log from './log';
-import Context from './context';
+import RemoteProvider from './remote-provider';
+import Storage from './storage/storage-manager';
 
 class Sync {
   constructor() {
@@ -32,9 +34,9 @@ class Sync {
 
   async execute() {
     // Reset cursor for testing
-    Context.remote.cursor = null;
+    RemoteProvider.cursor = null;
 
-    const incoming = await Context.remote.list();
+    const incoming = await RemoteProvider.list();
 
     this.fixConflicts();
     // upload all outbound
@@ -45,7 +47,7 @@ class Sync {
     //   else update, delete content data
     // for fs without data, download
 
-    const localIndex = (await Context.local.list())
+    const localIndex = (await LocalProvider.list())
       .reduce((output, item) => {
         output[item.key] = item.hash;
         return output;
@@ -57,11 +59,8 @@ class Sync {
     });
 
     Log.debug('deletes', deletes);
-    
-    await Promise.all(deletes.map(async metadata => {
-      await Context.storage.fs.metadata.delete(metadata.key);
-      await Context.storage.fs.content.delete(metadata.key);
-    }));
+    await Storage.fs.metadata.deleteAll(deletes.map(metadata => metadata.key));
+    await Storage.fs.content.deleteAll(deletes.map(metadata => metadata.key));
 
     const updates = incoming.filter(metadata => {
       return (!(metadata.key in localIndex) || metadata.hash !== localIndex[metadata.key])
@@ -69,23 +68,20 @@ class Sync {
     });
 
     Log.debug('updates', updates);
-
-    await Context.storage.fs.metadata.write(updates);
-    await Promise.all(updates.map(async file => {
-      await Context.storage.fs.content.delete(file.key);
-    }));
+    await Storage.fs.metadata.writeAll(updates);
+    await Storage.fs.content.deleteAll(updates.map(metadata => metadata.key));
 
     await this.syncContent();
   }
 
   async syncContent() {
-    const content = (await Context.storage.fs.content.keys())
+    const content = (await Storage.fs.content.keys())
       .reduce((output, key) => {
         output[key] = true;
         return output;
       }, {});
 
-    const queue = (await Context.storage.fs.metadata.list())
+    const queue = (await Storage.fs.metadata.list())
       .filter(metadata => metadata.tag === 'file' && !(metadata.key in content))
       .map(metadata => metadata.key);
 
@@ -94,12 +90,12 @@ class Sync {
     await Promise.all(queue.map(async key => {
       const content = {
         key: key,
-        data: await Context.remote.read(key)
+        data: await RemoteProvider.read(key)
       };
       if (key.endsWith('.txt')) {
         content.preview = Convert.arrayBufferToString(content.data).substr(0, 64);
       }
-      await Context.storage.fs.content.write([content]);
+      await Storage.fs.content.writeAll([content]);
       Log.debug('downloaded', key);
     }));
 

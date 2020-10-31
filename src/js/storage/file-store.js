@@ -18,12 +18,17 @@ export default class FileStore {
   }
 
   /**
-   * Deletes a file metadata
-   * @param {string} key - The metadata.key
+   * Deletes a file entry
+   * @param {Array.<string>} keys - The keys
    * @returns {Promise.<void>>} Promise<void>
    */
-  async delete(key) {
-    await Database.use(idb => idb.delete(this.store, key));
+  async deleteAll(keys) {
+    await Database.use(async idb => {
+      const tx = idb.transaction(this.store, 'readwrite');
+      const transactions = keys.map(key => tx.store.delete(key));
+      transactions.push(tx.done);
+      await Promise.all(transactions);
+    });
   }
 
   /**
@@ -56,7 +61,7 @@ export default class FileStore {
    * @param {Array.<Metadata>} items - The items to write
    * @returns {Promise.<void>} Promise<void>
    */
-  async write(items) {
+  async writeAll(items) {
     await Database.use(async idb => {
       const tx = idb.transaction(this.store, 'readwrite');
       const transactions = items.map(item => tx.store.put(item));

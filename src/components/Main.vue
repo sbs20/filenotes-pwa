@@ -10,7 +10,7 @@
 <script>
 import DevConsole from './DevConsole.vue'
 import List from './List.vue'
-import Context from '../js/context';
+import { connect } from '../js/remote-provider';
 import Sync from '../js/sync';
 
 export default {
@@ -27,7 +27,7 @@ export default {
   },
 
   mounted() {
-    Context.connect(window);
+    connect(window);
   },
 
   methods: {

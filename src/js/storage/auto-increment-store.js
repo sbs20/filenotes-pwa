@@ -34,7 +34,7 @@ export default class AutoIncrementStore {
    * Writes a list of items
    * @param {Array.<any>} items - The items to write
    */
-  async write(items) {
+  async writeAll(items) {
     await Database.use(async idb => {
       const tx = idb.transaction(this.store, 'readwrite');
       const transactions = items.map(item => tx.store.put(item));
