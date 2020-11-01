@@ -53,6 +53,25 @@ export default class FilePath {
   }
 
   /**
+   * @param {string} directory
+   * @returns {FilePath}
+   */
+  move(directory) {
+    if (!directory.endsWith('/')) {
+      directory += '/';
+    }
+    return new FilePath(`${directory}${this.name}`);
+  }
+
+  /**
+   * @param {string} name
+   * @returns {FilePath}
+   */
+  rename(name) {
+    return new FilePath(`${this.directory}${name}`);
+  }
+
+  /**
    * Creates a filepath
    * @param {string} path 
    */

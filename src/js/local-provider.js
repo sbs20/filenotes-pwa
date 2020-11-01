@@ -1,6 +1,7 @@
+import FileContent from './files/file-content';
+import FileMetadata from './files/file-metadata';
 import FileProvider from './file-provider';
 import Log from './log';
-import FileEntry from './files/file-entry';
 import StorageManager from './storage/storage-manager';
 
 const log = Log.get('LocalProvider');
@@ -40,8 +41,8 @@ class LocalProvider extends FileProvider {
    */
   async write(path, data) {
     if (data) {
-      const metadata = await FileEntry.createFileMetadata(path, data);
-      const content = FileEntry.createContent(metadata.key, data);
+      const metadata = await FileMetadata.create(path, data);
+      const content = FileContent.create(path, data);
 
       // See what's stored locally already
       const current = await StorageManager.fs.metadata.read(metadata.key);
@@ -63,7 +64,7 @@ class LocalProvider extends FileProvider {
   async delete(path) {
     await StorageManager.fs.metadata.deleteAll([path.toLowerCase()]);
     await StorageManager.fs.content.deleteAll([path.toLowerCase()]);
-    await StorageManager.fs.delta.writeAll([FileEntry.createDeletedMetadata(path)]);
+    await StorageManager.fs.delta.writeAll([FileMetadata.createDeleted(path)]);
   }
 
   /**

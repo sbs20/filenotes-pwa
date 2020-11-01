@@ -1,5 +1,5 @@
 import Convert from './convert';
-import FileEntry from './files/file-entry';
+import FileMetadata from './files/file-metadata';
 import FilePath from './files/file-path';
 import Log from './log';
 import RemoteProvider from './remote-provider';
@@ -15,7 +15,7 @@ async function moveLocal(path, destinationPath) {
   const source = await StorageManager.fs.metadata.read(path.toLowerCase());
   const content = await StorageManager.fs.content.read(path.toLowerCase());
 
-  const destination = FileEntry.moved(source, destinationPath);
+  const destination = new FileMetadata().extend(source).path(destinationPath).metadata();
   content.key = destinationPath.toLowerCase();
   
   await StorageManager.fs.metadata.writeAll([destination]);
