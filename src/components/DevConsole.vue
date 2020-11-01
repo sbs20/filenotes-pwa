@@ -10,7 +10,6 @@
 </template>
 
 <script>
-import Database from '../js/storage/database';
 import StorageManager from '../js/storage/storage-manager';
 import EventBus from '../js/event-bus';
 let listener = null;
@@ -59,7 +58,7 @@ export default {
     },
 
     nukeDatabase() {
-      new Database().delete();
+      StorageManager.deleteDatatabase();
     }
   }
 }

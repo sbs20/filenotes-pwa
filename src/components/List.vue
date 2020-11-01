@@ -19,7 +19,7 @@
 import Convert from '../js/convert';
 import LocalProvider from '../js/local-provider';
 import Log from '../js/log';
-import RemoteProvider from '../js/remote-provider';
+import hash from '../js/hashing-service';
 
 const log = Log.get('List');
 
@@ -65,7 +65,7 @@ export default {
         } else if (this.current.tag === 'file') {
           LocalProvider.read(this.current.key).then(buffer => {
             console.log('Stored', this.current.hash);
-            RemoteProvider.hash(buffer).then(hash => {
+            hash(buffer).then(hash => {
               console.log('Calc', hash);
             });
             this.data = `{${this.current.name}}`;

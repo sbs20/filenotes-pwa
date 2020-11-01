@@ -1,6 +1,6 @@
-import {STORE_FS_CONTENT, STORE_FS_DELTA, STORE_FS_METADATA, STORE_SETTINGS} from './database';
-import FileStore from './file-store';
-import KeyValueStore from './key-value-store';
+import Database, {STORE_FS_CONTENT, STORE_FS_DELTA, STORE_FS_METADATA, STORE_SETTINGS} from '../data/database';
+import FileStore from '../data/file-store';
+import KeyValueStore from '../data/key-value-store';
 
 class StorageManager {
   constructor() {
@@ -10,6 +10,10 @@ class StorageManager {
       delta: new FileStore(STORE_FS_DELTA)  
     };
     this.settings = new KeyValueStore(STORE_SETTINGS);
+  }
+
+  deleteDatatabase() {
+    new Database().delete();
   }
 }
 
