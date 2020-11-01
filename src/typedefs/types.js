@@ -15,7 +15,7 @@
  * @property {('file'|'folder'|'deleted')} tag
  * @property {string} key - The lowercase path
  * @property {string} name - The filename
- * @property {string} hash - sha256 of the file content
+ * @property {string} [hash] - sha256 of the file content
  * @property {string} [modified] - ISO8601 date string of the last modified time
  * @property {string} path - The filepath
  * @property {number} [size] - The size in bytes
@@ -27,4 +27,10 @@
  * @property {string} key - The lowercase path
  * @property {string} [preview] - Preview data
  * @property {ArrayBuffer} data - The data
+ */
+
+/**
+ * @typedef {Object} SyncActions
+ * @property {Array.<Metadata>} incoming - The incoming queue
+ * @property {Array.<Metadata>} outgoing - The outgoing queue
  */

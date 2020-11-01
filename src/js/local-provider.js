@@ -1,6 +1,6 @@
 import FileProvider from './file-provider';
 import Log from './log';
-import RemoteProvider from './remote-provider';
+import FileEntry from './files/file-entry';
 import StorageManager from './storage/storage-manager';
 
 const log = Log.get('LocalProvider');
@@ -40,22 +40,8 @@ class LocalProvider extends FileProvider {
    */
   async write(path, data) {
     if (data) {
-      /** @type {Metadata} */
-      const metadata = {
-        tag: 'file',
-        key: path.toLowerCase(),
-        name: path.split('/').slice(-1)[0],
-        path: path,
-        modified: new Date().toISOString(),
-        size: data.byteLength,
-        hash: await RemoteProvider.hash(data)
-      };
-
-      /** @type {Content} */
-      const content = {
-        key: metadata.key,
-        data: data
-      };
+      const metadata = await FileEntry.createFileMetadata(path, data);
+      const content = FileEntry.createContent(metadata.key, data);
 
       // See what's stored locally already
       const current = await StorageManager.fs.metadata.read(metadata.key);
@@ -68,6 +54,27 @@ class LocalProvider extends FileProvider {
         log.debug(`${metadata.key} has not changed`);        
       }
     }
+  }
+
+  /**
+   * Delete a file
+   * @param {string} path 
+   */
+  async delete(path) {
+    await StorageManager.fs.metadata.deleteAll([path.toLowerCase()]);
+    await StorageManager.fs.content.deleteAll([path.toLowerCase()]);
+    await StorageManager.fs.delta.writeAll([FileEntry.createDeletedMetadata(path)]);
+  }
+
+  /**
+   * Moves a file
+   * @param {string} path 
+   * @param {string} destinationPath 
+   */
+  async move(path, destinationPath) {
+    const content = await StorageManager.fs.content.read(path.toLowerCase());
+    await this.write(destinationPath, content.data);
+    await this.delete(path);
   }
 }
 

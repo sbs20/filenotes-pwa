@@ -6,6 +6,23 @@ export default class AutoIncrementStore {
   }
 
   /**
+   * Clears the store
+   * @returns {Promise.<void>>} Promise<void>
+   */
+  async clear() {
+    await Database.use(idb => idb.clear(this.store));
+  }
+
+  /**
+   * Deletes a value
+   * @param {number} id The key
+   * @returns {Promise.<void>>} Promise<void>
+   */
+  async delete(id) {
+    await Database.use(idb => idb.delete(this.store, id));
+  }
+
+  /**
    * Returns a list of file metadata keys
    * @returns {Promise.<Array.<Number>>} Promise<number[]>
    */
@@ -19,15 +36,6 @@ export default class AutoIncrementStore {
    */
   async list() {
     return await Database.use(idb => idb.getAll(this.store));
-  }
-
-  /**
-   * Deletes a value
-   * @param {number} id The key
-   * @returns {Promise.<void>>} Promise<void>
-   */
-  async delete(id) {
-    await Database.use(idb => idb.delete(this.store, id));
   }
 
   /**

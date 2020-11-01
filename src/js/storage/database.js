@@ -2,7 +2,7 @@
  * @typedef {import('idb').IDBPDatabase} IDBPDatabase
  */
 
-import { openDB } from 'idb';
+import { openDB, deleteDB } from 'idb';
 
 export const DB_NAME = 'filenotes.app';
 export const DB_VERSION = 1;
@@ -26,7 +26,7 @@ export default class Database {
         db.createObjectStore(STORE_SETTINGS);
         db.createObjectStore(STORE_FS_METADATA, { keyPath: 'key' });
         db.createObjectStore(STORE_FS_CONTENT, { keyPath: 'key' });
-        db.createObjectStore(STORE_FS_DELTA, { autoIncrement: true });
+        db.createObjectStore(STORE_FS_DELTA, { keyPath: 'key' });
         db.createObjectStore(STORE_QUEUE, { autoIncrement: true });
       },
       blocked() {
@@ -36,6 +36,13 @@ export default class Database {
         console.log('blocking');
       }
     });  
+  }
+
+  /**
+   * Deletes the database
+   */
+  async delete() {
+    await deleteDB(DB_NAME, {});
   }
 
   /**

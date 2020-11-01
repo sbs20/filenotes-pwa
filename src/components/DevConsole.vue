@@ -5,10 +5,12 @@
     <input type="button" value="Clear local actions" @click="clearLocalActions">
     <input type="button" value="Clear local filesystem" @click="clearLocalFs">
     <input type="button" value="Clear access token" @click="clearAccessToken">
+    <input type="button" value="Nuke database" @click="nukeDatabase">
   </div>
 </template>
 
 <script>
+import Database from '../js/storage/database';
 import StorageManager from '../js/storage/storage-manager';
 import EventBus from '../js/event-bus';
 let listener = null;
@@ -50,9 +52,14 @@ export default {
     clearLocalFs() {
       StorageManager.fs.metadata.clear();
       StorageManager.fs.content.clear();
+      StorageManager.fs.delta.clear();
     },
 
     clearAccessToken() {
+    },
+
+    nukeDatabase() {
+      new Database().delete();
     }
   }
 }
