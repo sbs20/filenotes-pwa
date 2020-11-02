@@ -1,8 +1,6 @@
-import FileProvider from './file-provider';
 /* eslint-disable no-unused-vars */
-export default class CloudService extends FileProvider {
+export default class CloudProvider {
   constructor() {
-    super();
     this.options = {
       clientId: ''
     };
@@ -29,5 +27,27 @@ export default class CloudService extends FileProvider {
 
   authenticationToken(uriHash) {}
 
-  async hash(buffer) {}
+  async list() {
+    throw new Error('list() not implemented');
+  }
+
+  async get(path) {
+    throw new Error('get() not implemented');
+  }
+
+  async read(path) {
+    throw new Error('read() not implemented');
+  }
+
+  async move(file, desiredPath) {
+    throw new Error('move() not implemented');
+  }
+
+  async delete(path) {
+    throw new Error('delete() not implemented');
+  }
+
+  async write(file) {
+    throw new Error('write() not implemented');
+  }
 }

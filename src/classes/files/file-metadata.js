@@ -1,5 +1,5 @@
 import FilePath from './file-path';
-import hash from '../hashing-service';
+import { Hasher } from '../service';
 
 const _metadata = Symbol();
 
@@ -50,7 +50,7 @@ export default class FileMetadata {
   async data(data) {
     return this.extend({
       size: data.byteLength,
-      hash: await hash(data),
+      hash: await Hasher.hash(data),
       modified: new Date().toISOString()
     });
   }

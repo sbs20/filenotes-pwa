@@ -1,7 +1,6 @@
 <template>
   <div>
     <h1>Filenotes</h1>
-    <input type="button" value="Sync" @click="go">
     <List></List>
     <DevConsole></DevConsole>
   </div>
@@ -10,8 +9,7 @@
 <script>
 import DevConsole from './DevConsole.vue'
 import List from './List.vue'
-import { connect } from '../js/remote-provider';
-import Sync from '../js/sync';
+import { connect } from '../classes/remote-provider';
 
 export default {
   name: 'Main',
@@ -29,12 +27,6 @@ export default {
   mounted() {
     connect(window);
   },
-
-  methods: {
-    async go() {
-      await Sync.execute();
-    },
-  }
 }
 </script>
 

@@ -1,12 +1,13 @@
-//import Convert from './convert';
-import FileContent from './files/file-content';
-//import FileMetadata from './files/file-metadata';
-import FilePath from './files/file-path';
-import Log from './log';
-import RemoteProvider from './remote-provider';
-import SyncProvider from './sync-provider';
+import FileContent from '../files/file-content';
+import FilePath from '../files/file-path';
+import Log from '../log';
+import RemoteProvider from '../remote-provider';
+import Storage from './storage';
 
-class Sync {
+const storage = new Storage();
+const log = Log.get('sync-engine');
+
+export default class SyncEngine {
   constructor() {
   }
 
@@ -17,8 +18,7 @@ class Sync {
   async resolveSyncActions() {
     const join = {};
     const incoming = await RemoteProvider.list();
-    /** @type {Array.<Metadata>} */
-    const outgoing = await SyncProvider.deltas();
+    const outgoing = await storage.deltas();
     const keys = [];
 
     outgoing.forEach(metadata => {
@@ -79,7 +79,7 @@ class Sync {
           // File conflict. Rename local, quicker
           const filepath = new FilePath(item.local.path);
           const destinationPath = `${filepath.directory}${filepath.stem}.${Date.now()}.conflict.${filepath.extension}`;
-          const destination = await SyncProvider.move(item.local.path, destinationPath);
+          const destination = await storage.move(item.local.path, destinationPath);
           queue.outgoing.push(destination);
           queue.incoming.push(item.remote);
         }
@@ -90,6 +90,7 @@ class Sync {
   }
 
   async execute() {
+    log.info('Start');
     // Reset cursor for testing
     RemoteProvider.cursor = null;
 
@@ -104,7 +105,7 @@ class Sync {
     //   else update, delete content data
     // for fs without data, download
 
-    const localIndex = (await SyncProvider.list())
+    const localIndex = (await storage.list())
       .reduce((output, item) => {
         output[item.key] = item.hash;
         return output;
@@ -115,35 +116,35 @@ class Sync {
       return metadata.key in localIndex && metadata.tag === 'deleted';
     });
 
-    Log.debug('deletes', deletes);
-    await SyncProvider.delete(deletes.map(metadata => metadata.key));
+    log.debug('deletes', deletes);
+    await storage.delete(deletes.map(metadata => metadata.key));
 
     const updates = incoming.filter(metadata => {
       return (!(metadata.key in localIndex) || metadata.hash !== localIndex[metadata.key])
         && metadata.tag !== 'deleted';
     });
 
-    Log.debug('updates', updates);
-    await SyncProvider.write(updates);
+    log.debug('updates', updates);
+    await storage.write(updates);
 
     await this.syncContent();
   }
 
   async syncContent() {
-    const queue = await SyncProvider.listWithoutContent()
+    const queue = await storage.listWithoutContent()
 
-    Log.debug('content queue', queue);
+    log.debug('content queue', queue);
 
     await Promise.all(queue.map(async key => {
-      const content = FileContent.create(key, await RemoteProvider.read(key));
-      await SyncProvider.writeContent([content]);
-      Log.debug('downloaded', key);
+      try {
+        const content = FileContent.create(key, await RemoteProvider.read(key));
+        await storage.writeContent([content]);  
+        log.debug('downloaded', key);
+      } catch (error) {
+        log.error(`error downloading ${key}`, error);
+      }
     }));
 
-    Log.debug('finished sync');
+    log.debug('finished sync');
   }
 }
-
-const sync = new Sync();
-
-export default sync;

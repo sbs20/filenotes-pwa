@@ -1,10 +1,7 @@
-import FileMetadata from './files/file-metadata';
-//import Log from './log';
-import { StorageService } from './service';
+import FileMetadata from '../files/file-metadata';
+import { StorageService } from '../service';
 
-//const log = Log.get('LocalProvider');
-
-class SyncProvider {
+export default class Storage {
 
   /**
    * Returns a metadata object
@@ -78,13 +75,12 @@ class SyncProvider {
   /**
    * Delete a list of files
    * @param {Array.<string>} paths - The path of the file to delete
-   * @param {boolean} [silent] - If true then wipes the delta record too. This will stop subsequent sync
    * @returns {Promise.<void>}
    */
   async delete(paths) {
     await StorageService.fs.metadata.deleteAll(paths.map(path => path.toLowerCase()));
     await StorageService.fs.content.deleteAll(paths.map(path => path.toLowerCase()));
-    await StorageService.fs.content.deleteAll(paths.map(path => path.toLowerCase()));
+    await StorageService.fs.delta.deleteAll(paths.map(path => path.toLowerCase()));
   }
 
   /**
@@ -108,7 +104,3 @@ class SyncProvider {
     return destination;
   }
 }
-
-const syncProvider = new SyncProvider();
-
-export default syncProvider;

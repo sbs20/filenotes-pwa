@@ -1,4 +1,4 @@
-import Convert from './convert';
+import Convert from '../utils/convert';
 
 /**
  * Calculates the content hash

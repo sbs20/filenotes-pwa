@@ -1,7 +1,7 @@
-import Convert from './convert';
-import CloudService from './cloud-service';
-import FieldAdapter from './field-adapter';
-import QueryString from './query-string';
+import Convert from '../utils/convert';
+import CloudProvider from '../cloud-provider';
+import FieldAdapter from '../utils/field-adapter';
+import QueryString from '../utils/query-string';
 import { Dropbox } from 'dropbox';
 
 const MAP = {
@@ -20,7 +20,7 @@ const MAP = {
 
 const client = Symbol();
 
-export default class DropboxService extends CloudService {
+export default class DropboxProvider extends CloudProvider {
   constructor() {
     super();
     this[client] = null;

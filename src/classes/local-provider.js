@@ -1,12 +1,11 @@
 import FileContent from './files/file-content';
 import FileMetadata from './files/file-metadata';
-import FileProvider from './file-provider';
 import Log from './log';
 import { StorageService } from './service';
 
 const log = Log.get('LocalProvider');
 
-class LocalProvider extends FileProvider {
+class LocalProvider {
 
   /**
    * Returns a metadata object
@@ -31,7 +30,7 @@ class LocalProvider extends FileProvider {
    */
   async read(path) {
     const content = await StorageService.fs.content.read(path);
-    return content.data;
+    return content === undefined ? new Uint8Array().buffer : content.data;
   }
 
   /**

@@ -1,4 +1,4 @@
-import Convert from "../convert";
+import Convert from "../utils/convert";
 import FilePath from "./file-path";
 
 const _content = Symbol();

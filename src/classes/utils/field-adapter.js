@@ -1,3 +1,12 @@
+function _apply(mapping, input) {
+  return Object.keys(input).reduce((output, key) => {
+    if (key in mapping) {
+      output[mapping[key]] = input[key];
+    }
+    return output;
+  }, {});
+}
+
 export default class FieldAdapter {
   constructor(mapping) {
     this.to = mapping;
@@ -7,22 +16,13 @@ export default class FieldAdapter {
     }, {});
   }
 
-  static _apply(mapping, input) {
-    return Object.keys(input).reduce((output, key) => {
-      if (key in mapping) {
-        output[mapping[key]] = input[key];
-      }
-      return output;
-    }, {});
-  }
-
   /**
    * Applies mapping
    * @param {Object} input 
    * @returns {Object} output
    */
   apply(input) {
-    return FieldAdapter._apply(this.to, input);
+    return _apply(this.to, input);
   }
   
   /**
@@ -31,6 +31,6 @@ export default class FieldAdapter {
    * @returns {Object} output
    */
   unapply(input) {
-    return FieldAdapter._apply(this.from, input);
+    return _apply(this.from, input);
   }
 }

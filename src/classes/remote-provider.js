@@ -1,9 +1,9 @@
 import Constants from './constants';
-import DropboxService from './dropbox-service';
+import DropboxProvider from './dropbox/dropbox-provider';
 import Log from './log';
 import { StorageService } from './service';
 
-const remote = new DropboxService();
+const remote = new DropboxProvider();
 const log = Log.get('RemoteProvider');
 
 /**

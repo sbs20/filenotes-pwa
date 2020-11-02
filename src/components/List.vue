@@ -1,10 +1,14 @@
 <template>
   <div>
+    <input type="button" value="Sync" @click="sync">
     <div v-for="entry in entries" v-bind:key="entry.key">
-      <div>{{ entry.tag }}</div>
-      <div><router-link :to="'/f/' + entry.key">{{ entry.key }}</router-link></div>
-      <div>{{ entry.size }}</div>
-      <div>{{ entry.modified }}</div>
+      <div>
+        {{ entry.tag }} |
+        <router-link :to="'/f/' + entry.key">{{ entry.key }}</router-link> |
+        {{ entry.size }} |
+        {{ entry.modified }}
+        <input type="button" value="x" @click="remove(entry)">
+      </div>
     </div>
     <div v-if="data">
       <input type="button" value="back" @click="$router.go(-1)">
@@ -16,10 +20,10 @@
 </template>
 
 <script>
-import Convert from '../js/convert';
-import LocalProvider from '../js/local-provider';
-import Log from '../js/log';
-import hash from '../js/hashing-service';
+import Convert from '../classes/utils/convert';
+import LocalProvider from '../classes/local-provider';
+import Log from '../classes/log';
+import { Hasher, SyncEngine } from '../classes/service';
 
 const log = Log.get('List');
 
@@ -47,9 +51,9 @@ export default {
 
   methods: {
     refresh() {
-      this.entries = []
-      this.data = null;
       LocalProvider.get(this.$route.params.pathMatch).then(current => {
+        this.entries = []
+        this.data = null;
         this.current = current || {
           tag: 'folder',
           key: ''
@@ -65,7 +69,7 @@ export default {
         } else if (this.current.tag === 'file') {
           LocalProvider.read(this.current.key).then(buffer => {
             console.log('Stored', this.current.hash);
-            hash(buffer).then(hash => {
+            Hasher.hash(buffer).then(hash => {
               console.log('Calc', hash);
             });
             this.data = `{${this.current.name}}`;
@@ -77,10 +81,24 @@ export default {
       });
     },
   
+    /**
+     * @param {Metadata} entry
+     */
+    remove(entry) {
+      LocalProvider.delete(entry.path);
+      this.refresh();
+    },
+
     save() {
       const buffer = Convert.stringToArrayBuffer(this.data);
       LocalProvider.write(this.current.path, buffer);
       log.debug('Save', this.current);
+    },
+
+    sync() {
+      SyncEngine.execute().then(() => {
+        this.refresh();
+      });
     }
   }
 }

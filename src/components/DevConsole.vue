@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import { StorageService } from '../js/service';
-import EventBus from '../js/event-bus';
+import { StorageService } from '../classes/service';
+import EventBus from '../classes/event-bus';
 let listener = null;
 
 export default {
