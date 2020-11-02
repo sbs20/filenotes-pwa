@@ -1,31 +1,10 @@
-import Convert from './convert';
-import FileMetadata from './files/file-metadata';
+//import Convert from './convert';
+import FileContent from './files/file-content';
+//import FileMetadata from './files/file-metadata';
 import FilePath from './files/file-path';
 import Log from './log';
 import RemoteProvider from './remote-provider';
-import StorageManager from './storage/storage-manager';
-
-/**
- * Performs a local move and updates the delta without recalculating hashes
- * @param {string} path 
- * @param {string} destinationPath 
- * @returns {Promise.<Metadata>} The moved metadata
- */
-async function moveLocal(path, destinationPath) {
-  const source = await StorageManager.fs.metadata.read(path.toLowerCase());
-  const content = await StorageManager.fs.content.read(path.toLowerCase());
-
-  const destination = new FileMetadata().extend(source).path(destinationPath).metadata();
-  content.key = destinationPath.toLowerCase();
-  
-  await StorageManager.fs.metadata.writeAll([destination]);
-  await StorageManager.fs.content.writeAll([content]);
-  await StorageManager.fs.delta.writeAll([destination]);
-  await StorageManager.fs.metadata.deleteAll([source.key]);
-  await StorageManager.fs.content.deleteAll([source.key]);
-  await StorageManager.fs.delta.deleteAll([source.key]);
-  return destination;
-}
+import SyncProvider from './sync-provider';
 
 class Sync {
   constructor() {
@@ -33,13 +12,13 @@ class Sync {
 
   /**
    * Resolves all actions to take
-   * @returns {SyncActions}
+   * @returns {Promise.<SyncActions>}
    */
   async resolveSyncActions() {
     const join = {};
     const incoming = await RemoteProvider.list();
     /** @type {Array.<Metadata>} */
-    const outgoing = await StorageManager.fs.delta.list();
+    const outgoing = await SyncProvider.deltas();
     const keys = [];
 
     outgoing.forEach(metadata => {
@@ -100,7 +79,7 @@ class Sync {
           // File conflict. Rename local, quicker
           const filepath = new FilePath(item.local.path);
           const destinationPath = `${filepath.directory}${filepath.stem}.${Date.now()}.conflict.${filepath.extension}`;
-          const destination = await moveLocal(item.local.path, destinationPath);
+          const destination = await SyncProvider.move(item.local.path, destinationPath);
           queue.outgoing.push(destination);
           queue.incoming.push(item.remote);
         }
@@ -125,7 +104,7 @@ class Sync {
     //   else update, delete content data
     // for fs without data, download
 
-    const localIndex = (await StorageManager.fs.metadata.list())
+    const localIndex = (await SyncProvider.list())
       .reduce((output, item) => {
         output[item.key] = item.hash;
         return output;
@@ -137,8 +116,7 @@ class Sync {
     });
 
     Log.debug('deletes', deletes);
-    await StorageManager.fs.metadata.deleteAll(deletes.map(metadata => metadata.key));
-    await StorageManager.fs.content.deleteAll(deletes.map(metadata => metadata.key));
+    await SyncProvider.delete(deletes.map(metadata => metadata.key));
 
     const updates = incoming.filter(metadata => {
       return (!(metadata.key in localIndex) || metadata.hash !== localIndex[metadata.key])
@@ -146,34 +124,19 @@ class Sync {
     });
 
     Log.debug('updates', updates);
-    await StorageManager.fs.metadata.writeAll(updates);
-    await StorageManager.fs.content.deleteAll(updates.map(metadata => metadata.key));
+    await SyncProvider.write(updates);
 
     await this.syncContent();
   }
 
   async syncContent() {
-    const content = (await StorageManager.fs.content.keys())
-      .reduce((output, key) => {
-        output[key] = true;
-        return output;
-      }, {});
-
-    const queue = (await StorageManager.fs.metadata.list())
-      .filter(metadata => metadata.tag === 'file' && !(metadata.key in content))
-      .map(metadata => metadata.key);
+    const queue = await SyncProvider.listWithoutContent()
 
     Log.debug('content queue', queue);
 
     await Promise.all(queue.map(async key => {
-      const content = {
-        key: key,
-        data: await RemoteProvider.read(key)
-      };
-      if (key.endsWith('.txt')) {
-        content.preview = Convert.arrayBufferToString(content.data).substr(0, 64);
-      }
-      await StorageManager.fs.content.writeAll([content]);
+      const content = FileContent.create(key, await RemoteProvider.read(key));
+      await SyncProvider.writeContent([content]);
       Log.debug('downloaded', key);
     }));
 

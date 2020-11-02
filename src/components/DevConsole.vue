@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import StorageManager from '../js/storage/storage-manager';
+import { StorageService } from '../js/service';
 import EventBus from '../js/event-bus';
 let listener = null;
 
@@ -49,16 +49,16 @@ export default {
     },
 
     clearLocalFs() {
-      StorageManager.fs.metadata.clear();
-      StorageManager.fs.content.clear();
-      StorageManager.fs.delta.clear();
+      StorageService.fs.metadata.clear();
+      StorageService.fs.content.clear();
+      StorageService.fs.delta.clear();
     },
 
     clearAccessToken() {
     },
 
     nukeDatabase() {
-      StorageManager.deleteDatatabase();
+      StorageService.deleteDatatabase();
     }
   }
 }

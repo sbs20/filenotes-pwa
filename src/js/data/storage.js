@@ -1,8 +1,8 @@
-import Database, {STORE_FS_CONTENT, STORE_FS_DELTA, STORE_FS_METADATA, STORE_SETTINGS} from '../data/database';
-import FileStore from '../data/file-store';
-import KeyValueStore from '../data/key-value-store';
+import Database, {STORE_FS_CONTENT, STORE_FS_DELTA, STORE_FS_METADATA, STORE_SETTINGS} from './database';
+import FileStore from './file-store';
+import KeyValueStore from './key-value-store';
 
-class StorageManager {
+export default class Storage {
   constructor() {
     this.fs = {
       metadata: new FileStore(STORE_FS_METADATA),
@@ -16,6 +16,3 @@ class StorageManager {
     new Database().delete();
   }
 }
-
-const instance = new StorageManager();
-export default instance;

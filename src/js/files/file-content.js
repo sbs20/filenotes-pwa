@@ -43,7 +43,7 @@ export default class FileContent {
       data: data      
     };
 
-    if (FilePath.create(this.key).extension === 'txt') {
+    if (FilePath.create(this[_content].key).extension === 'txt') {
       extension.preview = Convert.arrayBufferToString(data).substr(0, 50);
     }
 

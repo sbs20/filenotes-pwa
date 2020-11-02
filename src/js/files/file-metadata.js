@@ -47,7 +47,7 @@ export default class FileMetadata {
    * @param {ArrayBuffer} data
    * @returns {Promise.<FileMetadata>}
    */
-  static async data(data) {
+  async data(data) {
     return this.extend({
       size: data.byteLength,
       hash: await hash(data),

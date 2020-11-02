@@ -2,7 +2,7 @@ import FileContent from './files/file-content';
 import FileMetadata from './files/file-metadata';
 import FileProvider from './file-provider';
 import Log from './log';
-import StorageManager from './storage/storage-manager';
+import { StorageService } from './service';
 
 const log = Log.get('LocalProvider');
 
@@ -13,7 +13,7 @@ class LocalProvider extends FileProvider {
    * @returns {Promise.<Metadata>} - Promise<Metadata>
    */
   async get(path) {
-    return await StorageManager.fs.metadata.read(path);
+    return await StorageService.fs.metadata.read(path);
   }
 
   /**
@@ -21,7 +21,7 @@ class LocalProvider extends FileProvider {
    * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
   async list() {
-    return await StorageManager.fs.metadata.list();
+    return await StorageService.fs.metadata.list();
   }
 
   /**
@@ -30,7 +30,7 @@ class LocalProvider extends FileProvider {
    * @returns {Promise.<ArrayBuffer>} - Promise<ArrayBuffer>
    */
   async read(path) {
-    const content = await StorageManager.fs.content.read(path);
+    const content = await StorageService.fs.content.read(path);
     return content.data;
   }
 
@@ -45,12 +45,12 @@ class LocalProvider extends FileProvider {
       const content = FileContent.create(path, data);
 
       // See what's stored locally already
-      const current = await StorageManager.fs.metadata.read(metadata.key);
+      const current = await StorageService.fs.metadata.read(metadata.key);
       if (current.hash !== metadata.hash) {
         log.debug(`${metadata.key} has changed`);
-        await StorageManager.fs.metadata.writeAll([metadata]);
-        await StorageManager.fs.content.writeAll([content]);
-        await StorageManager.fs.delta.writeAll([metadata]);
+        await StorageService.fs.metadata.writeAll([metadata]);
+        await StorageService.fs.content.writeAll([content]);
+        await StorageService.fs.delta.writeAll([metadata]);
       } else {
         log.debug(`${metadata.key} has not changed`);        
       }
@@ -62,9 +62,9 @@ class LocalProvider extends FileProvider {
    * @param {string} path 
    */
   async delete(path) {
-    await StorageManager.fs.metadata.deleteAll([path.toLowerCase()]);
-    await StorageManager.fs.content.deleteAll([path.toLowerCase()]);
-    await StorageManager.fs.delta.writeAll([FileMetadata.createDeleted(path)]);
+    await StorageService.fs.metadata.deleteAll([path.toLowerCase()]);
+    await StorageService.fs.content.deleteAll([path.toLowerCase()]);
+    await StorageService.fs.delta.writeAll([FileMetadata.createDeleted(path)]);
   }
 
   /**
@@ -73,7 +73,7 @@ class LocalProvider extends FileProvider {
    * @param {string} destinationPath 
    */
   async move(path, destinationPath) {
-    const content = await StorageManager.fs.content.read(path.toLowerCase());
+    const content = await StorageService.fs.content.read(path.toLowerCase());
     await this.write(destinationPath, content.data);
     await this.delete(path);
   }

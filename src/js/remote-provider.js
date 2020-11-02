@@ -1,7 +1,7 @@
 import Constants from './constants';
 import DropboxService from './dropbox-service';
 import Log from './log';
-import StorageManager from './storage/storage-manager';
+import { StorageService } from './service';
 
 const remote = new DropboxService();
 const log = Log.get('RemoteProvider');
@@ -13,7 +13,7 @@ const log = Log.get('RemoteProvider');
  */
 export async function connect(window) {
   // Try local storage first
-  let accessToken = await StorageManager.settings.get('accessToken');
+  let accessToken = await StorageService.settings.get('accessToken');
   if (await remote.connect({ clientId: Constants.APP_ID, accessToken: accessToken })) {
     log.debug('Connected using stored access token');
     return;
@@ -28,7 +28,7 @@ export async function connect(window) {
   accessToken = remote.authenticationToken(window.location.hash);
   if (await remote.connect({ clientId: Constants.APP_ID, accessToken: accessToken })) {
     log.debug('Connected using url access token');
-    await StorageManager.settings.set('accessToken', accessToken);
+    await StorageService.settings.set('accessToken', accessToken);
     return;
   }
 
