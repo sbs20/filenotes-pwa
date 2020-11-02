@@ -17,10 +17,21 @@ class LocalProvider {
 
   /**
    * Returns a list of file metadata objects
+   * @param {Metadata} [directory]
    * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
-  async list() {
-    return await StorageService.fs.metadata.list();
+  async list(directory) {
+    let list = await StorageService.fs.metadata.list();
+
+    if (directory) {
+      list = list.filter(metadata => {
+        const fileKey = metadata.key;
+        const dirKey = directory.key + '/';
+        return fileKey.startsWith(dirKey) && fileKey.indexOf('/', dirKey.length) === -1;
+      });  
+    }
+
+    return list;
   }
 
   /**

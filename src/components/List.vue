@@ -4,7 +4,7 @@
     <div v-for="entry in entries" v-bind:key="entry.key">
       <div>
         {{ entry.tag }} |
-        <router-link :to="'/f/' + entry.key">{{ entry.key }}</router-link> |
+        <router-link :to="'/f/' + entry.key">{{ entry.name }}</router-link> |
         {{ entry.size }} |
         {{ entry.modified }}
         <input type="button" value="x" @click="remove(entry)">
@@ -21,6 +21,8 @@
 
 <script>
 import Convert from '../classes/utils/convert';
+import FilePath from '../classes/files/file-path';
+import FolderMetadata from '../classes/files/folder-metadata';
 import LocalProvider from '../classes/local-provider';
 import Log from '../classes/log';
 import { Hasher, SyncEngine } from '../classes/service';
@@ -56,15 +58,19 @@ export default {
         this.data = null;
         this.current = current || {
           tag: 'folder',
-          key: ''
+          key: '',
+          path: '',
+          name: '../ (parent)'
         };
 
         if (this.current.tag === 'folder') {
-          LocalProvider.list().then(entries => {
-            this.entries = entries.filter(metadata => {
-              const key = metadata.key;
-              return key.startsWith(this.current.key) && key.indexOf('/', this.current.key.length + 1) === -1;
-            });
+          LocalProvider.list(this.current).then(entries => {
+            if (this.current.key !== '') {
+              const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
+              parent.name = '../ (parent)';
+              entries.splice(0, 0, parent);
+            }
+            this.entries = entries;
           });
         } else if (this.current.tag === 'file') {
           LocalProvider.read(this.current.key).then(buffer => {

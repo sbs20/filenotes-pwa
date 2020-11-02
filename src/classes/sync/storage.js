@@ -2,7 +2,6 @@ import FileMetadata from '../files/file-metadata';
 import { StorageService } from '../service';
 
 export default class Storage {
-
   /**
    * Returns a metadata object
    * @returns {Promise.<Metadata>} - Promise<Metadata>

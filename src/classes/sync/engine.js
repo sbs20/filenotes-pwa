@@ -78,7 +78,7 @@ export default class SyncEngine {
         } else {
           // File conflict. Rename local, quicker
           const filepath = new FilePath(item.local.path);
-          const destinationPath = `${filepath.directory}${filepath.stem}.${Date.now()}.conflict.${filepath.extension}`;
+          const destinationPath = `${filepath.directory}/${filepath.stem}.${Date.now()}.conflict.${filepath.extension}`;
           const destination = await storage.move(item.local.path, destinationPath);
           queue.outgoing.push(destination);
           queue.incoming.push(item.remote);

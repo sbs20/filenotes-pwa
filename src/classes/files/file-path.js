@@ -12,7 +12,11 @@ export default class FilePath {
    * @returns {string}
    */
   get directory() {
-    const directory = this.path.substr(0, this.path.lastIndexOf('/') + 1);
+    const path = this.path;
+    if (path.indexOf('/') === -1) {
+      return ''
+    }
+    const directory = path.substr(0, path.lastIndexOf('/'));
     return directory;
   }
 
@@ -21,7 +25,12 @@ export default class FilePath {
    * @returns {string}
    */
   get extension() {
-    const extension = this.name.substr(this.name.lastIndexOf('.') + 1);
+    const name = this.name;
+    if (name.indexOf('.') === -1) {
+      return '';
+    }
+
+    const extension = name.substr(name.lastIndexOf('.') + 1);
     return extension;
   }
 
@@ -39,7 +48,11 @@ export default class FilePath {
    * @returns {string}
    */
   get stem() {
-    const stem = this.name.substr(0, this.name.lastIndexOf('.'));
+    const name = this.name;
+    if (name.indexOf('.') === -1) {
+      return name;
+    }
+    const stem = name.substr(0, name.lastIndexOf('.'));
     return stem;
   }
 
@@ -68,7 +81,7 @@ export default class FilePath {
    * @returns {FilePath}
    */
   rename(name) {
-    return new FilePath(`${this.directory}${name}`);
+    return new FilePath(`${this.directory}/${name}`);
   }
 
   /**
