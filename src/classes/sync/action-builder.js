@@ -5,22 +5,22 @@ export default class ActionBuilder {
 
   /**
    * Resolves all actions to take
-   * @param {Array.<Metadata>} list - Local files
-   * @param {Array.<Metadata>} deltas - Local deltas
-   * @param {Array.<Metadata>} incoming - Remote files
+   * @param {Array.<Metadata>} localFiles - Local files
+   * @param {Array.<Metadata>} localDeltas - Local deltas
+   * @param {Array.<Metadata>} remoteFiles - Remote files
    * @returns {Promise.<Array.<SyncAction>>}
    */
-  static async build(list, deltas, incoming) {
+  static async build(localFiles, localDeltas, remoteFiles) {
     /** @type {Object.<string, {delta: Metadata, local: Metadata, remote: Metadata}>} */
-    const join = list.concat(deltas).concat(incoming)
+    const join = localFiles.concat(localDeltas).concat(remoteFiles)
       .reduce((output, metadata) => {
         output[metadata.key] = {};
         return output;
       }, {});
 
-    deltas.forEach(metadata => join[metadata.key].delta = metadata);
-    incoming.forEach(metadata => join[metadata.key].remote = metadata);
-    list.forEach(metadata => join[metadata.key].local = metadata);
+    localDeltas.forEach(metadata => join[metadata.key].delta = metadata);
+    remoteFiles.forEach(metadata => join[metadata.key].remote = metadata);
+    localFiles.forEach(metadata => join[metadata.key].local = metadata);
 
     /** @type {Array.<SyncAction>} */
     const actions = [];
