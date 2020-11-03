@@ -1,7 +1,7 @@
 <template>
   <div>
     <input type="button" value="Sync" @click="sync">
-    <div v-if="entries">
+    <div v-if="entries.length > 0">
       <input type="button" value="mkdir" @click="mkdir">
       <input type="button" value="create file" @click="createFile">
       <div v-if="current">

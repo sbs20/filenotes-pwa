@@ -1,7 +1,7 @@
 import FileMetadata from '../files/file-metadata';
 import { StorageService } from '../service';
 
-export default class SyncFilesystem {
+export default class FileSystem {
   /**
    * Returns a metadata object
    * @returns {Promise.<Metadata>} - Promise<Metadata>

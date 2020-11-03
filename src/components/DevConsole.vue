@@ -4,6 +4,7 @@
     <input type="button" value="Clear cursor" @click="clearCursor">
     <input type="button" value="Clear local actions" @click="clearLocalActions">
     <input type="button" value="Clear local filesystem" @click="clearLocalFs">
+    <input type="button" value="Clear log" @click="clearLog">
     <input type="button" value="Clear access token" @click="clearAccessToken">
     <input type="button" value="Nuke database" @click="nukeDatabase">
     <input type="button" value="Remote error" @click="causeRemoteError">
@@ -64,6 +65,10 @@ export default {
       ).then(() => {
         log.info('Local database cleared');
       });
+    },
+
+    clearLog() {
+      this.messages = [];
     },
 
     clearAccessToken() {
