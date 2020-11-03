@@ -1,16 +1,24 @@
 <template>
   <div>
     <input type="button" value="Sync" @click="sync">
-    <div v-for="entry in entries" v-bind:key="entry.key">
-      <div>
-        {{ entry.tag }} |
-        <router-link :to="'/f/' + entry.key">{{ entry.name }}</router-link> |
-        {{ entry.size }} |
-        {{ entry.modified }}
-        <input type="button" value="x" @click="remove(entry)">
+    <div v-if="entries">
+      <input type="button" value="mkdir" @click="mkdir">
+      <input type="button" value="create file" @click="createFile">
+      <div v-if="current">
+        CWD: {{ current.path }}
+      </div>
+      <div v-for="entry in entries" v-bind:key="entry.key">
+        <div>
+          {{ entry.tag }} |
+          <router-link :to="'/f/' + entry.key">{{ entry.name }}</router-link> |
+          {{ entry.size }} |
+          {{ entry.modified }}
+          <input type="button" value="x" @click="remove(entry)">
+        </div>
       </div>
     </div>
-    <div v-if="data">
+
+    <div v-if="data !== null">
       <input type="button" value="back" @click="$router.go(-1)">
       <input type="button" value="save" @click="save">
       <textarea v-model="data"></textarea>
@@ -53,9 +61,14 @@ export default {
 
   methods: {
     refresh() {
-      LocalProvider.get(this.$route.params.pathMatch).then(current => {
-        this.entries = [];
-        this.data = null;
+      /** @type {string} */
+      const path = this.$route.params.pathMatch;
+      LocalProvider.get(path).then(current => {
+        if (current === undefined && path.length > 0) {
+          this.$router.push('/f/');
+          return;
+        }
+
         this.current = current || {
           tag: 'folder',
           key: '',
@@ -63,6 +76,8 @@ export default {
           name: '../ (parent)'
         };
 
+        this.entries = [];
+        this.data = null;
         if (this.current.tag === 'folder') {
           LocalProvider.list(this.current).then(entries => {
             if (this.current.key !== '') {
@@ -86,13 +101,34 @@ export default {
         }
       });
     },
-  
+
+    createFile() {
+      if (this.current.tag === 'folder') {
+        const name = window.prompt('File name');
+        const path = `${this.current.path}/${name}`;
+        const content = new Uint8Array();
+        LocalProvider.write(path, content).then(() => {
+          this.refresh();
+        });
+      }
+    },
+
+    mkdir() {
+      if (this.current.tag === 'folder') {
+        const dir = window.prompt('Directory name');
+        LocalProvider.mkdir(`${this.current.path}/${dir}`).then(() => {
+          this.refresh();
+        });
+      }
+    },
+
     /**
      * @param {Metadata} entry
      */
     remove(entry) {
-      LocalProvider.delete(entry.path);
-      this.refresh();
+      LocalProvider.delete(entry.path).then(() => {
+        this.refresh();
+      });
     },
 
     save() {

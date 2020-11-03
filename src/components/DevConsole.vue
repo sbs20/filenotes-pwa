@@ -6,13 +6,18 @@
     <input type="button" value="Clear local filesystem" @click="clearLocalFs">
     <input type="button" value="Clear access token" @click="clearAccessToken">
     <input type="button" value="Nuke database" @click="nukeDatabase">
+    <input type="button" value="Remote error" @click="causeRemoteError">
   </div>
 </template>
 
 <script>
 import { StorageService } from '../classes/service';
 import EventBus from '../classes/event-bus';
+import RemoteProvider from '../classes/remote-provider';
+import Log from '../classes/log';
+
 let listener = null;
+const log = Log.get('DevConsole');
 
 export default {
   name: 'DevConsole',
@@ -43,22 +48,38 @@ export default {
 
   methods: {
     clearCursor() {
+      StorageService.settings.delete('remoteCursor').then(() => {
+        log.info('Local cursor cleared');
+      });
     },
 
     clearLocalActions() {
     },
 
     clearLocalFs() {
-      StorageService.fs.metadata.clear();
-      StorageService.fs.content.clear();
-      StorageService.fs.delta.clear();
+      Promise.all(
+        StorageService.fs.metadata.clear(),
+        StorageService.fs.content.clear(),
+        StorageService.fs.delta.clear()
+      ).then(() => {
+        log.info('Local database cleared');
+      });
     },
 
     clearAccessToken() {
+      StorageService.settings.delete('accessToken').then(() => {
+        log.info('Access token cleared');
+      });
     },
 
     nukeDatabase() {
-      StorageService.deleteDatatabase();
+      StorageService.deleteDatatabase().then(() => {
+        log.info('Local database deleted');
+      });
+    },
+
+    causeRemoteError() {
+      RemoteProvider.read('/non-existent-file');
     }
   }
 };

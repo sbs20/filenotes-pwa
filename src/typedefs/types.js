@@ -31,6 +31,6 @@
 
 /**
  * @typedef {Object} SyncAction
- * @property {('download'|'upload'|'deleteLocal'|'deleteRemote')} type - The action type
+ * @property {('file-download'|'file-upload'|'mkdir-local'|'mkdir-remote'|'delete-local'|'delete-remote')} type - The action type
  * @property {Metadata} metadata - The data
  */

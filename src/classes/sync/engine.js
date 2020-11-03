@@ -15,52 +15,81 @@ export default class SyncEngine {
   /**
    * 
    * @param {Metadata} local 
+   * @param {Metadata} delta 
    * @param {Metadata} remote 
    * @returns {Promise.<Array.<SyncAction>>}
    */
-  async createActions(local, remote) {
-    if (local && remote === undefined) {
-      if (local.tag !== 'deleted') {
-        return [{ type: 'upload', metadata: local }];
+  async createActions(local, delta, remote) {
+    if (local && remote && local.tag === 'file' && local.hash === remote.hash) {
+      return [];
+    }
+    
+    const value = `${delta && delta.tag || 'null'}:${remote && remote.tag || 'null'}`;
+    switch (value) {
+      case 'deleted:deleted':
+        // No action
+        return [];
+
+      case 'deleted:file':
+        // Prefer downloading
+        return [{ type: 'file-download', metadata: remote }];
+
+      case 'deleted:folder':
+        // Prefer creating the folder
+        return [{ type: 'mkdir-local', metadata: remote }];
+
+      case 'deleted:null':
+        // Do delete
+        return [{ type: 'delete-remote', metadata: delta }];
+
+      case 'file:deleted':
+        // Prefer uploading
+        return [{ type: 'file-upload', metadata: delta }];
+
+      case 'file:file': {
+        // Rename local and sync both ways
+        let filepath = new FilePath(delta.path);
+        let destinationPath = `${filepath.directory}/${filepath.stem}.${Date.now()}.conflict.${filepath.extension}`;
+        let destination = await fs.move(delta.path, destinationPath);
+        return [
+          { type: 'file-download', metadata: remote },
+          { type: 'file-upload', metadata: destination }  
+        ];
       }
-      return [];
-    } else if (local === undefined && remote) {
-      if (remote.tag !== 'deleted') {
-        return [{ type: 'download', metadata: remote }];
-      }
-      return [];
-    } else if (local.tag === 'deleted' && remote.tag === 'deleted') {
-      return [];
+      case 'file:folder':
+        // There is a file with the same name as a folder. Rename the file
+        return [];
 
-    } else if (local.tag === 'deleted') {
-      return [{ type: 'download', metadata: remote }];
+      case 'file:null':
+        return [{ type: 'file-upload', metadata: delta }];
 
-    } else if (remote.tag === 'deleted') {
-      return [{ type: 'upload', metadata: local }];
 
-    } else if (local.tag === 'folder' && remote.tag === 'folder') {
-      return [];
+      case 'folder:deleted':
+        // Prefer creating the folder
+        return [{ type: 'mkdir-remote', metadata: delta }];
 
-    } else if (local.tag === 'folder') {
-      // There is a file with the same name as a folder. Rename the file
-      return [];
+      case 'folder:file':
+        // There is a file with the same name as a folder. Rename the file
+        return [];
+      case 'folder:folder':
+        // No action
+        return [];
 
-    } else if (remote.tag === 'folder') {
-      // There is a file with the same name as a folder. Rename the file
-      return [];
+      case 'folder:null':
+        return [{ type: 'mkdir-remote', metadata: delta }];
 
-    } else if (local.hash === remote.hash) {
-      return [];
+      case 'null:deleted':
+        return [{ type: 'delete-local', metadata: remote }];
 
-    } else {
-      // File conflict. Rename local
-      const filepath = new FilePath(local.path);
-      const destinationPath = `${filepath.directory}/${filepath.stem}.${Date.now()}.conflict.${filepath.extension}`;
-      const destination = await fs.move(local.path, destinationPath);
-      return [
-        { type: 'download', metadata: remote },
-        { type: 'upload', metadata: destination }  
-      ];
+      case 'null:file':
+        return [{ type: 'file-download', metadata: remote }];
+
+      case 'null:folder':
+        return [{ type: 'mkdir-local', metadata: remote }];
+
+      case 'null:null':
+        // No action
+        return [];
     }
   }
 
@@ -70,57 +99,40 @@ export default class SyncEngine {
    */
   async buildSyncActions() {
     const list = await fs.list();
-    const outgoing = RemoteProvider.cursor ? await fs.deltas() : list;
+    const deltas = await fs.deltas();
     const incoming = await RemoteProvider.list();
 
-    /** @type {Object.<string, {local: Metadata, remote: Metadata}>} */
-    const join = {};
-
-    outgoing.forEach(metadata => {
-      join[metadata.key] = {
-        local: metadata,
-        remote: undefined
-      };
-    });
-
-    incoming.forEach(metadata => {
-      if (metadata.key in join) {
-        join[metadata.key].remote = metadata;
-      } else {
-        join[metadata.key] = {
-          local: undefined,
-          remote: metadata
-        };
-      }
-    });
-
-    /** @type {Array.<SyncAction>} */
-    let actions = [];
-    for (const key in join) {
-      const item = join[key];
-      const itemActions = await this.createActions(item.local, item.remote);
-      itemActions.forEach(action => actions.push(action));
-    }
-
-    // Filter the actions against the local index. It's possible that we've
-    // uploaded a file that we already know about and we don't need to download
-    // it
-    /** @type {Object.<string, string>} */
-    const index = list
-      .filter(metadata => metadata.hash)
+    /** @type {Object.<string, {delta: Metadata, local: Metadata, remote: Metadata}>} */
+    const join = list.concat(deltas).concat(incoming)
       .reduce((output, metadata) => {
-        output[metadata.key] = metadata.hash;
+        output[metadata.key] = {};
         return output;
       }, {});
 
-    actions = actions
-      .filter(action => {
-        return action.type !== 'download'
-          || !(action.metadata.key in index)
-          || action.metadata.hash !== index[action.metadata.key];
-      });
+    deltas.forEach(metadata => join[metadata.key].delta = metadata);
+    incoming.forEach(metadata => join[metadata.key].remote = metadata);
+    list.forEach(metadata => join[metadata.key].local = metadata);
 
-    return actions;
+    /** @type {Array.<SyncAction>} */
+    const actions = [];
+    for (const key in join) {
+      const item = join[key];
+      const itemActions = await this.createActions(item.local, item.delta, item.remote);
+      itemActions.forEach(action => actions.push(action));
+    }
+
+    /** @type {Array.<SyncAction>} */
+    const sorted = [];
+    actions.filter(a => a.type === 'delete-local').forEach(a => sorted.push(a));
+    actions.filter(a => a.type === 'delete-remote')
+      .sort((a1, a2) => a2.metadata.key.length - a1.metadata.key.length).forEach(a => sorted.push(a));
+    actions.filter(a => a.type === 'mkdir-local').forEach(a => sorted.push(a));
+    actions.filter(a => a.type === 'mkdir-remote')
+      .sort((a1, a2) => a1.metadata.key.length - a2.metadata.key.length).forEach(a => sorted.push(a));
+    actions.filter(a => a.type === 'file-download').forEach(a => sorted.push(a));
+    actions.filter(a => a.type === 'file-upload').forEach(a => sorted.push(a));
+
+    return sorted;
   }
 
   /**
@@ -130,34 +142,40 @@ export default class SyncEngine {
   async performAction(action) {
     const key = action.metadata.key;
     switch (action.type) {
-      case 'download':
-        if (action.metadata.tag === 'folder') {
-          // TODO
-        } else {
-          const buffer = await RemoteProvider.read(key);
-          const content = FileContent.create(key, buffer);
-          await fs.write([action.metadata]);
-          await fs.writeContent([content]);  
-          log.debug('downloaded', key);
-        }
+      case 'file-download': {
+        const buffer = await RemoteProvider.read(key);
+        const content = FileContent.create(key, buffer);
+        await fs.write([action.metadata]);
+        await fs.writeContent([content]);  
+        log.debug(`downloaded ${key}`);
         break;
+      }
 
-      case 'upload':
-        if (action.metadata.tag === 'folder') {
-          // TODO
-        } else {
-          const buffer = await fs.read(key);
-          const response = await RemoteProvider.write(action.metadata.path, buffer);
-          log.debug('uploaded', response);
-        }
+      case 'file-upload': {
+        const buffer = await fs.read(key);
+        const response = await RemoteProvider.write(action.metadata.path, buffer);
+        log.debug(`uploaded ${key}`, response);
         break;
+      }
   
-      case 'deleteLocal':
-        await fs.delete([key]);
+      case 'mkdir-local':
+        await fs.write([action.metadata]);
+        log.debug(`created local directory ${key}`);
         break;
 
-      case 'deleteRemote':
-        log.error(`Remote delete not implemented ${key}`);
+      case 'mkdir-remote':
+        await RemoteProvider.mkdir(action.metadata.path);
+        log.debug(`created remote directory ${key}`);
+        break;
+
+      case 'delete-local':
+        await fs.delete([key]);
+        log.debug(`deleted local file ${key}`);
+        break;
+
+      case 'delete-remote':
+        await RemoteProvider.delete(action.metadata.path);
+        log.debug(`deleted remote file ${key}`);
         break;
 
       default:
@@ -185,7 +203,9 @@ export default class SyncEngine {
 
   async syncContent() {
     const queue = await fs.listWithoutContent();
-    log.debug('content queue', queue);
-    await Promise.all(queue.map(metadata => this.performAction({ type: 'download', metadata: metadata })));
+    if (queue.length > 0) {
+      log.debug('content queue', queue);
+      await Promise.all(queue.map(metadata => this.performAction({ type: 'file-download', metadata: metadata })));  
+    }
   }
 }

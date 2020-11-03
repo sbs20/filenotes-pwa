@@ -1,5 +1,6 @@
 import FileContent from './files/file-content';
 import FileMetadata from './files/file-metadata';
+import FolderMetadata from './files/folder-metadata';
 import Log from './log';
 import { StorageService } from './service';
 
@@ -13,6 +14,17 @@ class LocalProvider {
    */
   async get(path) {
     return await StorageService.fs.metadata.read(path);
+  }
+
+  /**
+   * Creates a local directory
+   * @param {string} path
+   * @returns {Promise.<void>}
+   */
+  async mkdir(path) {
+    const metadata = FolderMetadata.create(path);
+    await StorageService.fs.metadata.writeAll([metadata]);
+    await StorageService.fs.delta.writeAll([metadata]);    
   }
 
   /**
@@ -56,7 +68,7 @@ class LocalProvider {
 
       // See what's stored locally already
       const current = await StorageService.fs.metadata.read(metadata.key);
-      if (current.hash !== metadata.hash) {
+      if (current === undefined || current.hash !== metadata.hash) {
         log.debug(`${metadata.key} has changed`);
         await StorageService.fs.metadata.writeAll([metadata]);
         await StorageService.fs.content.writeAll([content]);

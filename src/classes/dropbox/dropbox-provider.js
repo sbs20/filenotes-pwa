@@ -94,6 +94,19 @@ export default class DropboxProvider extends CloudProvider {
   }
 
   /**
+   * Deletes a file or path
+   * @param {string} path
+   * @returns {Promise.<Metadata>}
+   */
+  async delete(path) {
+    const response = await this.client().filesDeleteV2({
+      path: path
+    });
+
+    return this.adapter.apply(response.result.metadata);
+  }
+
+  /**
    * Returns a list of file metadata objects
    * @returns {Promise.<Array.<Metadata>>}
    */
@@ -125,6 +138,15 @@ export default class DropboxProvider extends CloudProvider {
     }
 
     return files;
+  }
+
+  /**
+   * Creates a directory
+   * @param {string} path
+   */
+  async mkdir(path) {
+    const response = await this.client().filesCreateFolderV2({ path: path });
+    return response.result;
   }
 
   /**
