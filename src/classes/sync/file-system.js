@@ -1,7 +1,7 @@
 import FileMetadata from '../files/file-metadata';
 import { StorageService } from '../service';
 
-export default class Storage {
+export default class SyncFilesystem {
   /**
    * Returns a metadata object
    * @returns {Promise.<Metadata>} - Promise<Metadata>
@@ -16,6 +16,13 @@ export default class Storage {
    */
   async deltas() {
     return await StorageService.fs.delta.list();
+  }
+
+  /**
+   * Clear all deltas
+   */
+  async clearDeltas() {
+    return await StorageService.fs.delta.clear();
   }
 
   /**

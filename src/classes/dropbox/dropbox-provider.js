@@ -9,10 +9,7 @@ const MAP = {
   'name': 'name',
   'path_lower': 'key',
   'path_display': 'path',
-  // 'id': 'id',
-  // 'client_modified': 'clientModified',
   'server_modified': 'modified',
-  //'rev': 'rev',
   'size': 'size',
   'is_downloadable': 'downloadable',
   'content_hash': 'hash'
@@ -87,6 +84,7 @@ export default class DropboxProvider extends CloudProvider {
       if (this.options.accessToken) {
         const account = await this.client().usersGetCurrentAccount();
         this.connected = true;
+        // TODO : Account info
         this.currentAccountEmail = account.currentAccountEmail;  
       }
     } catch (error) {
@@ -112,7 +110,8 @@ export default class DropboxProvider extends CloudProvider {
       hasMore = result.has_more;
     };
 
-    if (this.cursor == null) {
+    // TODO : Linting
+    if (this.cursor == null || this.cursor == undefined) {
       const response = await this.client().filesListFolder({
         path: '',
         recursive: true,
@@ -139,4 +138,63 @@ export default class DropboxProvider extends CloudProvider {
     const buffer = await Convert.blobToArrayBuffer(response.result.fileBlob);
     return buffer;
   }
+
+  /**
+   * Writes a file to dropbox
+   * @param {string} path 
+   * @param {ArrayBuffer} buffer
+   * @returns {Promise.<Metadata>}
+   */
+  async write(path, buffer) {
+    //const UPLOAD_FILE_SIZE_LIMIT = 150 * 1024 * 1024;
+    const UPLOAD_FILE_SIZE_LIMIT = 1024;
+    
+    if (buffer.byteLength < UPLOAD_FILE_SIZE_LIMIT) {
+      // File is smaller than 150 Mb - use filesUpload API
+      const response = await this.client().filesUpload({
+        path: path, 
+        contents: buffer,
+        mode: 'overwrite',
+        autorename: true,
+        mute: false
+      });
+
+      return this.adapter.apply(response.result);
+    } else {
+      // File is bigger than 150 Mb - use filesUploadSession* API
+      // 8Mb - Dropbox JavaScript API suggested max file / chunk size
+      const maxBlob = 1 * 1024 * 1024;
+      let workItems = [];
+      let offset = 0;
+
+      // Create chunks
+      // TODO move into loop
+      while (offset < buffer.byteLength) {
+        var chunkSize = Math.min(maxBlob, buffer.byteLength - offset);
+        workItems.push(buffer.slice(offset, offset + chunkSize));
+        offset += chunkSize;
+      } 
+      
+      let sessionId = null;
+      for (let index = 0; index < workItems.length; index++) {
+        const chunk = workItems[index];
+        if (index === 0) {
+          const response = await this.client().filesUploadSessionStart({ close: false, contents: chunk });
+          sessionId = response.result.session_id;
+        } else if (index < workItems.length-1) {
+          const cursor = { session_id: sessionId, offset: index * maxBlob };
+          await this.client().filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
+        } else {
+          var cursor = { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength };
+          var commit = { path: path, mode: 'overwrite', autorename: true, mute: false };
+          const response = await this.client().filesUploadSessionFinish({ cursor: cursor, commit: commit, contents: chunk });           
+          return this.adapter.apply(response.result);
+        }
+      }
+    }
+  }
 }
+
+
+
+

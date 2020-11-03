@@ -30,7 +30,7 @@
  */
 
 /**
- * @typedef {Object} SyncActions
- * @property {Array.<Metadata>} incoming - The incoming queue
- * @property {Array.<Metadata>} outgoing - The outgoing queue
+ * @typedef {Object} SyncAction
+ * @property {('download'|'upload'|'deleteLocal'|'deleteRemote')} type - The action type
+ * @property {Metadata} metadata - The data
  */

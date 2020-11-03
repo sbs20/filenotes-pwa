@@ -72,6 +72,7 @@ class LocalProvider {
    * @param {string} path 
    */
   async delete(path) {
+    // TODO handle folders
     await StorageService.fs.metadata.deleteAll([path.toLowerCase()]);
     await StorageService.fs.content.deleteAll([path.toLowerCase()]);
     await StorageService.fs.delta.writeAll([FileMetadata.createDeleted(path)]);
@@ -83,6 +84,7 @@ class LocalProvider {
    * @param {string} destinationPath 
    */
   async move(path, destinationPath) {
+    // TODO handle folders
     const content = await StorageService.fs.content.read(path.toLowerCase());
     await this.write(destinationPath, content.data);
     await this.delete(path);
