@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint --no-fix"
   },
   "dependencies": {
     "core-js": "^3.6.5",
@@ -37,7 +37,39 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {}
+    "rules": {
+      "array-bracket-spacing": 1,
+      "brace-style": 1,
+      "comma-spacing": 1,
+      "eqeqeq": 1,
+      "indent": [
+        "error",
+        2,
+        {
+          "SwitchCase": 1
+        }
+      ],
+      "keyword-spacing": 1,
+      "no-mixed-spaces-and-tabs": 1,
+      "no-undef": 1,
+      "no-unused-vars": 1,
+      "no-var": 1,
+      "object-shorthand": [
+        1,
+        "methods"
+      ],
+      "prefer-arrow-callback": 1,
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "semi": [
+        "error",
+        "always"
+      ],
+      "space-before-blocks": 1,
+      "space-infix-ops": 1
+    }
   },
   "browserslist": [
     "> 1%",

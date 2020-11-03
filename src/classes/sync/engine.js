@@ -96,9 +96,9 @@ export default class SyncEngine {
     /** @type {Array.<SyncAction>} */
     const actions = [];
     for (const key in join) {
-      const item = join[key]
+      const item = join[key];
       const itemActions = await this.createActions(item.local, item.remote);
-      itemActions.forEach(action => actions.push(action))
+      itemActions.forEach(action => actions.push(action));
     }
 
     return actions;
@@ -165,7 +165,7 @@ export default class SyncEngine {
   }
 
   async syncContent() {
-    const queue = await fs.listWithoutContent()
+    const queue = await fs.listWithoutContent();
     log.debug('content queue', queue);
     await Promise.all(queue.map(metadata => this.performAction({ type: 'download', metadata: metadata })));
   }

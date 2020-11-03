@@ -61,7 +61,7 @@ export default {
       StorageService.deleteDatatabase();
     }
   }
-}
+};
 </script>
 
 <style scoped>

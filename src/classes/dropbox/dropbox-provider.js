@@ -13,7 +13,7 @@ const MAP = {
   'size': 'size',
   'is_downloadable': 'downloadable',
   'content_hash': 'hash'
-}
+};
 
 const client = Symbol();
 
@@ -111,7 +111,7 @@ export default class DropboxProvider extends CloudProvider {
     };
 
     // TODO : Linting
-    if (this.cursor == null || this.cursor == undefined) {
+    if (this.cursor === null || this.cursor === undefined) {
       const response = await this.client().filesListFolder({
         path: '',
         recursive: true,
@@ -170,7 +170,7 @@ export default class DropboxProvider extends CloudProvider {
       // Create chunks
       // TODO move into loop
       while (offset < buffer.byteLength) {
-        var chunkSize = Math.min(maxBlob, buffer.byteLength - offset);
+        let chunkSize = Math.min(maxBlob, buffer.byteLength - offset);
         workItems.push(buffer.slice(offset, offset + chunkSize));
         offset += chunkSize;
       } 
@@ -181,12 +181,12 @@ export default class DropboxProvider extends CloudProvider {
         if (index === 0) {
           const response = await this.client().filesUploadSessionStart({ close: false, contents: chunk });
           sessionId = response.result.session_id;
-        } else if (index < workItems.length-1) {
+        } else if (index < workItems.length - 1) {
           const cursor = { session_id: sessionId, offset: index * maxBlob };
           await this.client().filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
         } else {
-          var cursor = { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength };
-          var commit = { path: path, mode: 'overwrite', autorename: true, mute: false };
+          let cursor = { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength };
+          let commit = { path: path, mode: 'overwrite', autorename: true, mute: false };
           const response = await this.client().filesUploadSessionFinish({ cursor: cursor, commit: commit, contents: chunk });           
           return this.adapter.apply(response.result);
         }

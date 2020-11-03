@@ -53,11 +53,11 @@ export default class Database {
     this.db = null;
   }
 
-   /**
+  /**
     * Opens and closes a database using the callback in the middle
     * @param {function(IDBPDatabase)} callback 
     */
-   static async use(callback) {
+  static async use(callback) {
     const database = new Database();
     await database.open();
     let response = null;

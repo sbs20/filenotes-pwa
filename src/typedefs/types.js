@@ -22,7 +22,7 @@
  * @property {bool} downloadable - True if downloadable
  */
 
- /**
+/**
  * @typedef {Object} Content
  * @property {string} key - The lowercase path
  * @property {string} [preview] - Preview data

@@ -55,7 +55,7 @@ export default {
   arrayBufferToHex(buffer) {
     const array = Array.from(new Uint8Array(buffer));
     const hex = array.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hex
+    return hex;
   },
 
   /**
@@ -68,9 +68,9 @@ export default {
     let result = new Uint8Array(size);
     let offset = 0;
     for (const buffer of buffers) {
-        result.set(new Uint8Array(buffer), offset);
-        offset += buffer.byteLength;
+      result.set(new Uint8Array(buffer), offset);
+      offset += buffer.byteLength;
     }
     return result.buffer;
   }
-}
+};

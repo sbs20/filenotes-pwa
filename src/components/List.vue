@@ -54,7 +54,7 @@ export default {
   methods: {
     refresh() {
       LocalProvider.get(this.$route.params.pathMatch).then(current => {
-        this.entries = []
+        this.entries = [];
         this.data = null;
         this.current = current || {
           tag: 'folder',
@@ -82,7 +82,7 @@ export default {
             if (this.current.name.endsWith('.txt')) {
               this.data = Convert.arrayBufferToString(buffer);
             }
-          })
+          });
         }
       });
     },
@@ -107,7 +107,7 @@ export default {
       });
     }
   }
-}
+};
 </script>
 
 <style scoped>

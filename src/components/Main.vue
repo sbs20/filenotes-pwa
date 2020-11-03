@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import DevConsole from './DevConsole.vue'
-import List from './List.vue'
+import DevConsole from './DevConsole.vue';
+import List from './List.vue';
 import { connect } from '../classes/remote-provider';
 
 export default {
@@ -27,7 +27,7 @@ export default {
   mounted() {
     connect(window);
   },
-}
+};
 </script>
 
 <style scoped>

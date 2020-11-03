@@ -11,7 +11,7 @@ export default class FieldAdapter {
   constructor(mapping) {
     this.to = mapping;
     this.from = Object.keys(this.to).reduce((acc, key) => {
-      acc[this.to[key]] = key
+      acc[this.to[key]] = key;
       return acc;
     }, {});
   }

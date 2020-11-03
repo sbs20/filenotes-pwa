@@ -53,7 +53,7 @@ class Log {
    * @param {Object} data 
    */
   write(level, msg, data) {
-    const output = this.format(level, msg, data)
+    const output = this.format(level, msg, data);
     console.log(output);
     EventBus.emit(this.eventType, { data: output });
   }

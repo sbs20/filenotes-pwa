@@ -6,6 +6,6 @@ const StorageService = new Storage();
 const SyncEngine = new Engine();
 const Hasher = {
   hash: hash
-}
+};
 
 export { StorageService, SyncEngine, Hasher };

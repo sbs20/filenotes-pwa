@@ -14,7 +14,7 @@ export default class FilePath {
   get directory() {
     const path = this.path;
     if (path.indexOf('/') === -1) {
-      return ''
+      return '';
     }
     const directory = path.substr(0, path.lastIndexOf('/'));
     return directory;

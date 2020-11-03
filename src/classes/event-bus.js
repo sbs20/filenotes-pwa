@@ -15,18 +15,18 @@ class EventBus {
   on(eventType, callback) {
     const id = ++this.lastId;
     if (!this.listeners[eventType]) {
-      this.listeners[eventType] = {}
+      this.listeners[eventType] = {};
     }
 
     this.listeners[eventType][id] = callback;
     return {
       remove: () => {
-        delete this.listeners[eventType][id]
+        delete this.listeners[eventType][id];
         if (Object.keys(this.listeners[eventType]).length === 0) {
-          delete this.listeners[eventType]
+          delete this.listeners[eventType];
         }
       }
-    }
+    };
   }
 
   /**
