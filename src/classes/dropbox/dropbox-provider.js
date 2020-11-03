@@ -110,7 +110,6 @@ export default class DropboxProvider extends CloudProvider {
       hasMore = result.has_more;
     };
 
-    // TODO : Linting
     if (this.cursor === null || this.cursor === undefined) {
       const response = await this.client().filesListFolder({
         path: '',
@@ -146,11 +145,9 @@ export default class DropboxProvider extends CloudProvider {
    * @returns {Promise.<Metadata>}
    */
   async write(path, buffer) {
-    //const UPLOAD_FILE_SIZE_LIMIT = 150 * 1024 * 1024;
-    const UPLOAD_FILE_SIZE_LIMIT = 1024;
+    const CHUNKING_THRESHOLD = 2 * 1024 * 1024;
     
-    if (buffer.byteLength < UPLOAD_FILE_SIZE_LIMIT) {
-      // File is smaller than 150 Mb - use filesUpload API
+    if (buffer.byteLength < CHUNKING_THRESHOLD) {
       const response = await this.client().filesUpload({
         path: path, 
         contents: buffer,
@@ -161,33 +158,22 @@ export default class DropboxProvider extends CloudProvider {
 
       return this.adapter.apply(response.result);
     } else {
-      // File is bigger than 150 Mb - use filesUploadSession* API
-      // 8Mb - Dropbox JavaScript API suggested max file / chunk size
-      const maxBlob = 1 * 1024 * 1024;
-      let workItems = [];
-      let offset = 0;
+      const MAX_CHUNK_SIZE = CHUNKING_THRESHOLD;
+      for (let offset = 0, sessionId = null, chunkSize = 0; offset < buffer.byteLength; offset += chunkSize) {
+        chunkSize = Math.min(MAX_CHUNK_SIZE, buffer.byteLength - offset);
+        const chunk = buffer.slice(offset, offset + chunkSize);
 
-      // Create chunks
-      // TODO move into loop
-      while (offset < buffer.byteLength) {
-        let chunkSize = Math.min(maxBlob, buffer.byteLength - offset);
-        workItems.push(buffer.slice(offset, offset + chunkSize));
-        offset += chunkSize;
-      } 
-      
-      let sessionId = null;
-      for (let index = 0; index < workItems.length; index++) {
-        const chunk = workItems[index];
-        if (index === 0) {
+        if (sessionId === null) {
           const response = await this.client().filesUploadSessionStart({ close: false, contents: chunk });
           sessionId = response.result.session_id;
-        } else if (index < workItems.length - 1) {
-          const cursor = { session_id: sessionId, offset: index * maxBlob };
+        } else if (offset < buffer.byteLength - MAX_CHUNK_SIZE) {
+          const cursor = { session_id: sessionId, offset: offset };
           await this.client().filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
         } else {
-          let cursor = { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength };
-          let commit = { path: path, mode: 'overwrite', autorename: true, mute: false };
-          const response = await this.client().filesUploadSessionFinish({ cursor: cursor, commit: commit, contents: chunk });           
+          const response = await this.client().filesUploadSessionFinish({
+            cursor: { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength },
+            commit: { path: path, mode: 'overwrite', autorename: true, mute: false },
+            contents: chunk });           
           return this.adapter.apply(response.result);
         }
       }

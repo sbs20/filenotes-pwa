@@ -69,7 +69,8 @@ export default class SyncEngine {
    * @returns {Promise.<Array.<SyncAction>>}
    */
   async buildSyncActions() {
-    const outgoing = RemoteProvider.cursor ? await fs.deltas() : await fs.list();
+    const list = await fs.list();
+    const outgoing = RemoteProvider.cursor ? await fs.deltas() : list;
     const incoming = await RemoteProvider.list();
 
     /** @type {Object.<string, {local: Metadata, remote: Metadata}>} */
@@ -94,12 +95,30 @@ export default class SyncEngine {
     });
 
     /** @type {Array.<SyncAction>} */
-    const actions = [];
+    let actions = [];
     for (const key in join) {
       const item = join[key];
       const itemActions = await this.createActions(item.local, item.remote);
       itemActions.forEach(action => actions.push(action));
     }
+
+    // Filter the actions against the local index. It's possible that we've
+    // uploaded a file that we already know about and we don't need to download
+    // it
+    /** @type {Object.<string, string>} */
+    const index = list
+      .filter(metadata => metadata.hash)
+      .reduce((output, metadata) => {
+        output[metadata.key] = metadata.hash;
+        return output;
+      }, {});
+
+    actions = actions
+      .filter(action => {
+        return action.type !== 'download'
+          || !(action.metadata.key in index)
+          || action.metadata.hash !== index[action.metadata.key];
+      });
 
     return actions;
   }
