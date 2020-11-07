@@ -2,13 +2,16 @@ import Convert from '../utils/convert';
 import CloudProvider from '../cloud-provider';
 import FieldAdapter from '../utils/field-adapter';
 import QueryString from '../utils/query-string';
+import extend from '../utils/extend';
 import { Dropbox } from 'dropbox';
 
 const MAP = {
   '.tag': 'tag',
+  'id': 'id',
   'name': 'name',
   'path_lower': 'key',
   'path_display': 'path',
+  'rev': 'revision',
   'server_modified': 'modified',
   'size': 'size',
   'is_downloadable': 'downloadable',
@@ -166,19 +169,75 @@ export default class DropboxProvider extends CloudProvider {
    * @param {ArrayBuffer} buffer
    * @returns {Promise.<Metadata>}
    */
-  async write(path, buffer) {
+  async writeOld(path, buffer) {
+    /** @type {import('dropbox').files.CommitInfo} */
+    const commitInfo = {
+      path: path, 
+      contents: buffer,
+      mode: 'overwrite',
+      autorename: true,
+      mute: false
+    };
+
+    await this._write(commitInfo);
+  }
+
+  /**
+   * Writes a file to dropbox
+   * @param {Metadata} metadata 
+   * @param {ArrayBuffer} buffer
+   * @returns {Promise.<Metadata>}
+   */
+  async write(metadata, buffer) {
+    /** @type {import('dropbox').files.CommitInfo} */
+    const commitInfo = {
+      path: metadata.path, 
+      contents: buffer,
+      mode: 'overwrite',
+      autorename: true,
+      mute: false
+    };
+
+    return await this._write(commitInfo);
+  }
+
+  /**
+   * Writes a file to dropbox
+   * @param {Metadata} metadata 
+   * @param {ArrayBuffer} buffer
+   * @returns {Promise.<Metadata>}
+   */
+  async write2(metadata, buffer) {
+    /** @type {import('dropbox').files.CommitInfo} */
+    const mode = metadata.revision
+      ? { '.tag': 'update', update: metadata.revision }
+      : { '.tag': 'add'};
+
+    const commitInfo = {
+      path: metadata.path, 
+      contents: buffer,
+      mode: mode,
+      autorename: true,
+      mute: false
+    };
+
+    return await this._write(commitInfo);
+  }
+
+  /**
+   * Writes a file to dropbox
+   * @param {import('dropbox').files.CommitInfo} commitInfo 
+   * @returns {Promise.<Metadata>}
+   */
+  async _write(commitInfo) {
     const CHUNKING_THRESHOLD = 2 * 1024 * 1024;
+
+    /** @type {ArrayBuffer} */
+    const buffer = commitInfo.contents;
     
     if (buffer.byteLength < CHUNKING_THRESHOLD) {
-      const response = await this.client().filesUpload({
-        path: path, 
-        contents: buffer,
-        mode: 'overwrite',
-        autorename: true,
-        mute: false
-      });
-
-      return this.adapter.apply(response.result);
+      const response = await this.client().filesUpload(commitInfo);
+      return extend({ tag: 'file' }, this.adapter.apply(response.result));
     } else {
       const MAX_CHUNK_SIZE = CHUNKING_THRESHOLD;
       for (let offset = 0, sessionId = null, chunkSize = 0; offset < buffer.byteLength; offset += chunkSize) {
@@ -192,17 +251,14 @@ export default class DropboxProvider extends CloudProvider {
           const cursor = { session_id: sessionId, offset: offset };
           await this.client().filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
         } else {
+          delete commitInfo.contents;
           const response = await this.client().filesUploadSessionFinish({
             cursor: { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength },
-            commit: { path: path, mode: 'overwrite', autorename: true, mute: false },
+            commit: commitInfo,
             contents: chunk });           
-          return this.adapter.apply(response.result);
+          return extend({ tag: 'file' }, this.adapter.apply(response.result));
         }
       }
     }
   }
 }
-
-
-
-

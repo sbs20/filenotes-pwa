@@ -69,8 +69,23 @@ export default class FileMetadata {
    * @returns {Promise.<Metadata>}
    */
   static async create(path, data) {
+    // TODO: REMOVE THIS
     const file = new FileMetadata().path(path);
     await file.data(data);
+    return file.metadata();
+  }
+
+  /**
+   * Creates a new metadata
+   * @param {Metadata} metadata - The metadata
+   * @param {ArrayBuffer} data - The data
+   * @returns {Promise.<Metadata>}
+   */
+  static async from(metadata, data) {
+    const file = new FileMetadata().extend(metadata);
+    if (data) {
+      await file.data(data);
+    }
     return file.metadata();
   }
 

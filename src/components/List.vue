@@ -30,6 +30,7 @@
 <script>
 import Convert from '../classes/utils/convert';
 import FilePath from '../classes/files/file-path';
+import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
 import LocalProvider from '../classes/local-provider';
 import Log from '../classes/log';
@@ -107,8 +108,10 @@ export default {
         const name = window.prompt('File name');
         const path = `${this.current.path}/${name}`;
         const content = new Uint8Array();
-        LocalProvider.write(path, content).then(() => {
-          this.refresh();
+        FileMetadata.create(path, content).then(metadata => {
+          LocalProvider.write(metadata, content).then(() => {
+            this.refresh();
+          });
         });
       }
     },
@@ -133,8 +136,11 @@ export default {
 
     save() {
       const buffer = Convert.stringToArrayBuffer(this.data);
-      LocalProvider.write(this.current.path, buffer);
-      log.debug('Save', this.current);
+      FileMetadata.from(this.current, buffer).then(metadata => {
+        LocalProvider.write(metadata, buffer).then(() => {
+          log.debug('Saved', this.current);
+        });
+      });
     },
 
     sync() {

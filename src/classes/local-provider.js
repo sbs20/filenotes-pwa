@@ -58,13 +58,12 @@ class LocalProvider {
 
   /**
    * Writes file data to disk
-   * @param {string} path 
+   * @param {Metadata} metadata 
    * @param {ArrayBuffer} data 
    */
-  async write(path, data) {
+  async write(metadata, data) {
     if (data) {
-      const metadata = await FileMetadata.create(path, data);
-      const content = FileContent.create(path, data);
+      const content = FileContent.create(metadata.path, data);
 
       // See what's stored locally already
       const current = await StorageService.fs.metadata.read(metadata.key);
@@ -97,8 +96,10 @@ class LocalProvider {
    */
   async move(path, destinationPath) {
     // TODO handle folders
+    const source = await StorageService.fs.metadata.read(path.toLowerCase());
     const content = await StorageService.fs.content.read(path.toLowerCase());
-    await this.write(destinationPath, content.data);
+    const destination = new FileMetadata().extend(source).path(destinationPath).metadata();
+    await this.write(destination, content.data);
     await this.delete(path);
   }
 }

@@ -15,6 +15,8 @@
  * @property {('file'|'folder'|'deleted')} tag
  * @property {string} key - The lowercase path
  * @property {string} name - The filename
+ * @property {string} [id] - The id
+ * @property {string} [revision] - The revision
  * @property {string} [hash] - sha256 of the file content
  * @property {string} [modified] - ISO8601 date string of the last modified time
  * @property {string} path - The filepath
@@ -32,5 +34,11 @@
 /**
  * @typedef {Object} SyncAction
  * @property {('file-download'|'file-upload'|'mkdir-local'|'mkdir-remote'|'delete-local'|'delete-remote')} type - The action type
+ * @property {Metadata} metadata - The data
+ */
+
+ /**
+ * @typedef {Object} SynkAction
+ * @property {('local'|'remote')} location - Where to run
  * @property {Metadata} metadata - The data
  */

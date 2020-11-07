@@ -25,7 +25,7 @@ export default class ActionPerformer {
 
       case 'file-upload': {
         const buffer = await fs.read(key);
-        const response = await RemoteProvider.write(action.metadata.path, buffer);
+        const response = await RemoteProvider.write(action.metadata, buffer);
         log.debug(`uploaded ${key}`, response);
         break;
       }
