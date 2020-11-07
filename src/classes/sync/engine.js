@@ -1,12 +1,20 @@
 import Log from '../log';
 import RemoteProvider from '../remote-provider';
 import { StorageService } from '../service';
-import ActionBuilder from './action-builder';
-import ActionPerformer from './action-performer';
-import FileSystem from './file-system';
+import LocalAction from './local-action';
+import RemoteAction from './remote-action';
 
-const fs = new FileSystem();
 const log = Log.get('sync-engine');
+
+async function deltas() {
+  const deltas = await StorageService.fs.delta.list();
+    
+  const sorted = [];
+  deltas.filter(m => m.tag === 'deleted').sort((m1, m2) => m2.key.length - m1.key.length).forEach(m => sorted.push(m));
+  deltas.filter(m => m.tag === 'folder').sort((m1, m2) => m1.key.length - m2.key.length).forEach(m => sorted.push(m));
+  deltas.filter(m => m.tag === 'file').forEach(m => sorted.push(m));
+  return sorted;
+}
 
 export default class SyncEngine {
   constructor() {
@@ -18,28 +26,17 @@ export default class SyncEngine {
     RemoteProvider.cursor = cursor;
 
     try {
-      const localFiles = await fs.list();
-      const localDeltas = await fs.deltas();
-      const remoteDeltas = await RemoteProvider.list();
+      const localDeltas = await deltas();
+      await Promise.all(localDeltas.map(metadata => RemoteAction.perform(metadata)));
 
-      const actions = await ActionBuilder.build(localFiles, localDeltas, remoteDeltas);
-      log.debug('actions', actions);
-      await Promise.all(actions.map(action => ActionPerformer.perform(action)));
-      await fs.clearDeltas();
+      const remoteDeltas = await RemoteProvider.list();
+      await Promise.all(remoteDeltas.map(metadata => LocalAction.perform(metadata)));
+
       await StorageService.settings.set('remoteCursor', RemoteProvider.cursor);
-      await this.downloadMissingContent();  
       log.debug('finished sync');
     } catch (error) {
       log.error('Sync error occurred', error);
-    }
-  }
-
-  async downloadMissingContent() {
-    const queue = await fs.listWithoutContent();
-    if (queue.length > 0) {
-      log.debug('content queue', queue);
-      await Promise.all(queue.map(metadata =>
-        ActionPerformer.perform({ type: 'file-download', metadata: metadata })));  
+      throw error;
     }
   }
 }

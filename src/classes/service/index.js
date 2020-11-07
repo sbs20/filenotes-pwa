@@ -1,5 +1,5 @@
 import Storage from '../data/storage';
-import Engine from '../sync2/engine';
+import Engine from '../sync/engine';
 import hash from '../dropbox/dropbox-hasher';
 
 const StorageService = new Storage();

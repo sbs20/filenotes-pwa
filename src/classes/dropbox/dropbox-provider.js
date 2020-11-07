@@ -165,49 +165,11 @@ export default class DropboxProvider extends CloudProvider {
 
   /**
    * Writes a file to dropbox
-   * @param {string} path 
-   * @param {ArrayBuffer} buffer
-   * @returns {Promise.<Metadata>}
-   */
-  async writeOld(path, buffer) {
-    /** @type {import('dropbox').files.CommitInfo} */
-    const commitInfo = {
-      path: path, 
-      contents: buffer,
-      mode: 'overwrite',
-      autorename: true,
-      mute: false
-    };
-
-    await this._write(commitInfo);
-  }
-
-  /**
-   * Writes a file to dropbox
    * @param {Metadata} metadata 
    * @param {ArrayBuffer} buffer
    * @returns {Promise.<Metadata>}
    */
   async write(metadata, buffer) {
-    /** @type {import('dropbox').files.CommitInfo} */
-    const commitInfo = {
-      path: metadata.path, 
-      contents: buffer,
-      mode: 'overwrite',
-      autorename: true,
-      mute: false
-    };
-
-    return await this._write(commitInfo);
-  }
-
-  /**
-   * Writes a file to dropbox
-   * @param {Metadata} metadata 
-   * @param {ArrayBuffer} buffer
-   * @returns {Promise.<Metadata>}
-   */
-  async write2(metadata, buffer) {
     /** @type {import('dropbox').files.CommitInfo} */
     const mode = metadata.revision
       ? { '.tag': 'update', update: metadata.revision }

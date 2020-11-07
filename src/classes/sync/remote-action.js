@@ -15,7 +15,7 @@ export default class RemoteAction {
       case 'file': {
         /** @type {Content} */
         const content = await StorageService.fs.content.read(metadata.key);
-        const response = await RemoteProvider.write2(metadata, content.data);
+        const response = await RemoteProvider.write(metadata, content.data);
         if (response.key === metadata.key) {
           // Write the response in order to get the revision update
           await StorageService.fs.metadata.writeAll([response]);
