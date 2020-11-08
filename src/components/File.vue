@@ -2,7 +2,7 @@
   <div>
     <h2>{{ this.current.name }}</h2>
     <div v-if="data !== null">
-      <input type="button" value="back" @click="$router.go(-1)">
+      <input type="button" value="close" @click="close">
       <input type="button" value="save" @click="save">
       <textarea id="content" v-model="data"></textarea>
     </div>
@@ -37,6 +37,11 @@ export default {
   },
 
   methods: {
+    close() {
+      const parent = FilePath.create(this.current.path).directory;
+      this.$router.push(`/l/${parent}`);
+    },
+
     refresh() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
@@ -62,8 +67,7 @@ export default {
      */
     remove() {
       LocalProvider.delete(this.current.path).then(() => {
-        const parent = FilePath.create(this.current.path).directory;
-        this.$router.push(`/l/${parent}`);
+        this.close();
       });
     },
 

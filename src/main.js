@@ -11,15 +11,7 @@ Vue.use(VueRouter);
 const router = new VueRouter({
   routes: [
     { path: '/f/*', component: File },
-    { path: '/l/*', component: List }   
-    // {
-    //   path: '/',
-    //   component: App,
-    //   children: [
-    //     { path: 'f/*', component: File },
-    //     { path: 'l/*', component: List }   
-    //   ]
-    // }
+    { path: '/l/*', component: List }
   ]
 });
 
