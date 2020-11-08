@@ -40,7 +40,8 @@ export default class DropboxProvider extends CloudProvider {
       this[client] = new Dropbox({
         accessToken: this.options.accessToken,
         clientId: this.options.clientId,
-        fetch: (url, options) => fetch(url, options) });  
+        fetch: (url, options) => fetch(url, options)
+      });  
     }
     return this[client];
   }

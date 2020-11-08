@@ -39,8 +39,15 @@ export default class RemoteAction {
         break;
 
       case 'deleted':
-        await RemoteProvider.delete(metadata.path);
-        log.info(`deleted remote file: ${metadata.key}`);
+        try {
+          await RemoteProvider.delete(metadata.path);
+          log.info(`deleted remote file: ${metadata.key}`);  
+        } catch (exception) {
+          // If it's already been deleted we can ignore it
+          if (exception.error.indexOf('path_lookup/not_found') === -1) {
+            throw exception;
+          }
+        }
         break;
 
       default:

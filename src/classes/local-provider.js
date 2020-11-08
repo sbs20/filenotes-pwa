@@ -30,16 +30,17 @@ class LocalProvider {
   /**
    * Returns a list of file metadata objects
    * @param {Metadata} [directory]
+   * @param {boolean} [recursive]
    * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
-  async list(directory) {
+  async list(directory, recursive) {
     let list = await StorageService.fs.metadata.list();
 
     if (directory) {
       list = list.filter(metadata => {
         const fileKey = metadata.key;
         const dirKey = directory.key + '/';
-        return fileKey.startsWith(dirKey) && fileKey.indexOf('/', dirKey.length) === -1;
+        return fileKey.startsWith(dirKey) && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
       });  
     }
 
@@ -83,10 +84,16 @@ class LocalProvider {
    * @param {string} path 
    */
   async delete(path) {
-    // TODO handle folders
-    await StorageService.fs.metadata.deleteAll([path.toLowerCase()]);
-    await StorageService.fs.content.deleteAll([path.toLowerCase()]);
-    await StorageService.fs.delta.writeAll([FileMetadata.createDeleted(path)]);
+    const metadata = await StorageService.fs.metadata.read(path.toLowerCase());
+    const keys = [path.toLowerCase()];
+    if (metadata.tag === 'folder') {
+      const descendents = await this.list(metadata, true);
+      descendents.map(m => m.key).forEach(key => keys.push(key));
+    }
+
+    await StorageService.fs.metadata.deleteAll(keys);
+    await StorageService.fs.content.deleteAll(keys);
+    await StorageService.fs.delta.writeAll([FileMetadata.createDeleted(path.toLowerCase())]);
   }
 
   /**

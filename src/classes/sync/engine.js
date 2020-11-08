@@ -6,6 +6,9 @@ import RemoteAction from './remote-action';
 
 const log = Log.get('sync-engine');
 
+/**
+ * @returns {Promise.<Array.<Metadata>>}
+ */
 async function deltas() {
   const deltas = await StorageService.fs.delta.list();
     
@@ -21,19 +24,23 @@ export default class SyncEngine {
   }
 
   async execute() {
-    log.info('Start');
+    log.info('Started');
     const cursor = await StorageService.settings.get('remoteCursor');
     RemoteProvider.cursor = cursor;
 
     try {
       const localDeltas = await deltas();
-      await Promise.all(localDeltas.map(metadata => RemoteAction.perform(metadata)));
+      for (const delta of localDeltas) {
+        await RemoteAction.perform(delta);
+      }
 
       const remoteDeltas = await RemoteProvider.list();
-      await Promise.all(remoteDeltas.map(metadata => LocalAction.perform(metadata)));
+      for (const delta of remoteDeltas) {
+        await LocalAction.perform(delta);
+      }
 
       await StorageService.settings.set('remoteCursor', RemoteProvider.cursor);
-      log.debug('finished sync');
+      log.info('Finished');
     } catch (error) {
       log.error('Sync error occurred', error);
       throw error;

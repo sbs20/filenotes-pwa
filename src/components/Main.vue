@@ -1,8 +1,9 @@
 <template>
   <div>
     <h1>Filenotes</h1>
-    <List></List>
-    <DevConsole></DevConsole>
+    <input type="button" value="connect" @click="start">
+    <div style="float: left; width: 45%"><List></List></div>
+    <div style="float: left; width: 45%"><DevConsole></DevConsole></div>
   </div>
 </template>
 
@@ -25,8 +26,14 @@ export default {
   },
 
   mounted() {
-    connect(window);
+    this.start();
   },
+
+  methods: {
+    start() {
+      connect(window);
+    }
+  }
 };
 </script>
 
