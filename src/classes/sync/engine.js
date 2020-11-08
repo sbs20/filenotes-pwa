@@ -4,7 +4,7 @@ import { StorageService } from '../service';
 import LocalAction from './local-action';
 import RemoteAction from './remote-action';
 
-const log = Log.get('sync-engine');
+const log = Log.get('sync.engine');
 
 /**
  * @returns {Promise.<Array.<Metadata>>}

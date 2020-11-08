@@ -1,10 +1,10 @@
 <template>
   <div>
     <h2>{{ this.current.name }}</h2>
-    <div v-if="data !== null">
+    <div v-if="content !== null">
       <input type="button" value="close" @click="close">
       <input type="button" value="save" @click="save">
-      <textarea id="content" v-model="data"></textarea>
+      <prism-editor class="editor" v-model="content" :highlight="highlighter" line-numbers></prism-editor>
     </div>
   </div>
 </template>
@@ -15,18 +15,31 @@ import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import LocalProvider from '../classes/local-provider';
 import Log from '../classes/log';
+import { PrismEditor } from 'vue-prism-editor';
+
+import 'vue-prism-editor/dist/prismeditor.min.css';
+
+// import highlighting library
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/themes/prism-tomorrow.css'; // import syntax highlighting styles
 
 const log = Log.get('List');
 
 export default {
   name: 'File',
+  components: {
+    PrismEditor,
+  },
 
   data() {
     this.refresh();
     return {
       /** @type {Metadata} */
       current: {},
-      data: null
+      content: null
     };
   },
 
@@ -37,6 +50,10 @@ export default {
   },
 
   methods: {
+    highlighter(code) {
+      return highlight(code, languages.md);
+    },
+
     close() {
       const parent = FilePath.create(this.current.path).directory;
       this.$router.push(`/l/${parent}`);
@@ -52,11 +69,11 @@ export default {
         }
 
         this.current = current;
-        this.data = null;
+        this.content = null;
         LocalProvider.read(this.current.key).then(buffer => {
-          this.data = `{${this.current.name}}`;
+          this.content = `{${this.current.name}}`;
           if (this.current.name.endsWith('.txt')) {
-            this.data = Convert.arrayBufferToString(buffer);
+            this.content = Convert.arrayBufferToString(buffer);
           }
         });
       });
@@ -85,7 +102,7 @@ export default {
     },
 
     save() {
-      const buffer = Convert.stringToArrayBuffer(this.data);
+      const buffer = Convert.stringToArrayBuffer(this.content);
       FileMetadata.from(this.current, buffer).then(metadata => {
         LocalProvider.write(metadata, buffer).then(() => {
           log.debug('Saved', this.current);
@@ -97,8 +114,18 @@ export default {
 </script>
 
 <style scoped>
-#content {
-  width: 95%;
-  height: 20em;
+/* required class */
+.editor {
+  background: #2d2d2d;
+  color: #ccc;
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 1em;
+  line-height: 1.5em;
+  padding: 0.5em;
+}
+
+/* optional class for removing the outline */
+.prism-editor__textarea:focus {
+  outline: none;
 }
 </style>

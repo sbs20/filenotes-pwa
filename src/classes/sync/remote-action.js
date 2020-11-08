@@ -2,7 +2,7 @@ import Log from '../log';
 import RemoteProvider from '../remote-provider';
 import { StorageService } from '../service';
 
-const log = Log.get('sync-engine');
+const log = Log.get('sync.remote');
 
 export default class RemoteAction {
   /**
