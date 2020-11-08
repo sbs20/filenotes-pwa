@@ -4,7 +4,7 @@ export default class CloudProvider {
     this.options = {
       clientId: ''
     };
-    this.currentAccountEmail = '';
+    this.accountEmail = '';
     this.connected = false;    
   }
 

@@ -14,6 +14,7 @@
           {{ entry.size }} |
           {{ entry.modified }}
           <input type="button" value="x" @click="remove(entry)">
+          <input type="button" value="r" @click="rename(entry)">
         </div>
       </div>
     </div>
@@ -119,9 +120,11 @@ export default {
     mkdir() {
       if (this.current.tag === 'folder') {
         const dir = window.prompt('Directory name');
-        LocalProvider.mkdir(`${this.current.path}/${dir}`).then(() => {
-          this.refresh();
-        });
+        if (dir) {
+          LocalProvider.mkdir(`${this.current.path}/${dir}`).then(() => {
+            this.refresh();
+          });
+        }
       }
     },
 
@@ -132,6 +135,19 @@ export default {
       LocalProvider.delete(entry.path).then(() => {
         this.refresh();
       });
+    },
+
+    /**
+     * @param {Metadata} entry
+     */
+    rename(entry) {
+      const name = window.prompt('New name');
+      if (name) {
+        const destination = `${this.current.path}/${name}`;
+        LocalProvider.move(entry.key, destination).then(() => {
+          this.refresh();
+        });
+      }
     },
 
     save() {

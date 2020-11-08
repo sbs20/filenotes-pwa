@@ -98,16 +98,35 @@ class LocalProvider {
 
   /**
    * Moves a file
-   * @param {string} path 
+   * @param {string} sourcePath 
    * @param {string} destinationPath 
    */
-  async move(path, destinationPath) {
-    // TODO handle folders
-    const source = await StorageService.fs.metadata.read(path.toLowerCase());
-    const content = await StorageService.fs.content.read(path.toLowerCase());
-    const destination = new FileMetadata().extend(source).path(destinationPath).metadata();
-    await this.write(destination, content.data);
-    await this.delete(path);
+  async move(sourcePath, destinationPath) {
+    log.debug(`mv ${sourcePath} ${destinationPath}`);
+    const source = await StorageService.fs.metadata.read(sourcePath.toLowerCase());
+    const destination = await StorageService.fs.metadata.read(destinationPath.toLowerCase());
+    if (destination) {
+      throw new Error(`${destination.path} already exists`);
+    }
+
+    if (source.tag === 'folder') {
+      // TODO: Revisit this - move all the files and folders and only create
+      // deletion stub for the root dir
+      const descendents = await this.list(source);
+      await Promise.all(descendents.map(descendent => {
+        return this.move(descendent.path, `${destinationPath}/${descendent.name}`);
+      }));
+
+      this.mkdir(destinationPath);
+      await StorageService.fs.metadata.deleteAll([sourcePath]);
+      await StorageService.fs.delta.writeAll([FileMetadata.createDeleted(sourcePath)]);
+
+    } else {
+      const content = await StorageService.fs.content.read(sourcePath.toLowerCase());
+      const destination = new FileMetadata().extend(source).path(destinationPath).metadata();
+      await this.write(destination, content.data);
+      await this.delete(sourcePath);  
+    }
   }
 }
 

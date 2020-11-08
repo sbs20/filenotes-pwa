@@ -86,10 +86,11 @@ export default class DropboxProvider extends CloudProvider {
         this.configure(options);
       }
       if (this.options.accessToken) {
-        const account = await this.client().usersGetCurrentAccount();
+        const response = await this.client().usersGetCurrentAccount();
         this.connected = true;
-        // TODO : Account info
-        this.currentAccountEmail = account.currentAccountEmail;  
+        const account = response.result;
+        this.accountEmail = account.email;
+        this.accountName = account.name.display_name;  
       }
     } catch (error) {
       this.connected = false;
@@ -103,11 +104,15 @@ export default class DropboxProvider extends CloudProvider {
    * @returns {Promise.<Metadata>}
    */
   async delete(path) {
-    const response = await this.client().filesDeleteV2({
-      path: path
-    });
-
-    return this.adapter.apply(response.result.metadata);
+    try {
+      const response = await this.client().filesDeleteV2({ path: path });  
+      return this.adapter.apply(response.result.metadata);
+    } catch (exception) {
+      // If it's already been deleted we can ignore it, otherwise, throw
+      if (exception.error.indexOf('path_lookup/not_found') === -1) {
+        throw exception;
+      }
+    }
   }
 
   /**

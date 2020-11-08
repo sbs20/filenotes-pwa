@@ -16,6 +16,7 @@ export async function connect(window) {
   let accessToken = await StorageService.settings.get('accessToken');
   if (await remote.connect({ clientId: Constants.APP_ID, accessToken: accessToken })) {
     log.debug('Connected using stored access token');
+    log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
     return;
   }
 
@@ -28,6 +29,7 @@ export async function connect(window) {
   accessToken = remote.authenticationToken(window.location.hash);
   if (await remote.connect({ clientId: Constants.APP_ID, accessToken: accessToken })) {
     log.debug('Connected using url access token');
+    log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
     await StorageService.settings.set('accessToken', accessToken);
     return;
   }
