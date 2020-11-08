@@ -1,6 +1,8 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import App from './App.vue';
+import File from './components/File';
+import List from './components/List';
 import './registerServiceWorker';
 
 Vue.config.productionTip = false;
@@ -8,9 +10,16 @@ Vue.use(VueRouter);
 
 const router = new VueRouter({
   routes: [
-    { path: '/f/*', component: App },
-    { path: '/auth/*', component: App },
-    { path: '/', component: App },
+    { path: '/f/*', component: File },
+    { path: '/l/*', component: List }   
+    // {
+    //   path: '/',
+    //   component: App,
+    //   children: [
+    //     { path: 'f/*', component: File },
+    //     { path: 'l/*', component: List }   
+    //   ]
+    // }
   ]
 });
 

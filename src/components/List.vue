@@ -10,7 +10,9 @@
       <div v-for="entry in entries" v-bind:key="entry.key">
         <div>
           {{ entry.tag }} |
-          <router-link :to="'/f/' + entry.key">{{ entry.name }}</router-link> |
+          <router-link v-if="entry.tag === 'folder'" :to="'/l/' + entry.key">{{ entry.name }}</router-link>
+          <router-link v-if="entry.tag === 'file'" :to="'/f/' + entry.key">{{ entry.name }}</router-link>
+          |
           {{ entry.size }} |
           {{ entry.modified }}
           <input type="button" value="x" @click="remove(entry)">
@@ -67,7 +69,7 @@ export default {
       const path = this.$route.params.pathMatch;
       LocalProvider.get(path).then(current => {
         if (current === undefined && path.length > 0) {
-          this.$router.push('/f/');
+          this.$router.push('/l/');
           return;
         }
 

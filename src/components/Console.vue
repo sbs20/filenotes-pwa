@@ -1,6 +1,6 @@
 <template>
   <div>
-    <textarea rows="10" cols="80" v-model="text" readonly></textarea>
+    <textarea id="log" v-model="text" readonly></textarea>
     <input type="button" value="Clear cursor" @click="clearCursor">
     <input type="button" value="Clear local actions" @click="clearLocalActions">
     <input type="button" value="Clear local filesystem" @click="clearLocalFs">
@@ -18,14 +18,14 @@ import RemoteProvider from '../classes/remote-provider';
 import Log from '../classes/log';
 
 let listener = null;
-const log = Log.get('DevConsole');
+const log = Log.get('Console');
 
 export default {
-  name: 'DevConsole',
+  name: 'Console',
 
   created() {
     listener = EventBus.on('console', e => {
-      this.messages.push(e.data);
+      this.messages.splice(0, 0, e.data);
     });
   },
 
@@ -91,4 +91,8 @@ export default {
 </script>
 
 <style scoped>
+#log {
+  width: 100%;
+  height: 12em;
+}
 </style>

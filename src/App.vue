@@ -1,27 +1,34 @@
 <template>
   <div id="app">
-    <Main />
+    <h1>Filenotes</h1>
+    <div style="float: left; width: 60%">
+      <router-view></router-view>
+    </div>
+    <div v-if="true" style="float: left; width: 38%">
+      <Console></Console>
+    </div>
   </div>
 </template>
 
 <script>
-import Main from './components/Main.vue';
+import Console from './components/Console.vue';
+import { connect } from './classes/remote-provider';
 
 export default {
   name: 'App',
   components: {
-    Main
+    Console,
   },
+  mounted() {
+    this.start();
+  },
+  methods: {
+    start() {
+      connect(window);
+    }
+  }
 };
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>
