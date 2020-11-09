@@ -5,7 +5,7 @@
       <router-view></router-view>
     </div>
     <div v-if="true" style="float: left; width: 38%">
-      <Console></Console>
+      <console></console>
     </div>
   </div>
 </template>
@@ -24,7 +24,13 @@ export default {
   },
   methods: {
     start() {
-      connect(window);
+      connect(window).then(connected => {
+        /** @type {string} */
+        const path = this.$route.params.pathMatch;
+        if (connected && path && !path.startsWith('/l/')) {
+          this.$router.push('/l/');
+        }
+      });
     }
   }
 };
