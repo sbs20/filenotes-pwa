@@ -27,7 +27,7 @@ export default {
       connect(window).then(connected => {
         /** @type {string} */
         const path = this.$route.params.pathMatch;
-        if (connected && path && !path.startsWith('/l/')) {
+        if (connected && path === undefined) {
           this.$router.push('/l/');
         }
       });

@@ -32,13 +32,5 @@
  */
 
 /**
- * @typedef {Object} SyncAction
- * @property {('file-download'|'file-upload'|'mkdir-local'|'mkdir-remote'|'delete-local'|'delete-remote')} type - The action type
- * @property {Metadata} metadata - The data
- */
-
- /**
- * @typedef {Object} SynkAction
- * @property {('local'|'remote')} location - Where to run
- * @property {Metadata} metadata - The data
+ * @typedef {'audio'|'text'|'unknown'} FileType
  */

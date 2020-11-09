@@ -1,12 +1,13 @@
 <template>
   <div>
     <h2>{{ this.current.name }}</h2>
-    <div v-if="content !== null">
-      <input type="button" value="close" @click="close">
-      <input type="button" value="save" @click="save">
-      <prism-editor class="editor" v-model="content" :highlight="highlighter" line-numbers></prism-editor>
-      <av-waveform v-if="audioSrc" canv-class="audio-canvas" :audio-src="audioSrc" :canv-top="true" can ref="avbars"></av-waveform>
-    </div>
+    <input type="button" value="close" @click="close">
+    <input type="button" value="save" @click="save">
+    <prism-editor v-if="type === 'text'" class="editor" v-model="text"
+      :highlight="highlighter" :line-numbers="false"></prism-editor>
+    <av-waveform v-if="type === 'audio'" canv-class="audio-canvas"
+      :audio-src="audioSrc" :canv-top="true"></av-waveform>
+    <audio v-if="type === 'audio'" controls :src="audioSrc"></audio>
   </div>
 </template>
 
@@ -40,7 +41,11 @@ export default {
     return {
       /** @type {Metadata} */
       current: {},
-      content: null,
+
+      /** @type {FileType} */
+      type: 'unknown',
+
+      text: null,
       audioSrc: null
     };
   },
@@ -75,22 +80,30 @@ export default {
     load() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
+      this.type = 'unknown';
       LocalProvider.get(path).then(current => {
         if (current === undefined || current.tag !== 'file') {
           this.$router.push('/l/');
           return;
         }
 
+        const type = FilePath.create(path).type;
         this.current = current;
         this.content = null;
         LocalProvider.read(this.current.key).then(buffer => {
-          this.content = `{${this.current.name}}`;
-          if (this.current.name.endsWith('.txt')) {
-            this.content = Convert.arrayBufferToString(buffer);
-          } else if (this.current.name.endsWith('.mp3')) {
-            const blob = Convert.arrayBufferToBlob(buffer);
-            this.audioSrc = window.URL.createObjectURL(blob);
+          switch (type) {
+            case 'text':
+              this.text = Convert.arrayBufferToString(buffer);
+              break;
+
+            case 'audio': {
+              const blob = Convert.arrayBufferToBlob(buffer);
+              this.audioSrc = window.URL.createObjectURL(blob);
+              break;
+            }
           }
+
+          this.type = type;
         });
       });
     },

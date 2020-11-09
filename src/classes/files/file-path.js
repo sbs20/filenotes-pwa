@@ -66,6 +66,25 @@ export default class FilePath {
   }
 
   /**
+   * Returns the type
+   * @returns {FileType}
+   */
+  get type() {
+    switch (this.extension) {
+      case 'csv':
+      case 'md':
+      case 'txt':
+        return 'text';
+
+      case 'mp3':
+        return 'audio';
+
+      default:
+        return 'unknown';
+    }
+  }
+
+  /**
    * @param {string} directory
    * @returns {FilePath}
    */
