@@ -3,10 +3,12 @@ import VueRouter from 'vue-router';
 import App from './App.vue';
 import File from './components/File';
 import List from './components/List';
+import VueAudioVisual from 'vue-audio-visual';
 import './registerServiceWorker';
 
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
+Vue.use(VueAudioVisual);
 
 const router = new VueRouter({
   routes: [

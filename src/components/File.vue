@@ -5,6 +5,7 @@
       <input type="button" value="close" @click="close">
       <input type="button" value="save" @click="save">
       <prism-editor class="editor" v-model="content" :highlight="highlighter" line-numbers></prism-editor>
+      <av-waveform v-if="audioSrc" canv-class="audio-canvas" :audio-src="audioSrc" :canv-top="true" can ref="avbars"></av-waveform>
     </div>
   </div>
 </template>
@@ -36,12 +37,16 @@ export default {
   },
 
   data() {
-    this.load();
     return {
       /** @type {Metadata} */
       current: {},
-      content: null
+      content: null,
+      audioSrc: null
     };
+  },
+
+  created() {
+    this.load();
   },
 
   watch: {
@@ -54,6 +59,12 @@ export default {
     highlighter(code) {
       const language = languages.md;
       return highlight(code, language);
+    },
+
+    release() {
+      if (this.audioSrc) {
+        URL.revokeObjectURL(this.audioSrc);
+      }
     },
 
     close() {
@@ -77,17 +88,8 @@ export default {
           if (this.current.name.endsWith('.txt')) {
             this.content = Convert.arrayBufferToString(buffer);
           } else if (this.current.name.endsWith('.mp3')) {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            const audioContext = new AudioContext();
-            audioContext.decodeAudioData(buffer).then(audioData => {
-              const source = audioContext.createBufferSource();
-              source.buffer = audioData;
-              source.connect(audioContext.destination);
-              source.start(0);
-              window.setTimeout(() => {
-                source.stop(0);
-              }, 5000);
-            });
+            const blob = Convert.arrayBufferToBlob(buffer);
+            this.audioSrc = window.URL.createObjectURL(blob);
           }
         });
       });
@@ -142,4 +144,17 @@ export default {
 .prism-editor__textarea:focus {
   outline: none;
 }
+
 </style>
+
+<style>
+.audio-canvas {
+  background: #2d2d2d;
+  color: #ccc;
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 1em;
+  line-height: 1.5em;
+  padding: 0.5em;
+}
+</style>
+
