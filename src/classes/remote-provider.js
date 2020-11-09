@@ -9,7 +9,7 @@ const log = Log.get('RemoteProvider');
 /**
  * Attempts to connect and if not forces authentication
  * @param {Window} window
- * @returns {Promise.<void>} Promise<void>
+ * @returns {Promise.<boolean>} Promise<boolean>
  */
 export async function connect(window) {
   // Try local storage first
@@ -17,7 +17,7 @@ export async function connect(window) {
   if (await remote.connect({ clientId: Constants.APP_ID, accessToken: accessToken })) {
     log.debug('Connected using stored access token');
     log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
-    return;
+    return true;
   }
 
   if (window === undefined) {
@@ -31,13 +31,14 @@ export async function connect(window) {
     log.debug('Connected using url access token');
     log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
     await StorageService.settings.set('accessToken', accessToken);
-    return;
+    return true;
   }
 
   // Initiate sign in
   remote.configure({ clientId: Constants.APP_ID, authUrl: Constants.HOST_URL });
   const uri = remote.authenticationUrl();
   window.location.href = uri;
+  return false;
 }
 
 export default remote;
