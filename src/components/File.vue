@@ -21,10 +21,11 @@ import 'vue-prism-editor/dist/prismeditor.min.css';
 
 // import highlighting library
 import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/plugins/autolinker/prism-autolinker';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';
-import 'prismjs/themes/prism-tomorrow.css'; // import syntax highlighting styles
+import 'prismjs/themes/prism-tomorrow.css';
 
 const log = Log.get('List');
 
@@ -35,7 +36,7 @@ export default {
   },
 
   data() {
-    this.refresh();
+    this.load();
     return {
       /** @type {Metadata} */
       current: {},
@@ -45,13 +46,14 @@ export default {
 
   watch: {
     $route() {
-      this.refresh();
+      this.load();
     }
   },
 
   methods: {
     highlighter(code) {
-      return highlight(code, languages.md);
+      const language = languages.md;
+      return highlight(code, language);
     },
 
     close() {
@@ -59,7 +61,7 @@ export default {
       this.$router.push(`/l/${parent}`);
     },
 
-    refresh() {
+    load() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
       LocalProvider.get(path).then(current => {
@@ -74,6 +76,18 @@ export default {
           this.content = `{${this.current.name}}`;
           if (this.current.name.endsWith('.txt')) {
             this.content = Convert.arrayBufferToString(buffer);
+          } else if (this.current.name.endsWith('.mp3')) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            audioContext.decodeAudioData(buffer).then(audioData => {
+              const source = audioContext.createBufferSource();
+              source.buffer = audioData;
+              source.connect(audioContext.destination);
+              source.start(0);
+              window.setTimeout(() => {
+                source.stop(0);
+              }, 5000);
+            });
           }
         });
       });
@@ -96,7 +110,7 @@ export default {
       if (name) {
         const destination = `${this.current.path}/${name}`;
         LocalProvider.move(entry.key, destination).then(() => {
-          this.refresh();
+          this.close();
         });
       }
     },
