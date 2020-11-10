@@ -23,7 +23,6 @@ import 'vue-prism-editor/dist/prismeditor.min.css';
 
 // import highlighting library
 import { highlight, languages } from 'prismjs/components/prism-core';
-import 'prismjs/plugins/autolinker/prism-autolinker';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';

@@ -92,7 +92,14 @@ export default {
 
 <style scoped>
 #log {
+  background: #2d2d2d;
+  color: #ccc;
+  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 0.75em;
+  line-height: 1em;
+  padding: 0.5em;
   width: 100%;
   height: 12em;
 }
+
 </style>
