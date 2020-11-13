@@ -18,7 +18,7 @@
       <md-dialog :md-active.sync="showConsole">
         <md-dialog-title>Console</md-dialog-title>
         <md-dialog-content>
-          <console></console>
+          <console v-bind:logMessages="log.messages"></console>
         </md-dialog-content>
         <md-dialog-actions>
           <md-button class="md-primary" @click="showConsole = false">Close</md-button>
@@ -30,8 +30,11 @@
 
 <script>
 import Console from './components/Console.vue';
+import EventBus from './classes/event-bus';
 import { connect } from './classes/remote-provider';
 import { SyncEngine } from './classes/service';
+
+let listener = null;
 
 export default {
   name: 'App',
@@ -40,11 +43,24 @@ export default {
   },
   data() {
     return {
-      showConsole: false
+      showConsole: false,
+
+      /** {Array.<string>} */
+      log: {
+        messages: []
+      }
     };
   },
   created() {
+    listener = EventBus.on('console', e => {
+      this.log.messages.splice(0, 0, e.data);
+    });
     this.start();
+  },
+  destroyed() {
+    if (listener) {
+      listener.remove();
+    }
   },
   methods: {
     start() {
@@ -60,7 +76,6 @@ export default {
     sync() {
       SyncEngine.execute();
     }
-
   }
 };
 </script>

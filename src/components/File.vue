@@ -1,13 +1,23 @@
 <template>
   <div>
-    <h2>{{ this.current.name }}</h2>
-    <input type="button" value="close" @click="close">
-    <input type="button" value="save" @click="save">
-    <prism-editor v-if="type === 'text'" class="editor" v-model="text"
-      :highlight="highlighter" :line-numbers="false"></prism-editor>
-    <av-waveform v-if="type === 'audio'" canv-class="audio-canvas"
-      :audio-src="audioSrc" :canv-top="true"></av-waveform>
-    <audio v-if="type === 'audio'" controls :src="audioSrc"></audio>
+    <div class="md-layout">
+      <div class="md-layout-item">
+        <h2>{{ this.current.name }}</h2>
+      </div>
+      <div class="md-layout-item">
+        <md-button class="md-raised md-accent md-top-right" @click="close">Close</md-button>
+        <md-button class="md-raised md-primary" @click="save">Save</md-button>
+      </div>
+    </div>
+    <div class="md-layout">
+      <div class="md-layout-item">
+        <prism-editor v-if="type === 'text'" class="editor" v-model="text"
+          :highlight="highlighter" :line-numbers="false"></prism-editor>
+        <av-waveform v-if="type === 'audio'" canv-class="audio-canvas"
+          :audio-src="audioSrc" :canv-top="true" :audio-controls="false"></av-waveform>
+        <audio class="audio-control" v-if="type === 'audio'" controls :src="audioSrc"></audio>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -144,17 +154,18 @@ export default {
 <style scoped>
 /* required class */
 .editor {
-  background: #2d2d2d;
+  /* background: #2d2d2d; */
   color: #ccc;
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
   font-size: 1em;
   line-height: 1.5em;
   padding: 0.5em;
+  min-height: 12em;
 }
 
 /* optional class for removing the outline */
 .prism-editor__textarea:focus {
-  outline: none;
+  outline: #2d2d2d;
 }
 
 </style>
@@ -167,6 +178,10 @@ export default {
   font-size: 1em;
   line-height: 1.5em;
   padding: 0.5em;
+  width: 100%;
+}
+.audio-control {
+  width: 100%;
 }
 </style>
 
