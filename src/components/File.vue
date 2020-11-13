@@ -65,6 +65,10 @@ export default {
     this.load();
   },
 
+  destroyed() {
+    this.release();
+  },
+
   watch: {
     $route() {
       this.load();
@@ -100,7 +104,7 @@ export default {
 
         const type = FilePath.create(path).type;
         this.current = current;
-        this.content = null;
+        this.text = null;
         LocalProvider.read(this.current.key).then(buffer => {
           switch (type) {
             case 'text':
