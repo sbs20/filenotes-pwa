@@ -154,8 +154,16 @@ export default class DropboxProvider extends CloudProvider {
    * @param {string} path
    */
   async mkdir(path) {
-    const response = await this.client().filesCreateFolderV2({ path: path });
-    return response.result;
+    try {
+      const response = await this.client().filesCreateFolderV2({ path: path });
+      return response.result;
+    } catch (exception) {
+      // If it already exists we can ignore it, otherwise, throw
+      if (exception.error.indexOf('path/conflict/folder/') === -1) {
+        throw exception;
+      }
+    }
+
   }
 
   /**

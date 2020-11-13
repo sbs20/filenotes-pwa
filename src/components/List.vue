@@ -1,15 +1,15 @@
 <template>
   <div class="md-layout" style="position: relative;">
-    <md-dialog v-if="entry" :md-active="true">
+    <md-dialog v-if="dialog.action === 'rename'" :md-active="true">
       <md-dialog-title>Name</md-dialog-title>
       <md-dialog-content>
         <md-field>
           <label>Enter a name</label>
-          <md-input v-model="entry.name"></md-input>
+          <md-input v-model="dialog.entry.name"></md-input>
         </md-field>
       </md-dialog-content>
       <md-dialog-actions>
-        <md-button class="md-primary" @click="entry = null">Cancel</md-button>
+        <md-button class="md-primary" @click="dialog.action = null">Cancel</md-button>
         <md-button class="md-primary" @click="rename()">Save</md-button>
       </md-dialog-actions>
     </md-dialog>
@@ -274,9 +274,9 @@ export default {
           const source = this.dialog.entry.key;
           const destination = `${this.dialog.folder}/${this.dialog.entry.name}`;
           console.log(`move ${source} to ${destination}`);
-          // LocalProvider.move(source, destination).then(() => {
-          //   this.refresh();
-          // });
+          LocalProvider.move(source, destination).then(() => {
+            this.refresh();
+          });
         } else {
           log.info('Source and destination are the same. No action');
         }
@@ -294,16 +294,19 @@ export default {
      */
     rename(entry) {
       if (entry) {
-        this.entry = entry;
-        this.showRename = true;
-      } else if (this.showRename) {
-        this.showRename = false;
-        const source = this.entry.key;
-        const destination = `${this.current.path}/${this.entry.name}`;
-        this.entry = null;
+        this.dialog.entry = entry;
+        this.dialog.action = 'rename';
+      } else if (this.dialog.action === 'rename') {
+        const source = this.dialog.entry.key;
+        const destination = `${this.current.path}/${this.dialog.entry.name}`;
         LocalProvider.move(source, destination).then(() => {
           this.refresh();
         });
+        this.dialog = {
+          entry: null,
+          action: null,
+          folder: null
+        };
       }
     },
   }
