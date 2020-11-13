@@ -72,7 +72,7 @@ export default {
     },
 
     close() {
-      const parent = FilePath.create(this.current.path).directory;
+      const parent = FilePath.create(this.current.key).directory;
       this.$router.push(`/l/${parent}`);
     },
 
