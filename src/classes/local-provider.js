@@ -13,7 +13,7 @@ class LocalProvider {
    * @returns {Promise.<Metadata>} - Promise<Metadata>
    */
   async get(path) {
-    return await StorageService.fs.metadata.read(path);
+    return await StorageService.fs.metadata.read(path.toLowerCase());
   }
 
   /**
@@ -55,7 +55,7 @@ class LocalProvider {
    * @returns {Promise.<ArrayBuffer>} - Promise<ArrayBuffer>
    */
   async read(path) {
-    const content = await StorageService.fs.content.read(path);
+    const content = await StorageService.fs.content.read(path.toLowerCase());
     return content === undefined ? new Uint8Array().buffer : content.data;
   }
 

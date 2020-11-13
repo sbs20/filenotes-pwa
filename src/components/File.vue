@@ -16,6 +16,7 @@
         <av-waveform v-if="type === 'audio'" canv-class="audio-canvas"
           :audio-src="audioSrc" :canv-top="true" :audio-controls="false"></av-waveform>
         <audio class="audio-control" v-if="type === 'audio'" controls :src="audioSrc"></audio>
+        <img v-if="imageSrc" :src="imageSrc" />
       </div>
     </div>
   </div>
@@ -38,7 +39,7 @@ import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/themes/prism-tomorrow.css';
 
-const log = Log.get('List');
+const log = Log.get('File');
 
 export default {
   name: 'File',
@@ -57,7 +58,8 @@ export default {
       /** @type {string} */
       text: null,
 
-      audioSrc: null
+      audioSrc: null,
+      imageSrc: null
     };
   },
 
@@ -84,6 +86,9 @@ export default {
     release() {
       if (this.audioSrc) {
         URL.revokeObjectURL(this.audioSrc);
+      }
+      if (this.imageSrc) {
+        URL.revokeObjectURL(this.imageSrc);
       }
     },
 
@@ -114,6 +119,11 @@ export default {
             case 'audio': {
               const blob = Convert.arrayBufferToBlob(buffer);
               this.audioSrc = window.URL.createObjectURL(blob);
+              break;
+            }
+            case 'image': {
+              const blob = Convert.arrayBufferToBlob(buffer);
+              this.imageSrc = window.URL.createObjectURL(blob);
               break;
             }
           }

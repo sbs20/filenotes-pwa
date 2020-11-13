@@ -32,5 +32,5 @@
  */
 
 /**
- * @typedef {'audio'|'text'|'unknown'} FileType
+ * @typedef {'audio'|'text'|'image'|'unknown'} FileType
  */

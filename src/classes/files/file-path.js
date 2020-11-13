@@ -70,11 +70,16 @@ export default class FilePath {
    * @returns {FileType}
    */
   get type() {
-    switch (this.extension) {
+    switch (this.extension.toLowerCase()) {
       case 'csv':
       case 'md':
       case 'txt':
         return 'text';
+
+      case 'jpg':
+      case 'gif':
+      case 'png':
+        return 'image';
 
       case 'mp3':
         return 'audio';

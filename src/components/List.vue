@@ -14,6 +14,17 @@
       </md-dialog-actions>
     </md-dialog>
 
+    <md-dialog v-if="dialog.action === 'move'" :md-active="true">
+      <md-dialog-title>Move</md-dialog-title>
+      <md-dialog-content>
+        <folders v-model="dialog.folder"></folders>
+      </md-dialog-content>
+      <md-dialog-actions>
+        <md-button class="md-primary" @click="dialog.action = null">Cancel</md-button>
+        <md-button class="md-primary" @click="move()">Move</md-button>
+      </md-dialog-actions>
+    </md-dialog>
+
     <div class="md-layout-item">
       <md-speed-dial class="md-top-right" md-direction="bottom">
         <md-speed-dial-target class="md-primary" @click="createFile">
@@ -50,6 +61,11 @@
                   <md-icon>text_format</md-icon>
                 </md-menu-item>
 
+                <md-menu-item @click="move(entry)">
+                  <span>Move</span>
+                  <md-icon>text_format</md-icon>
+                </md-menu-item>
+
                 <md-menu-item @click="remove(entry)">
                   <span>Delete</span>
                   <md-icon>delete</md-icon>
@@ -70,10 +86,15 @@ import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
 import LocalProvider from '../classes/local-provider';
 import { DateTime } from 'luxon';
+import Folders from './Folders';
+import Log from '../classes/log';
+
+const log = Log.get('List');
 
 export default {
   name: 'List',
   components: {
+    Folders
   },
 
   data() {
@@ -89,7 +110,13 @@ export default {
       entry: null,
 
       /** @type {boolean} */
-      showRename: false
+      showRename: false,
+
+      dialog: {
+        action: null,
+        entry: null,
+        folder: null
+      }
     };
   },
 
@@ -150,7 +177,8 @@ export default {
       switch (FilePath.create(entry.path).type) {
         case 'audio':
           return 'mic';
-
+        case 'image':
+          return 'image';
         case 'text':
         default:
           return 'text_snippet';
@@ -234,6 +262,36 @@ export default {
     /**
      * @param {Metadata} entry
      */
+    move(entry) {
+      if (entry) {
+        this.dialog.entry = entry;
+        this.dialog.action = 'move';
+        this.dialog.folder = FilePath.create(entry.path).directory;
+      } else if (this.dialog.folder !== null) {
+        const sourceDir = FilePath.create(this.dialog.entry.path).directory;
+        const destinationDir = this.dialog.folder;
+        if (sourceDir.toLowerCase() !== destinationDir.toLowerCase()) {
+          const source = this.dialog.entry.key;
+          const destination = `${this.dialog.folder}/${this.dialog.entry.name}`;
+          console.log(`move ${source} to ${destination}`);
+          // LocalProvider.move(source, destination).then(() => {
+          //   this.refresh();
+          // });
+        } else {
+          log.info('Source and destination are the same. No action');
+        }
+        this.dialog = {
+          entry: null,
+          action: null,
+          folder: null
+        };
+      }
+    },
+
+
+    /**
+     * @param {Metadata} entry
+     */
     rename(entry) {
       if (entry) {
         this.entry = entry;
@@ -247,14 +305,6 @@ export default {
           this.refresh();
         });
       }
-      // this.entryName = null;
-      // const name = window.prompt('New name');
-      // if (name) {
-      //   const destination = `${this.current.path}/${name}`;
-      //   LocalProvider.move(entry.key, destination).then(() => {
-      //     this.refresh();
-      //   });
-      // }
     },
   }
 };
