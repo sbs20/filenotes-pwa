@@ -54,7 +54,9 @@ export default {
       /** @type {FileType} */
       type: 'unknown',
 
+      /** @type {string} */
       text: null,
+
       audioSrc: null
     };
   },
@@ -140,7 +142,7 @@ export default {
     },
 
     save() {
-      const buffer = Convert.stringToArrayBuffer(this.content);
+      const buffer = Convert.stringToArrayBuffer(this.text);
       FileMetadata.from(this.current, buffer).then(metadata => {
         LocalProvider.write(metadata, buffer).then(() => {
           log.debug('Saved', this.current);
@@ -161,6 +163,8 @@ export default {
   line-height: 1.5em;
   padding: 0.5em;
   min-height: 12em;
+  white-space: nowrap;
+  overflow: auto;
 }
 
 /* optional class for removing the outline */
