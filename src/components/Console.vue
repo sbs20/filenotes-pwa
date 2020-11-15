@@ -85,7 +85,6 @@ export default {
   resize: none;
   color: #ccc;
   font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
-  font-size: 0.75em;
   line-height: 1em;
   padding: 0.5em;
   width: 100%;

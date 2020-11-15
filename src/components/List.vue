@@ -45,6 +45,7 @@
       <md-list class="md-double-line">
         <div v-for="entry in entries" v-bind:key="entry.key">
           <md-list-item @click="open(entry)">
+            <div class="flash" :style="{ backgroundColor: colour(entry) }"></div>
             <md-icon>{{ icon(entry) }}</md-icon>
             <div class="md-list-item-text">
               <span>{{ entry.name }}</span>
@@ -63,7 +64,7 @@
 
                 <md-menu-item @click="move(entry)">
                   <span>Move</span>
-                  <md-icon>text_format</md-icon>
+                  <md-icon>forward</md-icon>
                 </md-menu-item>
 
                 <md-menu-item @click="remove(entry)">
@@ -90,6 +91,12 @@ import Folders from './Folders';
 import Log from '../classes/log';
 
 const log = Log.get('List');
+
+const COLORS = [
+  '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4',
+  '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107',
+  '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'
+];
 
 export default {
   name: 'List',
@@ -164,6 +171,14 @@ export default {
       }
 
       return `${this.size(entry)} (${this.modified(entry)})`; 
+    },
+
+    /**
+     * @param {Metadata} entry
+     */
+    colour() {
+      const index = parseInt(Math.random() * COLORS.length);
+      return COLORS[index];
     },
 
     /**
@@ -288,7 +303,6 @@ export default {
       }
     },
 
-
     /**
      * @param {Metadata} entry
      */
@@ -314,11 +328,20 @@ export default {
 </script>
 
 <style scoped>
+.flash {
+  width: 0.25em;
+  height: 4em;
+  margin-left: -0.75em;
+  margin-right: 0.75em;
+}
 .md-list {
   width: 100%;
   max-width: 100%;
   display: inline-block;
   vertical-align: top;
   border: 1px solid rgba(#000, .12);
+}
+.md-list-item-text {
+  margin-left: 1em;
 }
 </style>
