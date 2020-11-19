@@ -1,5 +1,6 @@
 import FileContent from './files/file-content';
 import FileMetadata from './files/file-metadata';
+import FilePath from './files/file-path';
 import FolderMetadata from './files/folder-metadata';
 import Log from './log';
 import { StorageService } from './service';
@@ -7,6 +8,24 @@ import { StorageService } from './service';
 const log = Log.get('LocalProvider');
 
 class LocalProvider {
+
+  /**
+   * Gets an available filename in a given directory
+   * @param {Metadata} directory
+   * @param {string} name
+   * @returns {Promise.<string>}
+   */
+  async new(directory, name) {
+    const existing = await this.list(directory, false);
+    let candidate = name;
+    let index = 0;
+    while (existing.filter(m => m.name === candidate).length > 0) {
+      index++;
+      const file = FilePath.create(name);
+      candidate = `${file.stem} (${index}).${file.extension}`;
+    }
+    return candidate;
+  }
 
   /**
    * Returns a metadata object

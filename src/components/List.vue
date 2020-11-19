@@ -1,107 +1,69 @@
 <template>
-  <div class="md-layout" style="position: relative;">
-    <md-dialog v-if="dialog.action === 'rename'" :md-active="true">
-      <md-dialog-title>Name</md-dialog-title>
-      <md-dialog-content>
-        <md-field>
-          <label>Enter a name</label>
-          <md-input v-model="dialog.entry.name"></md-input>
-        </md-field>
-      </md-dialog-content>
-      <md-dialog-actions>
-        <md-button class="md-primary" @click="dialog.action = null">Cancel</md-button>
-        <md-button class="md-primary" @click="rename()">Save</md-button>
-      </md-dialog-actions>
-    </md-dialog>
+  <div class="container">
+    <navigation>
+      <template v-slot:header>{{ header }}</template>
+      <template v-slot:end>
+        <b-navbar-item @click="sync"><b-icon icon="sync"></b-icon></b-navbar-item>
+        <b-navbar-item @click="mkdir"><b-icon icon="folder-plus"></b-icon></b-navbar-item>
+        <b-navbar-item @click="createText"><b-icon icon="file-plus"></b-icon></b-navbar-item>
+        <b-navbar-item><b-icon icon="microphone"></b-icon></b-navbar-item>
+        <b-navbar-item><b-icon icon="image-plus"></b-icon></b-navbar-item>
+      </template>
+    </navigation>
 
-    <md-dialog v-if="dialog.action === 'move'" :md-active="true">
-      <md-dialog-title>Move</md-dialog-title>
-      <md-dialog-content>
-        <folders v-model="dialog.folder"></folders>
-      </md-dialog-content>
-      <md-dialog-actions>
-        <md-button class="md-primary" @click="dialog.action = null">Cancel</md-button>
-        <md-button class="md-primary" @click="move()">Move</md-button>
-      </md-dialog-actions>
-    </md-dialog>
-
-    <div class="md-layout-item">
-      <md-speed-dial class="md-top-right" md-direction="bottom">
-        <md-speed-dial-target class="md-primary" @click="createFile">
-          <md-icon>text_snippet</md-icon>
-        </md-speed-dial-target>
-
-        <md-speed-dial-content>
-          <md-button class="md-icon-button" @click="mkdir">
-            <md-icon>create_new_folder</md-icon>
-          </md-button>
-        </md-speed-dial-content>
-      </md-speed-dial>
-
-      <div v-if="current">
-        <h2>Location: {{ current.path || "/" }}</h2>
+    <b-modal :active.sync="moveDialog.show" has-modal-card trap-focus
+      :destroy-on-hide="true" aria-role="dialog" aria-modal>
+      <div class="modal-card" style="min-width: 400px; height: 600px;">
+        <header class="modal-card-head">Move</header>
+        <section class="modal-card-body">
+          <folders v-model="moveDialog.folder"></folders>
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button" type="button" @click="moveDialog.show = false">Cancel</button>
+          <button class="button is-primary" @click="move()">Move</button>
+        </footer>
       </div>
+    </b-modal>
 
-      <md-list class="md-double-line">
-        <div v-for="entry in entries" v-bind:key="entry.key">
-          <md-list-item @click="open(entry)">
-            <div class="flash" :style="{ backgroundColor: colour(entry) }"></div>
-            <md-icon>{{ icon(entry) }}</md-icon>
-            <div class="md-list-item-text">
-              <span>{{ entry.name }}</span>
-              <span>{{ description(entry) }}</span>
-            </div>
-            <md-menu md-size="medium" :md-offset-x="-82" :md-offset-y="-40" v-on:click.stop>
-              <md-button class="md-icon-button" md-menu-trigger>
-                <md-icon>more_vert</md-icon>
-              </md-button>
-
-              <md-menu-content>
-                <md-menu-item @click="rename(entry)">
-                  <span>Rename</span>
-                  <md-icon>text_format</md-icon>
-                </md-menu-item>
-
-                <md-menu-item @click="move(entry)">
-                  <span>Move</span>
-                  <md-icon>forward</md-icon>
-                </md-menu-item>
-
-                <md-menu-item @click="remove(entry)">
-                  <span>Delete</span>
-                  <md-icon>delete</md-icon>
-                </md-menu-item>
-              </md-menu-content>
-            </md-menu>
-          </md-list-item>
-        </div>
-      </md-list>
-
+    <div class="file-entry" v-for="entry in entries" v-bind:key="entry.key">
+      <list-entry :value="entry" @open="open" @rename="rename" @remove="remove" @move="move"></list-entry>
     </div>
+
   </div>
 </template>
 
 <script>
+import EventBus from '../classes/event-bus';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
 import LocalProvider from '../classes/local-provider';
-import { DateTime } from 'luxon';
-import Folders from './Folders';
 import Log from '../classes/log';
 
-const log = Log.get('List');
+import Folders from './Folders';
+import ListEntry from './ListEntry';
+import Navigation from './Navigation';
 
-const COLORS = [
-  '#f44336', '#e91e63', '#9c27b0', '#673ab7', '#3f51b5', '#2196f3', '#03a9f4',
-  '#00bcd4', '#009688', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b', '#ffc107',
-  '#ff9800', '#ff5722', '#795548', '#9e9e9e', '#607d8b'
-];
+const log = Log.get('List');
 
 export default {
   name: 'List',
   components: {
-    Folders
+    Folders,
+    ListEntry,
+    Navigation
+  },
+
+  computed: {
+    header() {
+      if (this.current && this.current.path) {
+        /** @type {string} */
+        const path = this.current.path;
+        return path.slice(path.length - 30);
+      } else {
+        return '/';
+      }
+    }
   },
 
   data() {
@@ -113,16 +75,11 @@ export default {
       /** @type {Array.<Metadata>} */
       entries: [],
 
-      /** @type {Metadata} */
-      entry: null,
-
-      /** @type {boolean} */
-      showRename: false,
-
-      dialog: {
-        action: null,
+      moveDialog: {
+        show: false,
         entry: null,
-        folder: null
+        folder: null,
+        callback: () => {}
       }
     };
   },
@@ -134,72 +91,6 @@ export default {
   },
 
   methods: {
-
-    /**
-     * @param {Metadata} entry
-     */
-    size(entry) {
-      const kb = 1 << 10;
-      const mb = kb << 10;
-      if (entry.size < 0) {
-        return '0';
-      } else if (entry.size === 1) {
-        return '1 Byte';
-      } else if (entry.size < kb << 1) {
-        return `${entry.size} Bytes`;
-      } else if (entry.size < mb << 1) {
-        return `${Math.ceil(entry.size / kb)} KB`;
-      } else {
-        return `${Math.round(100.0 * entry.size / mb) / 100.0} MB`;
-      }
-    },
-
-    /**
-     * @param {Metadata} entry
-     */
-    modified(entry) {
-      const dt = DateTime.fromISO(entry.modified);
-      return dt.toLocaleString(DateTime.DATETIME_MED);
-    },
-
-    /**
-     * @param {Metadata} entry
-     */
-    description(entry) {
-      if (entry.tag === 'folder') {
-        return '';
-      }
-
-      return `${this.size(entry)} (${this.modified(entry)})`; 
-    },
-
-    /**
-     * @param {Metadata} entry
-     */
-    colour() {
-      const index = parseInt(Math.random() * COLORS.length);
-      return COLORS[index];
-    },
-
-    /**
-     * @param {Metadata} entry
-     */
-    icon(entry) {
-      if (entry.tag === 'folder') {
-        return 'folder';
-      }
-
-      switch (FilePath.create(entry.path).type) {
-        case 'audio':
-          return 'mic';
-        case 'image':
-          return 'image';
-        case 'text':
-        default:
-          return 'text_snippet';
-      }
-    },
-
     refresh() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
@@ -231,29 +122,43 @@ export default {
       });
     },
 
-    createFile() {
+    createText() {
       if (this.current.tag === 'folder') {
-        const name = window.prompt('File name');
-        if (name) {
-          const path = `${this.current.path}/${name}`;
-          const content = new Uint8Array();
-          FileMetadata.create(path, content).then(metadata => {
-            LocalProvider.write(metadata, content).then(() => {
-              this.refresh();
+        LocalProvider.new(this.current, 'New Text.txt').then(name => {
+          if (name) {
+            const path = `${this.current.path}/${name}`;
+            const content = new Uint8Array();
+            FileMetadata.create(path, content).then(metadata => {
+              LocalProvider.write(metadata, content).then(() => {
+                this.refresh();
+              });
             });
-          });
-        }
+          }
+        });
       }
     },
 
     mkdir() {
       if (this.current.tag === 'folder') {
-        const dir = window.prompt('Directory name');
-        if (dir) {
-          LocalProvider.mkdir(`${this.current.path}/${dir}`).then(() => {
-            this.refresh();
-          });
-        }
+        this.$buefy.dialog.prompt({
+          message: 'Directory name',
+          inputAttrs: {
+            type: 'text'
+          },
+          trapFocus: true,
+          onConfirm: (value) => {
+            const dir = `${this.current.path}/${value}`;
+            LocalProvider.get(dir).then(existing => {
+              if (existing !== undefined) {
+                console.log(`Directory '${dir}' already exists`);
+              } else {
+                LocalProvider.mkdir(dir).then(() => {
+                  this.refresh();
+                });
+              }
+            });
+          }
+        });
       }
     },
 
@@ -279,25 +184,31 @@ export default {
      */
     move(entry) {
       if (entry) {
-        this.dialog.entry = entry;
-        this.dialog.action = 'move';
-        this.dialog.folder = FilePath.create(entry.path).directory;
-      } else if (this.dialog.folder !== null) {
-        const sourceDir = FilePath.create(this.dialog.entry.path).directory;
-        const destinationDir = this.dialog.folder;
+        this.moveDialog.show = true;
+        this.moveDialog.entry = entry;
+        this.moveDialog.folder = FilePath.create(entry.path).directory;
+      } else if (this.moveDialog.folder !== null) {
+        const sourceDir = FilePath.create(this.moveDialog.entry.path).directory;
+        const destinationDir = this.moveDialog.folder;
         if (sourceDir.toLowerCase() !== destinationDir.toLowerCase()) {
-          const source = this.dialog.entry.key;
-          const destination = `${this.dialog.folder}/${this.dialog.entry.name}`;
-          console.log(`move ${source} to ${destination}`);
-          LocalProvider.move(source, destination).then(() => {
-            this.refresh();
+          const source = this.moveDialog.entry.key;
+          const destination = `${this.moveDialog.folder}/${this.moveDialog.entry.name}`;
+          LocalProvider.get(destination).then(existing => {
+            if (existing !== undefined) {
+              console.log(`Destination '${destination}' already exists`);
+            } else {
+              console.log(`move ${source} to ${destination}`);
+              LocalProvider.move(source, destination).then(() => {
+                this.refresh();
+              });
+            }
           });
         } else {
           log.info('Source and destination are the same. No action');
         }
-        this.dialog = {
+        this.moveDialog = {
+          show: false,
           entry: null,
-          action: null,
           folder: null
         };
       }
@@ -307,41 +218,45 @@ export default {
      * @param {Metadata} entry
      */
     rename(entry) {
-      if (entry) {
-        this.dialog.entry = entry;
-        this.dialog.action = 'rename';
-      } else if (this.dialog.action === 'rename') {
-        const source = this.dialog.entry.key;
-        const destination = `${this.current.path}/${this.dialog.entry.name}`;
-        LocalProvider.move(source, destination).then(() => {
-          this.refresh();
-        });
-        this.dialog = {
-          entry: null,
-          action: null,
-          folder: null
-        };
-      }
+      this.$buefy.dialog.prompt({
+        message: 'Filename',
+        inputAttrs: {
+          type: 'text',
+          value: entry.name,
+        },
+        trapFocus: true,
+        onConfirm: (value) => {
+          const source = entry.key;
+          const destination = `${this.current.path}/${value}`;
+          LocalProvider.get(destination).then(existing => {
+            if (existing !== undefined) {
+              console.log(`Destination '${destination}' already exists`);
+            } else {
+              LocalProvider.move(source, destination).then(() => {
+                this.refresh();
+              });
+            }
+          });
+        }
+      });
     },
+
+    sync() {
+      EventBus.emit('sync.request');
+    }
   }
 };
 </script>
 
 <style scoped>
 .flash {
-  width: 0.25em;
-  height: 4em;
-  margin-left: -0.75em;
+  width: 0.25rem;
+  height: 3rem;
+  float: left;
   margin-right: 0.75em;
 }
-.md-list {
-  width: 100%;
-  max-width: 100%;
-  display: inline-block;
-  vertical-align: top;
-  border: 1px solid rgba(#000, .12);
-}
-.md-list-item-text {
-  margin-left: 1em;
+.file-entry {
+  height: 3.5rem;
+  cursor: pointer;
 }
 </style>

@@ -1,19 +1,19 @@
 <template>
-  <div class="md-layout" style="position: relative;">
+  <div class="is-relative">
     <div v-if="current">
       <h2>Location: {{ current.path || "/" }}</h2>
     </div>
 
-    <md-list class="md-double-line">
-      <div v-for="entry in entries" v-bind:key="entry.key">
-        <md-list-item @click="open(entry)">
-          <md-icon>folder</md-icon>
-          <div class="md-list-item-text">
-            <span>{{ entry.name }}</span>
-          </div>
-        </md-list-item>
+    <div v-for="entry in entries" v-bind:key="entry.key">
+      <div class="media" @click="open(entry)" style="cursor: pointer;">
+        <div class="media-left">
+          <b-icon icon="folder"></b-icon>
+        </div>
+        <div class="media-content">
+          <div>{{ entry.name }}&nbsp;</div>
+        </div>
       </div>
-    </md-list>
+    </div>
   </div>
 </template>
 

@@ -1,23 +1,21 @@
 <template>
   <div>
     <textarea id="log" v-model="text" readonly></textarea>
-    <md-button class="md-raised" @click="clearCursor">Clear cursor</md-button>
-    <md-button class="md-raised" @click="clearLocalDeltas">Clear local actions</md-button>
-    <md-button class="md-raised" @click="clearLocalFs">Clear local filesystem</md-button>
-    <md-button class="md-raised" @click="clearLog">Clear log</md-button>
-    <md-button class="md-raised" @click="clearAccessToken">Clear access token</md-button>
-    <md-button class="md-raised md-accent" @click="nukeDatabase">Nuke database</md-button>
-    <md-button class="md-raised" @click="causeRemoteError">Force remote error</md-button>
+    <button class="button" @click="clearCursor">Clear cursor</button>
+    <button class="button" @click="clearLocalDeltas">Clear local actions</button>
+    <button class="button" @click="clearLocalFs">Clear local filesystem</button>
+    <button class="button" @click="clearLog">Clear log</button>
+    <button class="button" @click="clearAccessToken">Clear access token</button>
+    <button class="button" @click="nukeDatabase">Nuke database</button>
+    <button class="button" @click="causeRemoteError">Force remote error</button>
   </div>
 </template>
 
 <script>
 import { StorageService } from '../classes/service';
-//import EventBus from '../classes/event-bus';
 import RemoteProvider from '../classes/remote-provider';
 import Log from '../classes/log';
 
-//let listener = null;
 const log = Log.get('Console');
 
 export default {

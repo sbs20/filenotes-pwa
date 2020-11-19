@@ -1,23 +1,22 @@
 <template>
   <div>
-    <div class="md-layout">
-      <div class="md-layout-item">
-        <h2>{{ this.current.name }}</h2>
-      </div>
-      <div class="md-layout-item">
-        <md-button class="md-raised md-accent md-top-right" @click="close">Close</md-button>
-        <md-button class="md-raised md-primary" @click="save">Save</md-button>
-      </div>
-    </div>
-    <div class="md-layout">
-      <div class="md-layout-item">
-        <prism-editor v-if="type === 'text'" class="editor" v-model="text"
-          :highlight="highlighter" :line-numbers="false"></prism-editor>
-        <av-waveform v-if="type === 'audio'" canv-class="audio-canvas"
-          :audio-src="audioSrc" :canv-top="true" :audio-controls="false"></av-waveform>
-        <audio class="audio-control" v-if="type === 'audio'" controls :src="audioSrc"></audio>
-        <img v-if="imageSrc" :src="imageSrc" />
-      </div>
+    <navigation>
+      <template v-slot:header>
+        {{ current.name }}
+      </template>
+      <template v-slot:end>
+        <b-navbar-item @click="save"><b-icon icon="content-save"></b-icon></b-navbar-item>
+        <b-navbar-item @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
+      </template>
+    </navigation>
+
+    <div class="container">
+      <prism-editor v-if="type === 'text'" class="editor" v-model="text"
+        :highlight="highlighter" :line-numbers="false"></prism-editor>
+      <av-waveform v-if="type === 'audio'" canv-class="audio-canvas"
+        :audio-src="audioSrc" :canv-top="true" :audio-controls="false"></av-waveform>
+      <audio class="audio-control" v-if="type === 'audio'" controls :src="audioSrc"></audio>
+      <img v-if="imageSrc" :src="imageSrc" />
     </div>
   </div>
 </template>
@@ -29,6 +28,8 @@ import FileMetadata from '../classes/files/file-metadata';
 import LocalProvider from '../classes/local-provider';
 import Log from '../classes/log';
 import { PrismEditor } from 'vue-prism-editor';
+
+import Navigation from './Navigation';
 
 import 'vue-prism-editor/dist/prismeditor.min.css';
 
@@ -45,6 +46,7 @@ export default {
   name: 'File',
   components: {
     PrismEditor,
+    Navigation
   },
 
   data() {
@@ -185,10 +187,13 @@ export default {
 .prism-editor__textarea:focus {
   outline: #2d2d2d;
 }
-
 </style>
 
 <style>
+.prism-editor__editor .title {
+  font-size: 1rem;
+}
+
 .audio-canvas {
   background: #2d2d2d;
   color: #ccc;
