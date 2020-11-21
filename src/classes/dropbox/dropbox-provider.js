@@ -1,9 +1,8 @@
 import Convert from '../utils/convert';
 import CloudProvider from '../cloud-provider';
 import FieldAdapter from '../utils/field-adapter';
-import QueryString from '../utils/query-string';
 import extend from '../utils/extend';
-import { Dropbox } from 'dropbox';
+import Dropbox from 'dropbox/src/dropbox';
 
 const MAP = {
   '.tag': 'tag',
@@ -18,42 +17,30 @@ const MAP = {
   'content_hash': 'hash'
 };
 
-const client = Symbol();
-
 export default class DropboxProvider extends CloudProvider {
   constructor() {
     super();
-    this[client] = null;
+    this.client = null;
+
     /** @type {ConfigureOptions} */
     this.options = null;
+
     /** @type {string} */
     this.cursor = null;
     this.adapter = new FieldAdapter(MAP);
-  }
-
-  /**
-   * Ensures a Dropbox client
-   * @returns {Dropbox} - Dropbox
-   */
-  client() {
-    if (this[client] === null && this.options.clientId) {
-      this[client] = new Dropbox({
-        accessToken: this.options.accessToken,
-        clientId: this.options.clientId,
-        fetch: (url, options) => fetch(url, options)
-      });  
-    }
-    return this[client];
+    this.connected = false;
   }
 
   /**
    * Configures the service. Can be called as many times as required.
    * @param {ConfigureOptions} options - Options
    */
-  configure(options) {
-    this[client] = null;
+  init(options) {
     this.connected = false;
-    super.configure(options);
+    this.options = options;
+    this.client = new Dropbox({
+      clientId: this.options.clientId,
+      fetch: (url, options) => fetch(url, options) });
   }
 
   /**
@@ -61,18 +48,35 @@ export default class DropboxProvider extends CloudProvider {
    * @returns {string} The authentication URL
    */
   authenticationUrl() {
-    return this.client().auth.getAuthenticationUrl(this.options.authUrl);
+    return this.client.auth.getAuthenticationUrl(
+      this.options.authUrl, null, 'code', 'offline', null, 'none', true);
   }
 
   /**
-   * Extracts the access token from the URI#hash
-   * @param {string} uriHash The uri hash component
-   * @returns {string} The access token
+   * Extracts the access token from the URI?search
+   * @param {string} challenge The challenge
+   * @param {string} verifier The verifier
+   * @param {string} code The code
+   * @returns {Promise.<OAuthToken>} The access token
    */
-  authenticationToken(uriHash) {
-    this[client] = null;
-    this.options.accessToken = QueryString.parse(uriHash).access_token;
-    return this.options.accessToken;
+  async authenticationToken(challenge, verifier, code) {
+    this.client.auth.codeChallenge = challenge;
+    this.client.auth.codeVerifier = verifier;
+    if (code !== undefined) {
+      delete this.options.accessToken;
+
+      try {
+        const response = await this.client.auth.getAccessTokenFromCode(this.options.authUrl, code);
+        /** @type {OAuthToken} */
+        const token = response.result;
+        this.client.auth.setRefreshToken(token.refresh_token);
+        this.options.accessToken = token;
+        return this.options.accessToken;  
+      } catch {
+        return undefined;
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -80,18 +84,13 @@ export default class DropboxProvider extends CloudProvider {
    * @param {ConfigureOptions} [options] - Options 
    * @returns {Promise.<bool>}
    */
-  async connect(options) {
+  async connect() {
     try {
-      if (options) {
-        this.configure(options);
-      }
-      if (this.options.accessToken) {
-        const response = await this.client().usersGetCurrentAccount();
-        this.connected = true;
-        const account = response.result;
-        this.accountEmail = account.email;
-        this.accountName = account.name.display_name;  
-      }
+      const response = await this.client.usersGetCurrentAccount();
+      this.connected = true;
+      const account = response.result;
+      this.accountEmail = account.email;
+      this.accountName = account.name.display_name;  
     } catch (error) {
       this.connected = false;
     }
@@ -105,7 +104,7 @@ export default class DropboxProvider extends CloudProvider {
    */
   async delete(path) {
     try {
-      const response = await this.client().filesDeleteV2({ path: path });  
+      const response = await this.client.filesDeleteV2({ path: path });  
       return this.adapter.apply(response.result.metadata);
     } catch (exception) {
       // If it's already been deleted we can ignore it, otherwise, throw
@@ -133,7 +132,7 @@ export default class DropboxProvider extends CloudProvider {
     };
 
     if (this.cursor === null || this.cursor === undefined) {
-      const response = await this.client().filesListFolder({
+      const response = await this.client.filesListFolder({
         path: '',
         recursive: true,
         include_deleted: true });
@@ -142,7 +141,7 @@ export default class DropboxProvider extends CloudProvider {
     }
 
     while (hasMore) {
-      const response = await this.client().filesListFolderContinue({ cursor: this.cursor });
+      const response = await this.client.filesListFolderContinue({ cursor: this.cursor });
       handleResult(response.result);
     }
 
@@ -155,7 +154,7 @@ export default class DropboxProvider extends CloudProvider {
    */
   async mkdir(path) {
     try {
-      const response = await this.client().filesCreateFolderV2({ path: path });
+      const response = await this.client.filesCreateFolderV2({ path: path });
       return response.result;
     } catch (exception) {
       // If it already exists we can ignore it, otherwise, throw
@@ -172,7 +171,7 @@ export default class DropboxProvider extends CloudProvider {
    * @returns {Promise.<ArrayBuffer>} 
    */
   async read(path) {
-    const response = await this.client().filesDownload({ path: path });
+    const response = await this.client.filesDownload({ path: path });
     const buffer = await Convert.blobToArrayBuffer(response.result.fileBlob);
     return buffer;
   }
@@ -212,7 +211,7 @@ export default class DropboxProvider extends CloudProvider {
     const buffer = commitInfo.contents;
     
     if (buffer.byteLength < CHUNKING_THRESHOLD) {
-      const response = await this.client().filesUpload(commitInfo);
+      const response = await this.client.filesUpload(commitInfo);
       return extend({ tag: 'file' }, this.adapter.apply(response.result));
     } else {
       const MAX_CHUNK_SIZE = CHUNKING_THRESHOLD;
@@ -221,14 +220,14 @@ export default class DropboxProvider extends CloudProvider {
         const chunk = buffer.slice(offset, offset + chunkSize);
 
         if (sessionId === null) {
-          const response = await this.client().filesUploadSessionStart({ close: false, contents: chunk });
+          const response = await this.client.filesUploadSessionStart({ close: false, contents: chunk });
           sessionId = response.result.session_id;
         } else if (offset < buffer.byteLength - MAX_CHUNK_SIZE) {
           const cursor = { session_id: sessionId, offset: offset };
-          await this.client().filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
+          await this.client.filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
         } else {
           delete commitInfo.contents;
-          const response = await this.client().filesUploadSessionFinish({
+          const response = await this.client.filesUploadSessionFinish({
             cursor: { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength },
             commit: commitInfo,
             contents: chunk });           

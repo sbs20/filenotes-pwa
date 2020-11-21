@@ -34,3 +34,14 @@
 /**
  * @typedef {'audio'|'text'|'image'|'unknown'} FileType
  */
+
+/**
+ * @typedef {Object} OAuthToken
+ * @property {string} uid
+ * @property {string} access_token
+ * @property {number} expires_in
+ * @property {string} token_type
+ * @property {string} scope
+ * @property {string} refresh_token
+ * @property {string} account_id
+ */
