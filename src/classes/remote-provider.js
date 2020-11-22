@@ -15,9 +15,9 @@ const log = Log.get('RemoteProvider');
  * @returns {Promise.<boolean>} Promise<boolean>
  */
 export async function connectUsingStoredToken() {
-  const accessToken = await StorageService.settings.get('accessToken');
-  if (accessToken && accessToken.refresh_token) {
-    remote.client.auth.setRefreshToken(accessToken.refresh_token);
+  const oauthToken = await StorageService.settings.get('oauth');
+  if (oauthToken && oauthToken.refresh_token) {
+    remote.refreshToken = oauthToken.refresh_token;
     if (await remote.connect()) {
       log.debug('Connected using stored access token');
       log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
@@ -36,15 +36,15 @@ export async function connectUsingStoredToken() {
 export async function connectUsingUrlCode(queryString) {
   const code = QueryString.parse(queryString).code;
   if (code) {
-    const challenge = await StorageService.settings.get('challenge');
-    const verifier = await StorageService.settings.get('verifier');
-    const accessToken = await remote.authenticationToken(challenge, verifier, code);
-    if (accessToken && await remote.connect()) {
+    /** @type {PkceParameters} */
+    const pkceParams = await StorageService.settings.get('pkce');
+    pkceParams.code = code;
+    const oauthToken = await remote.pkceFinish(pkceParams);
+    if (oauthToken && await remote.connect()) {
       log.debug('Connected using url access token');
       log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
-      await StorageService.settings.set('accessToken', accessToken);
-      await StorageService.settings.delete('challenge');
-      await StorageService.settings.delete('verifier');
+      await StorageService.settings.set('oauth', oauthToken);
+      await StorageService.settings.delete('pkce');
       return true;
     }
   }
@@ -64,10 +64,10 @@ export async function forceAuthentication(window) {
   }
 
   // Initiate sign in
-  const uri = remote.authenticationUrl();
-  await StorageService.settings.set('challenge', remote.client.auth.codeChallenge);
-  await StorageService.settings.set('verifier', remote.client.auth.codeVerifier);
-  window.location.href = uri;
+  await StorageService.settings.delete('oauth');
+  const params = remote.pkceStart();
+  await StorageService.settings.set('pkce', params);
+  window.location.href = params.url;
   return false;
 }
 

@@ -5,7 +5,7 @@
     <button class="button" @click="clearLocalDeltas">Clear local actions</button>
     <button class="button" @click="clearLocalFs">Clear local filesystem</button>
     <button class="button" @click="clearLog">Clear log</button>
-    <button class="button" @click="clearAccessToken">Clear access token</button>
+    <button class="button" @click="clearOAuthToken">Clear access token</button>
     <button class="button" @click="nukeDatabase">Nuke database</button>
     <button class="button" @click="causeRemoteError">Force remote error</button>
   </div>
@@ -58,8 +58,8 @@ export default {
       // TODO
     },
 
-    clearAccessToken() {
-      StorageService.settings.delete('accessToken').then(() => {
+    clearOAuthToken() {
+      StorageService.settings.delete('oauth').then(() => {
         log.info('Access token cleared');
       });
     },

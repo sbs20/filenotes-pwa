@@ -1,5 +1,4 @@
 import Convert from '../utils/convert';
-import CloudProvider from '../cloud-provider';
 import FieldAdapter from '../utils/field-adapter';
 import extend from '../utils/extend';
 import Dropbox from 'dropbox/src/dropbox';
@@ -17,13 +16,12 @@ const MAP = {
   'content_hash': 'hash'
 };
 
-export default class DropboxProvider extends CloudProvider {
+export default class DropboxProvider {
   /**
    * Constructor
    * @param {ConfigureOptions} options - Options
    */
   constructor(options) {
-    super();
     this.client = null;
 
     /** @type {ConfigureOptions} */
@@ -40,34 +38,45 @@ export default class DropboxProvider extends CloudProvider {
   }
 
   /**
-   * Returns the authentication URL
-   * @returns {string} The authentication URL
+   * @param {string} value
    */
-  authenticationUrl() {
-    return this.client.auth.getAuthenticationUrl(
-      this.options.authUrl, null, 'code', 'offline', null, 'none', true);
+  set refreshToken(value) {
+    this.client.auth.setRefreshToken(value);
   }
 
   /**
-   * Extracts the access token from the URI?search
-   * @param {string} challenge The challenge
-   * @param {string} verifier The verifier
-   * @param {string} code The code
+   * Returns the authentication parameters
+   * @returns {PkceParameters} The authentication parameters
+   */
+  pkceStart() {
+    const url = this.client.auth.getAuthenticationUrl(
+      this.options.authUrl, null, 'code', 'offline', null, 'none', true);
+    return {
+      challenge: this.client.auth.codeChallenge,
+      url: url,
+      verifier: this.client.auth.codeVerifier
+    };
+  }
+
+  /**
+   * Continues the PKCE process
+   * @param {PkceParameters} params The PKCE parameters
    * @returns {Promise.<OAuthToken>} The access token
    */
-  async authenticationToken(challenge, verifier, code) {
-    this.client.auth.codeChallenge = challenge;
-    this.client.auth.codeVerifier = verifier;
-    if (code !== undefined) {
-      delete this.options.accessToken;
+  async pkceFinish(params) {
+    this.client.auth.codeChallenge = params.challenge;
+    this.client.auth.codeVerifier = params.verifier;
+    if (params.code !== undefined) {
+      delete this.options.oauthToken;
 
       try {
-        const response = await this.client.auth.getAccessTokenFromCode(this.options.authUrl, code);
+        const response = await this.client.auth.getAccessTokenFromCode(
+          this.options.authUrl, params.code);
         /** @type {OAuthToken} */
         const token = response.result;
-        this.client.auth.setRefreshToken(token.refresh_token);
-        this.options.accessToken = token;
-        return this.options.accessToken;  
+        this.refreshToken = token.refresh_token;
+        this.options.oauthToken = token;
+        return this.options.oauthToken;  
       } catch {
         return undefined;
       }

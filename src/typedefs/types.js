@@ -1,6 +1,6 @@
 /**
  * @typedef {Object} ConfigureOptions
- * @property {string} accessToken - The access token
+ * @property {string} oauthToken - The access token
  * @property {string} clientId - The app client id
  * @property {string} [authUrl] - The return url
  */
@@ -33,6 +33,14 @@
 
 /**
  * @typedef {'audio'|'text'|'image'|'unknown'} FileType
+ */
+
+/**
+ * @typedef {Object} PkceParameters
+ * @property {string} [url]
+ * @property {string} challenge
+ * @property {string} verifier
+ * @property {string} [code]
  */
 
 /**
