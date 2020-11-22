@@ -18,26 +18,22 @@ const MAP = {
 };
 
 export default class DropboxProvider extends CloudProvider {
-  constructor() {
+  /**
+   * Constructor
+   * @param {ConfigureOptions} options - Options
+   */
+  constructor(options) {
     super();
     this.client = null;
 
     /** @type {ConfigureOptions} */
-    this.options = null;
+    this.options = options;
 
     /** @type {string} */
     this.cursor = null;
     this.adapter = new FieldAdapter(MAP);
     this.connected = false;
-  }
 
-  /**
-   * Configures the service. Can be called as many times as required.
-   * @param {ConfigureOptions} options - Options
-   */
-  init(options) {
-    this.connected = false;
-    this.options = options;
     this.client = new Dropbox({
       clientId: this.options.clientId,
       fetch: (url, options) => fetch(url, options) });

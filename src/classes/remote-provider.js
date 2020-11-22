@@ -4,40 +4,42 @@ import Log from './log';
 import QueryString from './utils/query-string';
 import { StorageService } from './service';
 
-const remote = new DropboxProvider();
-remote.init({ clientId: Constants.APP_ID, authUrl: Constants.HOST_URL });
+const remote = new DropboxProvider({
+  clientId: Constants.APP_ID,
+  authUrl: Constants.HOST_URL });
+
 const log = Log.get('RemoteProvider');
 
 /**
- * Attempts to connect and if not forces authentication
- * @param {Window} window
+ * Attempts to connect
  * @returns {Promise.<boolean>} Promise<boolean>
  */
-export async function connect(window) {
-  // Try local storage first
-  let accessToken = await StorageService.settings.get('accessToken');
+export async function connectUsingStoredToken() {
+  const accessToken = await StorageService.settings.get('accessToken');
   if (accessToken && accessToken.refresh_token) {
     remote.client.auth.setRefreshToken(accessToken.refresh_token);
+    if (await remote.connect()) {
+      log.debug('Connected using stored access token');
+      log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
+      return true;
+    }
   }
 
-  if (await remote.connect()) {
-    log.debug('Connected using stored access token');
-    log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
-    return true;
-  }
+  return false;
+}
 
-  if (window === undefined) {
-    log.error('window parameter must be specified');
-    throw new Error('window parameter must be specified');
-  }
-
-  // If that didn't work, see if there's a code
-  const code = QueryString.parse(window.location.search).code;
+/**
+ * Attempts to connect
+ * @param {string} queryString
+ * @returns {Promise.<boolean>} Promise<boolean>
+ */
+export async function connectUsingUrlCode(queryString) {
+  const code = QueryString.parse(queryString).code;
   if (code) {
     const challenge = await StorageService.settings.get('challenge');
     const verifier = await StorageService.settings.get('verifier');
-    accessToken = await remote.authenticationToken(challenge, verifier, code);
-    if (await remote.connect()) {
+    const accessToken = await remote.authenticationToken(challenge, verifier, code);
+    if (accessToken && await remote.connect()) {
       log.debug('Connected using url access token');
       log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
       await StorageService.settings.set('accessToken', accessToken);
@@ -45,6 +47,20 @@ export async function connect(window) {
       await StorageService.settings.delete('verifier');
       return true;
     }
+  }
+
+  return false;
+}
+
+/**
+ * Forces authentication
+ * @param {Window} window
+ * @returns {Promise.<boolean>} Promise<boolean>
+ */
+export async function forceAuthentication(window) {
+  if (window === undefined) {
+    log.error('window parameter must be specified');
+    throw new Error('window parameter must be specified');
   }
 
   // Initiate sign in
