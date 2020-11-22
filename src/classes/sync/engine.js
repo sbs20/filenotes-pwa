@@ -47,14 +47,14 @@ export default class SyncEngine {
 
     try {
       const localDeltas = await deltas();
+      // Uploads, creates and deletes have rate limiting - await each
       for (const delta of localDeltas) {
         await RemoteAction.perform(delta);
       }
 
       const remoteDeltas = await RemoteProvider.list();
-      for (const delta of remoteDeltas) {
-        await LocalAction.perform(delta);
-      }
+      // There doesn't appear to be rate limiting for downloads
+      await Promise.all(remoteDeltas.map(delta => LocalAction.perform(delta)));
 
       await StorageService.settings.set('cursor', RemoteProvider.cursor);
       log.info('Finished');
