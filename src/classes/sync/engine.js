@@ -23,11 +23,24 @@ async function deltas() {
   return sorted;
 }
 
+const active = Symbol();
+
 export default class SyncEngine {
   constructor() {
+    this[active] = false;
+  }
+
+  get active() {
+    return this[active];
   }
 
   async execute() {
+    if (this.active) {
+      log.info('Already syncing. Terminating');
+      return;
+    }
+
+    this[active] = true;
     log.info('Started');
     const cursor = await StorageService.settings.get('cursor');
     RemoteProvider.cursor = cursor;
@@ -45,8 +58,10 @@ export default class SyncEngine {
 
       await StorageService.settings.set('cursor', RemoteProvider.cursor);
       log.info('Finished');
+      this[active] = false;
     } catch (error) {
       log.error('Sync error occurred', error);
+      this[active] = false;
       throw error;
     }
   }

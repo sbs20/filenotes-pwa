@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import EventBus from '../classes/event-bus';
 import { StorageService } from '../classes/service';
 import Navigation from './Navigation';
 import RemoteProvider from '../classes/remote-provider';
@@ -35,24 +36,48 @@ import {
 
 const log = Log.get('Console');
 
+/** @type {Array.<function(Event):void>} */
+let listeners = [];
+
 export default {
   name: 'Console',
   components: {
     Navigation
   },
 
+  created() {
+    listeners.push(EventBus.on('console', (e) => {
+      this.messages.push(e.data);
+    }));
+  },
+
   computed: {
     text() {
-      const messages = [...log.messages];
-      messages.reverse();
-      return messages.join('\n');
+      let value = '';
+      for (let index = this.messages.length - 1; index > -1; index--) {
+        value += `${this.messages[index]}\n`;
+      }
+      return value;
+    }
+  },
+
+  data() {
+    return {
+      messages: [...log.messages]
+    };
+  },
+
+  destroyed() {
+    while (listeners.length) {
+      const listener = listeners.pop();
+      listener.remove();
     }
   },
 
   methods: {
     clearCursor() {
-      StorageService.settings.delete('remoteCursor').then(() => {
-        log.info('Local cursor cleared');
+      StorageService.settings.delete('cursor').then(() => {
+        log.info('Cursor cleared');
       });
     },
 
@@ -63,11 +88,11 @@ export default {
     },
 
     clearLocalFs() {
-      Promise.all(
+      Promise.all([
         StorageService.fs.metadata.clear(),
         StorageService.fs.content.clear(),
         StorageService.fs.delta.clear()
-      ).then(() => {
+      ]).then(() => {
         log.info('Local database cleared');
       });
     },
