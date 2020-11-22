@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import App from './App.vue';
+import Console from './components/Console';
 import File from './components/File';
 import List from './components/List';
 import VueAudioVisual from 'vue-audio-visual';
@@ -17,6 +18,7 @@ Vue.use(Buefy);
 
 const router = new VueRouter({
   routes: [
+    { path: '/console', component: Console },
     { path: '/f/*', component: File },
     { path: '/l/*', component: List }
   ]

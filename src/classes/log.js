@@ -7,9 +7,17 @@ const LEVELS = {
   ERROR: 'ERROR'
 };
 
+const SIZE = 128;
+/** @type {Array.<string>} */
+const messages = [];
+
 const loggers = {};
 
 class Log {
+  get messages() {
+    return messages;
+  }
+
   /**
    * Constructor
    * @param {string} name 
@@ -55,6 +63,10 @@ class Log {
   write(level, msg, data) {
     const output = this.format(level, msg, data);
     console.log(output);
+    messages.push(output);
+    if (messages.length > SIZE) {
+      messages.shift();
+    }
     EventBus.emit(this.eventType, { data: output });
   }
 

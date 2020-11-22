@@ -1,33 +1,51 @@
 <template>
-  <div>
-    <textarea id="log" v-model="text" readonly></textarea>
-    <button class="button" @click="clearCursor">Clear cursor</button>
-    <button class="button" @click="clearLocalDeltas">Clear local actions</button>
-    <button class="button" @click="clearLocalFs">Clear local filesystem</button>
-    <button class="button" @click="clearLog">Clear log</button>
-    <button class="button" @click="clearOAuthToken">Clear access token</button>
-    <button class="button" @click="nukeDatabase">Nuke database</button>
-    <button class="button" @click="causeRemoteError">Force remote error</button>
+  <div class="container">
+    <navigation>
+      <template v-slot:header>Console</template>
+      <template v-slot:end>
+        <b-navbar-item tag="router-link" :to="{ path: '/l/' }"><b-icon icon="close"></b-icon></b-navbar-item>
+      </template>
+    </navigation>
+
+    <div>
+      <textarea id="log" v-model="text" readonly></textarea>
+      <button class="button" @click="clearCursor">Clear cursor</button>
+      <button class="button" @click="clearLocalDeltas">Clear local actions</button>
+      <button class="button" @click="clearLocalFs">Clear local filesystem</button>
+      <button class="button" @click="clearLog">Clear log</button>
+      <button class="button" @click="clearOAuthToken">Clear access token</button>
+      <button class="button" @click="nukeDatabase">Nuke database</button>
+      <button class="button" @click="causeRemoteError">Force remote error</button>
+      <button class="button" @click="connect1">Connect from storage</button>
+      <button class="button" @click="connect2">Connect from code</button>
+      <button class="button" @click="connect3">Force auth</button>
+    </div>
   </div>
 </template>
 
 <script>
 import { StorageService } from '../classes/service';
+import Navigation from './Navigation';
 import RemoteProvider from '../classes/remote-provider';
 import Log from '../classes/log';
+import {
+  connectUsingStoredToken,
+  connectUsingUrlCode,
+  forceAuthentication } from '../classes/remote-provider';
 
 const log = Log.get('Console');
 
 export default {
   name: 'Console',
-
-  props: {
-    logMessages: Array
+  components: {
+    Navigation
   },
 
   computed: {
     text() {
-      return this.logMessages.join('\n');
+      const messages = [...log.messages];
+      messages.reverse();
+      return messages.join('\n');
     }
   },
 
@@ -72,6 +90,18 @@ export default {
 
     causeRemoteError() {
       RemoteProvider.read('/non-existent-file');
+    },
+
+    connect1() {
+      connectUsingStoredToken().then(this.afterConnect);
+    },
+
+    connect2() {
+      connectUsingUrlCode(window.location.search).then(this.afterConnect);
+    },
+
+    connect3() {
+      forceAuthentication(window);
     }
   }
 };

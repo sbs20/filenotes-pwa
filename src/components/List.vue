@@ -3,6 +3,7 @@
     <navigation>
       <template v-slot:header>{{ header }}</template>
       <template v-slot:end>
+        <b-navbar-item tag="router-link" :to="{ path: '/console' }"><b-icon icon="console"></b-icon></b-navbar-item>
         <b-navbar-item @click="sync"><b-icon icon="sync"></b-icon></b-navbar-item>
         <b-navbar-item @click="mkdir"><b-icon icon="folder-plus"></b-icon></b-navbar-item>
         <b-navbar-item @click="createText"><b-icon icon="file-plus"></b-icon></b-navbar-item>
