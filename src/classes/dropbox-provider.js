@@ -1,7 +1,7 @@
 import Convert from './utils/convert';
 import FieldAdapter from './utils/field-adapter';
 import extend from './utils/extend';
-import Dropbox from 'dropbox/src/dropbox';
+import { Dropbox } from 'dropbox';
 import { sha256Sync } from './utils/sha256';
 
 const MAP = {
