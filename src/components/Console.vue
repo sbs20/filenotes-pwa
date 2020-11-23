@@ -24,15 +24,12 @@
 </template>
 
 <script>
-import EventBus from '../classes/event-bus';
-import { StorageService } from '../classes/service';
+import { EventBus, Log, RemoteProvider, StorageService } from '../services';
 import Navigation from './Navigation';
-import RemoteProvider from '../classes/remote-provider';
-import Log from '../classes/log';
 import {
   connectUsingStoredToken,
   connectUsingUrlCode,
-  forceAuthentication } from '../classes/remote-provider';
+  forceAuthentication } from '../services/remote-provider';
 
 const log = Log.get('Console');
 

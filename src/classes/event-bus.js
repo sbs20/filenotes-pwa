@@ -1,7 +1,7 @@
 /**
  * @typedef {import('../typedefs/types').Event} Event
  */
-class EventBus {
+export default class EventBus {
   constructor() {
     this.listeners = {};
     this.lastId = 0;
@@ -41,6 +41,3 @@ class EventBus {
     Object.keys(this.listeners[eventType]).forEach(id => this.listeners[eventType][id](event));
   }
 }
-
-const eventBus = new EventBus();
-export default eventBus;

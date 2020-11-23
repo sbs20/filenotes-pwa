@@ -1,8 +1,8 @@
-import Constants from './constants';
-import DropboxProvider from './dropbox/dropbox-provider';
+import Constants from '../classes/constants';
+import DropboxProvider from '../classes/dropbox-provider';
+import QueryString from '../classes/utils/query-string';
 import Log from './log';
-import QueryString from './utils/query-string';
-import { StorageService } from './service';
+import StorageService from './storage';
 
 const remote = new DropboxProvider({
   clientId: Constants.APP_ID,

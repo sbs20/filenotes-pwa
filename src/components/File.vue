@@ -25,8 +25,7 @@
 import Convert from '../classes/utils/convert';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
-import LocalProvider from '../classes/local-provider';
-import Log from '../classes/log';
+import { LocalProvider, Log } from '../services';
 import { PrismEditor } from 'vue-prism-editor';
 
 import Navigation from './Navigation';

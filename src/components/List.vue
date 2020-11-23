@@ -34,12 +34,10 @@
 </template>
 
 <script>
-import EventBus from '../classes/event-bus';
+import { EventBus, LocalProvider, Log } from '../services';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
-import LocalProvider from '../classes/local-provider';
-import Log from '../classes/log';
 
 import Folders from './Folders';
 import ListEntry from './ListEntry';
@@ -129,10 +127,9 @@ export default {
           if (name) {
             const path = `${this.current.path}/${name}`;
             const content = new Uint8Array();
-            FileMetadata.create(path, content).then(metadata => {
-              LocalProvider.write(metadata, content).then(() => {
-                this.refresh();
-              });
+            const metadata = FileMetadata.create(path, content);
+            LocalProvider.write(metadata, content).then(() => {
+              this.refresh();
             });
           }
         });

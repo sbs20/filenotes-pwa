@@ -20,7 +20,7 @@
 <script>
 import FilePath from '../classes/files/file-path';
 import FolderMetadata from '../classes/files/folder-metadata';
-import LocalProvider from '../classes/local-provider';
+import { LocalProvider } from '../services';
 
 export default {
   name: 'Folders',

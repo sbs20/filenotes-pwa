@@ -1,4 +1,4 @@
-import EventBus from './event-bus';
+import EventBus from '../services/event-bus';
 
 const LEVELS = {
   DEBUG: 'DEBUG',
@@ -13,7 +13,7 @@ const messages = [];
 
 const loggers = {};
 
-class Log {
+export default class Log {
   get messages() {
     return messages;
   }
@@ -106,6 +106,3 @@ class Log {
     this.write(LEVELS.WARNING, msg, data);
   }
 }
-
-const log = new Log();
-export default log;

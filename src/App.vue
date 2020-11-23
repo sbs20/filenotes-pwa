@@ -7,9 +7,8 @@
 </template>
 
 <script>
-import EventBus from './classes/event-bus';
-import { connectUsingStoredToken } from './classes/remote-provider';
-import { SyncEngine } from './classes/service';
+import { connectUsingStoredToken } from './services/remote-provider';
+import { EventBus, SyncEngine } from './services';
 
 /** @type {Array.<function(Event):void>} */
 let listeners = [];

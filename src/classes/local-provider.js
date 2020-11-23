@@ -2,12 +2,12 @@ import FileContent from './files/file-content';
 import FileMetadata from './files/file-metadata';
 import FilePath from './files/file-path';
 import FolderMetadata from './files/folder-metadata';
-import Log from './log';
-import { StorageService } from './service';
+import Log from '../services/log';
+import { StorageService } from '../services';
 
 const log = Log.get('LocalProvider');
 
-class LocalProvider {
+export default class LocalProvider {
 
   /**
    * Gets an available filename in a given directory
@@ -149,6 +149,3 @@ class LocalProvider {
     }
   }
 }
-
-const localProvider = new LocalProvider();
-export default localProvider;

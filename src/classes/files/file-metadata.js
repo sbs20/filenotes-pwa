@@ -1,5 +1,5 @@
 import FilePath from './file-path';
-import { Hasher } from '../service';
+import { Hasher } from '../../services';
 
 const _metadata = Symbol();
 
