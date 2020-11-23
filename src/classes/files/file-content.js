@@ -1,25 +1,18 @@
 import Convert from '../utils/convert';
+import BaseMetadata from './base-metadata';
 import FilePath from './file-path';
 
-const _content = Symbol();
-
-export default class FileContent {
+export default class FileContent extends BaseMetadata {
   constructor() {
-    /** @type {Content} */
-    this[_content] = {};   
+    super();
   }
 
   /**
-   * @param {Content} [content] 
-   * @returns {FileContent}
+   * Returns the value
+   * @returns {Content}
    */
-  extend(content) {
-    if (content) {
-      for (const property in content) {
-        this[_content][property] = content[property];
-      }
-    }
-    return this;
+  get value() {
+    return super.value;
   }
 
   /**
@@ -28,7 +21,7 @@ export default class FileContent {
    * @returns {FileContent}
    */
   key(key) {
-    return this.extend({
+    return this.assign({
       key: key.toLowerCase()
     });
   }
@@ -43,18 +36,11 @@ export default class FileContent {
       data: data      
     };
 
-    if (FilePath.create(this[_content].key).extension === 'txt') {
+    if (FilePath.create(this.value.key).extension === 'txt') {
       extension.preview = Convert.arrayBufferToString(data).substr(0, 50);
     }
 
-    return this.extend(extension);
-  }
-
-  /**
-   * @returns {Content}
-   */
-  content() {
-    return this[_content];
+    return this.assign(extension);
   }
 
   /**
@@ -64,6 +50,6 @@ export default class FileContent {
    * @returns {Content}
    */
   static create(key, data) {
-    return new FileContent().key(key).data(data).content();
+    return new FileContent().key(key).data(data).value;
   }
 }

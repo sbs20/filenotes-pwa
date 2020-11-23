@@ -127,7 +127,7 @@ export default {
           if (name) {
             const path = `${this.current.path}/${name}`;
             const content = new Uint8Array();
-            const metadata = FileMetadata.create(path, content);
+            const metadata = FileMetadata.create().path(path).data(content).value;
             LocalProvider.write(metadata, content).then(() => {
               this.refresh();
             });

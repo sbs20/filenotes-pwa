@@ -1,50 +1,38 @@
+import BaseMetadata from './base-metadata';
 import FilePath from './file-path';
 
-const _metadata = Symbol();
-
-export default class FolderMetadata {
+export default class FolderMetadata extends BaseMetadata {
   /**
    * Constructor
    */
   constructor() {
-    /** @type {Metadata} */
-    this[_metadata] = {
+    super();
+    this.assign({
       tag: 'folder'
-    };
+    });
   }
 
   /**
-   * @param {Metadata} [metadata]
-   * @returns {FolderMetadata}
+   * Returns the value
+   * @returns {Metadata}
    */
-  extend(metadata) {
-    if (metadata) {
-      for (const property in metadata) {
-        this[_metadata][property] = metadata[property];
-      }
-    }
-    return this;
+  get value() {
+    return super.value;
   }
 
   /**
    * Updates the path and associated members
    * @param {string} path - The filepath
-   * @returns {FileMetadata}
+   * @returns {FolderMetadata}
    */
   path(path) {
     const filepath = new FilePath(path);
-    return this.extend({
+    this.assign({
       path: path,
       key: filepath.key,
       name: filepath.name
     });
-  }
-
-  /**
-   * @returns {Metadata}
-   */
-  metadata() {
-    return this[_metadata];
+    return this;
   }
 
   /**
@@ -54,17 +42,6 @@ export default class FolderMetadata {
    * @returns {Metadata}
    */
   static create(path) {
-    return new FolderMetadata().path(path).metadata();
-  }
-
-  /**
-   * Creates a deletion stub
-   * @param {string} path - The path
-   * @returns {Metadata}
-   */
-  static createDeleted(path) {
-    return new FolderMetadata().extend({
-      tag: 'deleted'
-    }).path(path).metadata();
+    return new FolderMetadata().path(path).value;
   }
 }

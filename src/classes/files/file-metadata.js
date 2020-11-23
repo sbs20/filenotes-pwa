@@ -1,31 +1,25 @@
+import BaseMetadata from './base-metadata';
 import FilePath from './file-path';
 import { Hasher } from '../../services';
 
-const _metadata = Symbol();
-
-export default class FileMetadata {
+export default class FileMetadata extends BaseMetadata {
 
   /**
    * Constructor
    */
   constructor() {
-    /** @type {Metadata} */
-    this[_metadata] = {
+    super();
+    this.assign({
       tag: 'file'
-    };
+    });
   }
 
   /**
-   * @param {Metadata} [metadata]
-   * @returns {FileMetadata}
+   * Returns the value
+   * @returns {Metadata}
    */
-  extend(metadata) {
-    if (metadata) {
-      for (const property in metadata) {
-        this[_metadata][property] = metadata[property];
-      }
-    }
-    return this;
+  get value() {
+    return super.value;
   }
 
   /**
@@ -35,7 +29,7 @@ export default class FileMetadata {
    */
   path(path) {
     const filepath = new FilePath(path);
-    return this.extend({
+    return this.assign({
       path: path,
       key: filepath.key,
       name: filepath.name,
@@ -48,7 +42,7 @@ export default class FileMetadata {
    * @returns {FileMetadata}
    */
   data(data) {
-    return this.extend({
+    return this.assign({
       size: data.byteLength,
       hash: Hasher.hash(data),
       modified: new Date().toISOString()
@@ -56,35 +50,13 @@ export default class FileMetadata {
   }
 
   /**
-   * @returns {Metadata}
-   */
-  metadata() {
-    return this[_metadata];
-  }
-
-  /**
-   * Creates a new metadata
+   * Creates a new FileMetadata
    * @param {string} path - The path
    * @param {ArrayBuffer} data - The data
-   * @returns {Metadata}
+   * @returns {FileMetadata}
    */
-  static create(path, data) {
-    // TODO: REMOVE THIS
-    return new FileMetadata().path(path).data(data).metadata();
-  }
-
-  /**
-   * Creates a new metadata
-   * @param {Metadata} metadata - The metadata
-   * @param {ArrayBuffer} data - The data
-   * @returns {Metadata}
-   */
-  static from(metadata, data) {
-    const file = new FileMetadata().extend(metadata);
-    if (data) {
-      file.data(data);
-    }
-    return file.metadata();
+  static create() {
+    return new FileMetadata();
   }
 
   /**
@@ -93,8 +65,8 @@ export default class FileMetadata {
    * @returns {Metadata}
    */
   static createDeleted(path) {
-    return new FileMetadata().extend({
+    return new FileMetadata().assign({
       tag: 'deleted'
-    }).path(path).metadata();
+    }).path(path).value;
   }
 }

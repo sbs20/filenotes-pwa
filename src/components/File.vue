@@ -166,7 +166,7 @@ export default {
 
     save() {
       const buffer = Convert.stringToArrayBuffer(this.text);
-      const metadata = FileMetadata.from(this.current, buffer);
+      const metadata = FileMetadata.create().assign(this.current).data(buffer).value;
       LocalProvider.write(metadata, buffer).then((saved) => {
         if (saved) {
           log.debug('Saved', this.current);

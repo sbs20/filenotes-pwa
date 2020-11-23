@@ -143,7 +143,7 @@ export default class LocalProvider {
 
     } else {
       const content = await StorageService.fs.content.read(sourcePath.toLowerCase());
-      const destination = new FileMetadata().extend(source).path(destinationPath).metadata();
+      const destination = FileMetadata.create().assign(source).path(destinationPath).value;
       await this.write(destination, content.data);
       await this.delete(sourcePath);  
     }
