@@ -26,10 +26,6 @@
 <script>
 import { EventBus, Log, RemoteProvider, StorageService } from '../services';
 import Navigation from './Navigation';
-import {
-  connectUsingStoredToken,
-  connectUsingUrlCode,
-  forceAuthentication } from '../services/remote-provider';
 
 const log = Log.get('Console');
 
@@ -115,15 +111,15 @@ export default {
     },
 
     connect1() {
-      connectUsingStoredToken().then(this.afterConnect);
+      RemoteProvider.startFromToken().then(this.afterConnect);
     },
 
     connect2() {
-      connectUsingUrlCode(window.location.search).then(this.afterConnect);
+      RemoteProvider.startFromQueryString(window.location.search).then(this.afterConnect);
     },
 
     connect3() {
-      forceAuthentication(window);
+      RemoteProvider.startAuthentication(window);
     }
   }
 };

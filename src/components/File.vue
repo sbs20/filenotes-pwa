@@ -66,10 +66,12 @@ export default {
 
   created() {
     this.load();
+    document.addEventListener('keyup', this._escape);
   },
 
   destroyed() {
     this.release();
+    document.removeEventListener('keyup', this._escape);
   },
 
   watch: {
@@ -79,6 +81,12 @@ export default {
   },
 
   methods: {
+    _escape(event) {
+      if (event.keyCode === 27) {
+        this.close();
+      }
+    },
+
     highlighter(code) {
       const language = languages.md;
       return highlight(code, language);

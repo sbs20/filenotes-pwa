@@ -7,8 +7,7 @@
 </template>
 
 <script>
-import { connectUsingStoredToken } from './services/remote-provider';
-import { EventBus, SyncEngine } from './services';
+import { EventBus, RemoteProvider, SyncEngine } from './services';
 
 /** @type {Array.<function(Event):void>} */
 let listeners = [];
@@ -45,7 +44,7 @@ export default {
     },
 
     start() {
-      connectUsingStoredToken().then(this.afterConnect);
+      RemoteProvider.start(window).then(this.afterConnect);
     },
   }
 };

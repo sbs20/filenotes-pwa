@@ -10,39 +10,42 @@ const remote = new DropboxProvider({
 
 const log = Log.get('RemoteProvider');
 
+/** @type {DropboxProvider} */
+const methods = {};
+
 /**
  * Attempts to connect
  * @returns {Promise.<boolean>} Promise<boolean>
  */
-export async function connectUsingStoredToken() {
+methods.startFromToken = async function () {
   const oauthToken = await StorageService.settings.get('oauth');
   if (oauthToken && oauthToken.refresh_token) {
-    remote.refreshToken = oauthToken.refresh_token;
-    if (await remote.connect()) {
+    this.refreshToken = oauthToken.refresh_token;
+    if (await this.connect()) {
       log.debug('Connected using stored access token');
-      log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
+      log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
       return true;
     }
   }
 
   return false;
-}
+};
 
 /**
  * Attempts to connect
  * @param {string} queryString
  * @returns {Promise.<boolean>} Promise<boolean>
  */
-export async function connectUsingUrlCode(queryString) {
+methods.startFromQueryString = async function (queryString) {
   const code = QueryString.parse(queryString).code;
   if (code) {
     /** @type {PkceParameters} */
     const pkceParams = await StorageService.settings.get('pkce');
     pkceParams.code = code;
-    const oauthToken = await remote.pkceFinish(pkceParams);
-    if (oauthToken && await remote.connect()) {
+    const oauthToken = await this.pkceFinish(pkceParams);
+    if (oauthToken && await this.connect()) {
       log.debug('Connected using url access token');
-      log.info(`Logged in as ${remote.accountName} (${remote.accountEmail})`);
+      log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
       await StorageService.settings.set('oauth', oauthToken);
       await StorageService.settings.delete('pkce');
       return true;
@@ -50,14 +53,14 @@ export async function connectUsingUrlCode(queryString) {
   }
 
   return false;
-}
+};
 
 /**
  * Forces authentication
  * @param {Window} window
  * @returns {Promise.<boolean>} Promise<boolean>
  */
-export async function forceAuthentication(window) {
+methods.startAuthentication = async function (window) {
   if (window === undefined) {
     log.error('window parameter must be specified');
     throw new Error('window parameter must be specified');
@@ -65,10 +68,27 @@ export async function forceAuthentication(window) {
 
   // Initiate sign in
   await StorageService.settings.delete('oauth');
-  const params = remote.pkceStart();
+  const params = this.pkceStart();
   await StorageService.settings.set('pkce', params);
   window.location.href = params.url;
   return false;
-}
+};
+
+/**
+ * Start
+ * @param {Window} window
+ * @returns {Promise.<boolean>} Promise<boolean>
+ */
+methods.start = async function (window) {
+  if (await this.startFromToken()) {
+    return true;
+  }
+  if (await this.startFromQueryString(window.location.search)) {
+    return true;
+  }
+  this.startAuthentication(window);
+};
+
+Object.assign(remote, methods);
 
 export default remote;
