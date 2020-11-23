@@ -78,6 +78,7 @@ class LocalProvider {
    * Writes file data to disk
    * @param {Metadata} metadata 
    * @param {ArrayBuffer} data 
+   * @returns {Promise.<boolean>} Whether the file was saved
    */
   async write(metadata, data) {
     if (data) {
@@ -90,9 +91,11 @@ class LocalProvider {
         await StorageService.fs.metadata.writeAll([metadata]);
         await StorageService.fs.content.writeAll([content]);
         await StorageService.fs.delta.writeAll([metadata]);
-      } else {
-        log.debug(`${metadata.key} has not changed`);        
+        return true;
       }
+
+      log.debug(`${metadata.key} has not changed`);
+      return false;
     }
   }
 

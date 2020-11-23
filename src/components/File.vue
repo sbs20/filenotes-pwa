@@ -159,10 +159,11 @@ export default {
 
     save() {
       const buffer = Convert.stringToArrayBuffer(this.text);
-      FileMetadata.from(this.current, buffer).then(metadata => {
-        LocalProvider.write(metadata, buffer).then(() => {
+      const metadata = FileMetadata.from(this.current, buffer);
+      LocalProvider.write(metadata, buffer).then((saved) => {
+        if (saved) {
           log.debug('Saved', this.current);
-        });
+        }
       });
     },
   }

@@ -45,12 +45,12 @@ export default class FileMetadata {
 
   /**
    * @param {ArrayBuffer} data
-   * @returns {Promise.<FileMetadata>}
+   * @returns {FileMetadata}
    */
-  async data(data) {
+  data(data) {
     return this.extend({
       size: data.byteLength,
-      hash: await Hasher.hash(data),
+      hash: Hasher.hash(data),
       modified: new Date().toISOString()
     });
   }
@@ -66,25 +66,23 @@ export default class FileMetadata {
    * Creates a new metadata
    * @param {string} path - The path
    * @param {ArrayBuffer} data - The data
-   * @returns {Promise.<Metadata>}
+   * @returns {Metadata}
    */
-  static async create(path, data) {
+  static create(path, data) {
     // TODO: REMOVE THIS
-    const file = new FileMetadata().path(path);
-    await file.data(data);
-    return file.metadata();
+    return new FileMetadata().path(path).data(data).metadata();
   }
 
   /**
    * Creates a new metadata
    * @param {Metadata} metadata - The metadata
    * @param {ArrayBuffer} data - The data
-   * @returns {Promise.<Metadata>}
+   * @returns {Metadata}
    */
-  static async from(metadata, data) {
+  static from(metadata, data) {
     const file = new FileMetadata().extend(metadata);
     if (data) {
-      await file.data(data);
+      file.data(data);
     }
     return file.metadata();
   }

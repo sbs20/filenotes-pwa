@@ -2,6 +2,7 @@ import Convert from '../utils/convert';
 import FieldAdapter from '../utils/field-adapter';
 import extend from '../utils/extend';
 import Dropbox from 'dropbox/src/dropbox';
+import { sha256Sync } from '../utils/sha256';
 
 const MAP = {
   '.tag': 'tag',
@@ -240,5 +241,31 @@ export default class DropboxProvider {
         }
       }
     }
+  }
+
+  /**
+   * Calculates the content hash
+   * @param {BufferLike} buffer - The byte array
+   * @returns {string} - Hex encoded hash
+   */
+  static hash(buffer) {
+    const BLOCK_SIZE = 4 * 1024 * 1024;
+    if (!Buffer.isBuffer(buffer)) {
+      buffer = Buffer.from(buffer);
+    }
+
+    /** @type {Array.<ArrayBuffer>} */
+    const digests = [];
+    for (let offset = 0, length = 0; offset < buffer.length; offset += length) {
+      length = Math.min(buffer.length - offset, BLOCK_SIZE);
+      const block = buffer.slice(offset, offset + length);
+      const digest = sha256Sync(block);
+      digests.push(digest);
+    }
+
+    const digestsConcat = Convert.arrayBuffersConcat(digests);
+    const superDigest = sha256Sync(digestsConcat);
+    const hex = Convert.arrayBufferToHex(superDigest);
+    return hex;
   }
 }

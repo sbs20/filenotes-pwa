@@ -1,11 +1,11 @@
 import Storage from '../data/storage';
 import Engine from '../sync/engine';
-import hash from '../dropbox/dropbox-hasher';
+import DropboxProvider from '../dropbox/dropbox-provider';
 
 const StorageService = new Storage();
 const SyncEngine = new Engine();
 const Hasher = {
-  hash: hash
+  hash: DropboxProvider.hash
 };
 
 export { StorageService, SyncEngine, Hasher };
