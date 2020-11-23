@@ -1,3 +1,4 @@
+import DeletedMetadata from './files/deleted-metadata';
 import FileContent from './files/file-content';
 import FileMetadata from './files/file-metadata';
 import FilePath from './files/file-path';
@@ -113,7 +114,7 @@ export default class LocalProvider {
 
     await StorageService.fs.metadata.deleteAll(keys);
     await StorageService.fs.content.deleteAll(keys);
-    await StorageService.fs.delta.writeAll([FileMetadata.createDeleted(path.toLowerCase())]);
+    await StorageService.fs.delta.writeAll([DeletedMetadata.create(path)]);
   }
 
   /**
@@ -139,7 +140,7 @@ export default class LocalProvider {
 
       this.mkdir(destinationPath);
       await StorageService.fs.metadata.deleteAll([sourcePath]);
-      await StorageService.fs.delta.writeAll([FileMetadata.createDeleted(sourcePath)]);
+      await StorageService.fs.delta.writeAll([DeletedMetadata.create(sourcePath)]);
 
     } else {
       const content = await StorageService.fs.content.read(sourcePath.toLowerCase());

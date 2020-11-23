@@ -58,15 +58,4 @@ export default class FileMetadata extends BaseMetadata {
   static create() {
     return new FileMetadata();
   }
-
-  /**
-   * Creates a deletion stub
-   * @param {string} path - The path
-   * @returns {Metadata}
-   */
-  static createDeleted(path) {
-    return new FileMetadata().assign({
-      tag: 'deleted'
-    }).path(path).value;
-  }
 }
