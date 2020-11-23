@@ -53,16 +53,12 @@ class LocalProvider {
    * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
   async list(directory, recursive) {
-    let list = await StorageService.fs.metadata.list();
+    const predicate = directory === undefined ? undefined : (fileKey) => {
+      const dirKey = directory.key + '/';
+      return fileKey.startsWith(dirKey) && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
+    };
 
-    if (directory) {
-      list = list.filter(metadata => {
-        const fileKey = metadata.key;
-        const dirKey = directory.key + '/';
-        return fileKey.startsWith(dirKey) && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
-      });  
-    }
-
+    let list = await StorageService.fs.metadata.list(predicate);
     return list.sort((a, b) => {
       return a.tag !== b.tag ? b.tag.localeCompare(a.tag) : a.key.localeCompare(b.key);
     });

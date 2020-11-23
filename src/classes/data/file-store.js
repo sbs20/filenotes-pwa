@@ -1,50 +1,13 @@
-import Database from './database';
+import GenericStore from './generic-store';
 
-export default class FileStore {
-  /**
-   * Creates a new FileStore
-   * @param {string} store - The store name 
-   */
-  constructor(store) {
-    this.store = store;
-  }
-
-  /**
-   * Clears the file store
-   * @returns {Promise.<void>>} Promise<void>
-   */
-  async clear() {
-    await Database.use(idb => idb.clear(this.store));
-  }
-
-  /**
-   * Deletes a file entry
-   * @param {Array.<string>} keys - The keys
-   * @returns {Promise.<void>>} Promise<void>
-   */
-  async deleteAll(keys) {
-    await Database.use(async idb => {
-      const tx = idb.transaction(this.store, 'readwrite');
-      const transactions = keys.map(key => tx.store.delete(key));
-      transactions.push(tx.done);
-      await Promise.all(transactions);
-    });
-  }
-
-  /**
-   * Returns a list of file metadata keys
-   * @returns {Promise.<Array.<string>>} Promise<string[]>
-   */
-  async keys() {
-    return await Database.use(idb => idb.getAllKeys(this.store));
-  }
-
+export default class FileStore extends GenericStore {
   /**
    * Returns a list of file metadata objects
+   * @param {function(string, Metadata):boolean} [predicate]
    * @returns {Promise.<Array.<Metadata>>} Promise<Metadata[]>
    */
-  async list() {
-    return await Database.use(idb => idb.getAll(this.store));
+  async list(predicate) {
+    return await super.list(predicate);
   }
 
   /**
@@ -53,7 +16,7 @@ export default class FileStore {
    * @returns {Promise.<Metadata>} Promise<Metadata>
    */
   async read(key) {
-    return await Database.use(idb => idb.get(this.store, key));
+    return await super.read(key);
   }
 
   /**
@@ -62,11 +25,6 @@ export default class FileStore {
    * @returns {Promise.<void>} Promise<void>
    */
   async writeAll(items) {
-    await Database.use(async idb => {
-      const tx = idb.transaction(this.store, 'readwrite');
-      const transactions = items.map(item => tx.store.put(item));
-      transactions.push(tx.done);
-      await Promise.all(transactions);
-    });
+    await super.writeAll(items);
   }
 }
