@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="container">
+      <install></install>
       <router-view></router-view>
     </div>
   </div>
@@ -8,12 +9,17 @@
 
 <script>
 import { EventBus, RemoteProvider, SyncEngine } from './services';
+import Install from './components/Install';
 
 /** @type {Array.<function(Event):void>} */
 let listeners = [];
 
 export default {
   name: 'App',
+
+  components: {
+    Install
+  },
 
   created() {
     listeners.push(EventBus.on('sync.request', () => {
