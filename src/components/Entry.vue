@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div>
     <prism-editor v-if="type === 'text'" class="editor" v-model="text"
       :highlight="highlighter" :line-numbers="false"></prism-editor>
     <av-waveform v-if="type === 'audio'" canv-class="audio-canvas"

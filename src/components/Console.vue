@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div>
     <navigation>
       <template v-slot:header>Console</template>
       <template v-slot:end>

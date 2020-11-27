@@ -1,4 +1,4 @@
-export default {
+const Constants = {
   APP_ID: process.env.VUE_APP_DROPBOX_CLIENT_ID,
   HOST_URL: process.env.VUE_APP_HOST_URL,
 
@@ -6,6 +6,14 @@ export default {
     Name: 'name',
     Email: 'email',
     OAuth: 'oauth',
-    Pkce: 'pkce'
+    Pkce: 'pkce',
+    Theme: 'theme'
+  },
+
+  Themes: {
+    Light: 'light',
+    Dark: 'dark'
   }
 };
+
+export default Constants;

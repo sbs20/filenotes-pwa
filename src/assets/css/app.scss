@@ -1,0 +1,12 @@
+// See https://bulma.io/documentation/customize/variables/
+$navbar-height: 2rem;
+$navbar-padding-vertical: 10rem;
+$navbar-breakpoint: 0;
+
+.has-navbar-fixed-top {
+  margin-top: 1.5rem;
+}
+
+@import 'cyborg.scss';
+@import "~bulma";
+@import "~buefy/src/scss/buefy";

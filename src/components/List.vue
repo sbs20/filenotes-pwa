@@ -1,7 +1,9 @@
 <template>
-  <div class="container">
+  <div>
     <navigation>
-      <template v-slot:header>{{ header }}</template>
+      <template v-slot:header>
+        {{ header }}
+      </template>
       <template v-slot:end>
         <b-navbar-item tag="router-link" :to="{ path: '/console' }"><b-icon icon="console"></b-icon></b-navbar-item>
         <b-navbar-item @click="sync"><b-icon icon="sync"></b-icon></b-navbar-item>
@@ -26,7 +28,7 @@
       </div>
     </b-modal>
 
-    <div class="file-entry" v-for="entry in entries" v-bind:key="entry.key">
+    <div class="file-entry" tabindex="1" v-for="entry in entries" v-bind:key="entry.key">
       <list-entry :value="entry" @open="open" @rename="rename" @remove="remove" @move="move"></list-entry>
     </div>
 
@@ -58,7 +60,7 @@ export default {
       if (this.current && this.current.path) {
         /** @type {string} */
         const path = this.current.path;
-        return path.slice(path.length - 30);
+        return path;//.slice(path.length - 40);
       } else {
         return '/';
       }
@@ -255,6 +257,7 @@ export default {
 }
 .file-entry {
   height: 3.5rem;
+  padding: 0 0.5rem 0 0.5rem;
   cursor: pointer;
 }
 </style>

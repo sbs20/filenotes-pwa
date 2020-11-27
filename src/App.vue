@@ -2,7 +2,10 @@
   <div>
     <div class="container">
       <install></install>
-      <router-view></router-view>
+      <transition mode="out-in">
+        <router-view></router-view>
+      </transition>
+      <theme></theme>
     </div>
   </div>
 </template>
@@ -10,6 +13,7 @@
 <script>
 import { EventBus, RemoteProvider, SyncEngine } from './services';
 import Install from './components/Install';
+import Theme from './components/Theme';
 
 /** @type {Array.<function(Event):void>} */
 let listeners = [];
@@ -18,13 +22,27 @@ export default {
   name: 'App',
 
   components: {
-    Install
+    Install,
+    Theme
+  },
+
+  mounted() {
+    document.body.classList.add('app-background');
+    document.body.classList.add('has-navbar-fixed-top');
+    document.documentElement.setAttribute('theme', 'dark');
   },
 
   created() {
     listeners.push(EventBus.on('sync.request', () => {
       SyncEngine.execute();
     }));
+
+    document.addEventListener('isUpdateAvailable', (available) => {
+      if (available) {
+        // Toast
+      }
+    });
+
 
     this.start();
   },
@@ -55,6 +73,3 @@ export default {
   }
 };
 </script>
-
-<style>
-</style>

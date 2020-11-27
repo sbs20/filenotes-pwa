@@ -1,10 +1,10 @@
 <template>
-  <b-navbar>
+  <b-navbar :fixed-top="true" :shadow="true">
     <template v-slot:brand>
       <b-navbar-item tag="a" href="/">
         <img src="../../public/img/filenotes-88.png" alt="Filenotes">
       </b-navbar-item>
-      <b-navbar-item tag="h3" class="title is-3 navigation-header">
+      <b-navbar-item tag="div" class="has-text-weight-bold is-size-5">
         <slot name="header">Filenotes</slot>
       </b-navbar-item>
     </template>
