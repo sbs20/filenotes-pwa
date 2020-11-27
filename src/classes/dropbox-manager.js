@@ -121,6 +121,7 @@ export default class DropboxManager extends DropboxProvider {
         this.refreshToken = oauthToken.refresh_token;
       }
       log.info(`Logged in as ${this.accountName} (${this.accountEmail}) (cached)`);
+      return true;
     }
   }
 }
