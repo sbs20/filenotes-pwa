@@ -6,7 +6,11 @@ import File from './components/File';
 import List from './components/List';
 import VueAudioVisual from 'vue-audio-visual';
 import Buefy from 'buefy';
+
 import 'buefy/dist/buefy.css';
+
+// https://github.com/buefy/buefy/issues/1500
+import '@mdi/font/css/materialdesignicons.css';
 
 import './registerServiceWorker';
 

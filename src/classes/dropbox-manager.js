@@ -14,16 +14,39 @@ export default class DropboxManager extends DropboxProvider {
   }
 
   /**
+   * Indicates if we've connected in the past on the basis of settings
+   * @returns {Promise.<boolean>}
+   */
+  async hasConnected() {
+    const oauth = await StorageService.settings.get(Constants.Settings.OAuth);
+    const name = await StorageService.settings.get(Constants.Settings.Name);
+    const email = await StorageService.settings.get(Constants.Settings.Email);
+    return oauth && name && email;
+  }
+
+  /**
+   * Clears all authentication data from settings
+   */
+  async clear() {
+    await StorageService.settings.delete(Constants.Settings.Pkce);
+    await StorageService.settings.delete(Constants.Settings.OAuth);
+    await StorageService.settings.delete(Constants.Settings.Name);
+    await StorageService.settings.delete(Constants.Settings.Email);
+  }
+
+  /**
    * Attempts to connect
    * @returns {Promise.<boolean>} Promise<boolean>
    */
   async startFromToken() {
-    const oauthToken = await StorageService.settings.get('oauth');
+    const oauthToken = await StorageService.settings.get(Constants.Settings.OAuth);
     if (oauthToken && oauthToken.refresh_token) {
       this.refreshToken = oauthToken.refresh_token;
       if (await this.connect()) {
         log.debug('Connected using stored access token');
         log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
+        await StorageService.settings.set(Constants.Settings.Name, this.accountName);
+        await StorageService.settings.set(Constants.Settings.Email, this.accountEmail);
         return true;
       }
     }
@@ -40,14 +63,16 @@ export default class DropboxManager extends DropboxProvider {
     const code = QueryString.parse(queryString).code;
     if (code) {
       /** @type {PkceParameters} */
-      const pkceParams = await StorageService.settings.get('pkce');
+      const pkceParams = await StorageService.settings.get(Constants.Settings.Pkce);
       pkceParams.code = code;
       const oauthToken = await this.pkceFinish(pkceParams);
       if (oauthToken && await this.connect()) {
         log.debug('Connected using url access token');
         log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
-        await StorageService.settings.set('oauth', oauthToken);
-        await StorageService.settings.delete('pkce');
+        await StorageService.settings.set(Constants.Settings.OAuth, oauthToken);
+        await StorageService.settings.set(Constants.Settings.Name, this.accountName);
+        await StorageService.settings.set(Constants.Settings.Email, this.accountEmail);
+        await StorageService.settings.delete(Constants.Settings.Pkce);
         return true;
       }
     }
@@ -67,9 +92,9 @@ export default class DropboxManager extends DropboxProvider {
     }
 
     // Initiate sign in
-    await StorageService.settings.delete('oauth');
+    await this.clear();
     const params = this.pkceStart();
-    await StorageService.settings.set('pkce', params);
+    await StorageService.settings.set(Constants.Settings.Pkce, params);
     window.location.href = params.url;
     return false;
   }
@@ -79,13 +104,23 @@ export default class DropboxManager extends DropboxProvider {
    * @param {Window} window
    * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async start(window) {
-    if (await this.startFromToken()) {
-      return true;
+  async start(window, force) {
+    if (!await this.hasConnected() || force) {
+      if (await this.startFromToken()) {
+        return true;
+      }
+      if (await this.startFromQueryString(window.location.search)) {
+        return true;
+      }
+      this.startAuthentication(window);
+    } else {
+      this.accountName = await StorageService.settings.get(Constants.Settings.Name);
+      this.accountEmail = await StorageService.settings.get(Constants.Settings.Email);
+      const oauthToken = await StorageService.settings.get(Constants.Settings.OAuth);
+      if (oauthToken && oauthToken.refresh_token) {
+        this.refreshToken = oauthToken.refresh_token;
+      }
+      log.info(`Logged in as ${this.accountName} (${this.accountEmail}) (cached)`);
     }
-    if (await this.startFromQueryString(window.location.search)) {
-      return true;
-    }
-    this.startAuthentication(window);
   }
 }
