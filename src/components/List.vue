@@ -66,7 +66,7 @@
 </template>
 
 <script>
-import { EventBus, LocalProvider, Log } from '../services';
+import { LocalProvider, Log } from '../services';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
@@ -292,7 +292,8 @@ export default {
     },
 
     sync() {
-      EventBus.emit('sync.request');
+      this.$root.$emit('sync.start');
+      //EventBus.emit('sync.request');
     }
   }
 };

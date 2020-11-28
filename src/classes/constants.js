@@ -7,7 +7,8 @@ const Constants = {
     Email: 'email',
     OAuth: 'oauth',
     Pkce: 'pkce',
-    Theme: 'theme'
+    Theme: 'theme',
+    Cursor: 'cursor'
   },
 
   Themes: {

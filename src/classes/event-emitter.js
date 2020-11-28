@@ -1,10 +1,29 @@
 /**
  * @typedef {import('../typedefs/types').Event} Event
  */
-export default class EventBus {
+export default class EventEmitter {
   constructor() {
     this.listeners = {};
     this.lastId = 0;
+  }
+
+  /**
+   * 
+   * @param {string} eventType - The event type
+   * @param {function(Event):void|number} [data] - The event handler
+   */
+  off(eventType, data) {
+    if (data === undefined) {
+      delete this.listeners[eventType];
+    } else if (typeof(data) === 'number') {
+      const id = data;
+      delete this.listeners[eventType][id];
+      if (Object.keys(this.listeners[eventType]).length === 0) {
+        delete this.listeners[eventType];
+      }
+    } else if (typeof(data) === 'function') {
+      // TODO     
+    }
   }
 
   /**
@@ -21,10 +40,7 @@ export default class EventBus {
     this.listeners[eventType][id] = callback;
     return {
       remove: () => {
-        delete this.listeners[eventType][id];
-        if (Object.keys(this.listeners[eventType]).length === 0) {
-          delete this.listeners[eventType];
-        }
+        this.off(eventType, id);
       }
     };
   }

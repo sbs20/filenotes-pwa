@@ -1,4 +1,6 @@
+import EventEmitter from './event-emitter';
 import FileContent from './files/file-content';
+
 import Log from '../services/log';
 import RemoteProvider from '../services/remote-provider';
 import StorageService from '../services/storage';
@@ -25,47 +27,56 @@ async function deltas() {
 /**
  * Applies a metadata to the local filesystem
  * @param {Metadata} metadata
- * @returns {Promise.<void>}
+ * @returns {Promise.<boolean>}
  */
 async function applyLocal(metadata) {
+  const local = await StorageService.fs.metadata.read(metadata.key);
   switch (metadata.tag) {
     case 'file': {
-      const local = await StorageService.fs.metadata.read(metadata.key);
       if (local === undefined || metadata.hash !== local.hash) {
         const buffer = await RemoteProvider.read(metadata.key);
         const content = FileContent.create(metadata.key, buffer);
         await StorageService.fs.content.writeAll([content]);   
         await StorageService.fs.metadata.writeAll([metadata]);
         log.info(`downloaded: ${metadata.key}`);
+        return true;
       } else if (metadata.revision !== local.revision) {
         await StorageService.fs.metadata.writeAll([metadata]);
         log.debug(`revision update: ${metadata.key}`);
+        return true;
       } else {
         log.debug(`no change: ${metadata.key}`);
+        return false;
       }
-      break;
     }
 
     case 'folder':
-      await StorageService.fs.metadata.writeAll([metadata]);
-      log.info(`created local directory: ${metadata.key}`);
-      break;
+      if (local === undefined) {
+        await StorageService.fs.metadata.writeAll([metadata]);
+        log.info(`created local directory: ${metadata.key}`);
+        return true;
+      }
+      return false;
 
     case 'deleted':
-      await StorageService.fs.metadata.deleteAll([metadata.key]);
-      await StorageService.fs.content.deleteAll([metadata.key]);        
-      log.info(`deleted local entry: ${metadata.key}`);
-      break;
+      if (local !== undefined) {
+        await StorageService.fs.metadata.deleteAll([metadata.key]);
+        await StorageService.fs.content.deleteAll([metadata.key]);        
+        log.info(`deleted local entry: ${metadata.key}`);
+        return true;
+      }
+      return false;
 
     default:
       log.error(`Unknown tag: ${metadata.tag}`);
+      return false;
   }
 }
 
 /**
  * Applies a metadata
  * @param {Metadata} metadata
- * @returns {Promise.<void>}
+ * @returns {Promise.<boolean>}
  */
 async function applyRemote(metadata) {
   switch (metadata.tag) {
@@ -106,12 +117,14 @@ async function applyRemote(metadata) {
 
   // If we got here we can delete the local delta
   await StorageService.fs.delta.deleteAll([metadata.key]);
+  return true;
 }
 
 const active = Symbol();
 
-export default class SyncEngine {
+export default class SyncEngine extends EventEmitter {
   constructor() {
+    super();
     this[active] = false;
   }
 
@@ -132,14 +145,30 @@ export default class SyncEngine {
 
     try {
       const localDeltas = await deltas();
+      const peek = await RemoteProvider.peek();
+      const total = localDeltas.length + peek.length;
+      const completed = count => {
+        return 100 * count * (1 / total);
+      };
+      let index = 0;
+
       // Uploads, creates and deletes have rate limiting - await each
       for (const delta of localDeltas) {
         await applyRemote(delta);
+        this.emit('progress', {
+          value: completed(++index)
+        });
       }
 
       const remoteDeltas = await RemoteProvider.list();
       // There doesn't appear to be rate limiting for downloads
-      await Promise.all(remoteDeltas.map(delta => applyLocal(delta)));
+      await Promise.all(remoteDeltas.map(delta => applyLocal(delta).then((update) => {
+        if (update) {
+          this.emit('progress', {
+            value: completed(++index)
+          });
+        }
+      })));
 
       await StorageService.settings.set('cursor', RemoteProvider.cursor);
       log.info('Finished');

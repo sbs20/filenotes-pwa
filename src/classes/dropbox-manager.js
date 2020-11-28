@@ -64,16 +64,18 @@ export default class DropboxManager extends DropboxProvider {
     if (code) {
       /** @type {PkceParameters} */
       const pkceParams = await StorageService.settings.get(Constants.Settings.Pkce);
-      pkceParams.code = code;
-      const oauthToken = await this.pkceFinish(pkceParams);
-      if (oauthToken && await this.connect()) {
-        log.debug('Connected using url access token');
-        log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
-        await StorageService.settings.set(Constants.Settings.OAuth, oauthToken);
-        await StorageService.settings.set(Constants.Settings.Name, this.accountName);
-        await StorageService.settings.set(Constants.Settings.Email, this.accountEmail);
-        await StorageService.settings.delete(Constants.Settings.Pkce);
-        return true;
+      if (pkceParams) {
+        pkceParams.code = code;
+        const oauthToken = await this.pkceFinish(pkceParams);
+        if (oauthToken && await this.connect()) {
+          log.debug('Connected using url access token');
+          log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
+          await StorageService.settings.set(Constants.Settings.OAuth, oauthToken);
+          await StorageService.settings.set(Constants.Settings.Name, this.accountName);
+          await StorageService.settings.set(Constants.Settings.Email, this.accountEmail);
+          await StorageService.settings.delete(Constants.Settings.Pkce);
+          return true;
+        }  
       }
     }
 
@@ -114,6 +116,7 @@ export default class DropboxManager extends DropboxProvider {
       }
       this.startAuthentication(window);
     } else {
+      this.cursor = await StorageService.settings.get(Constants.Settings.Cursor);
       this.accountName = await StorageService.settings.get(Constants.Settings.Name);
       this.accountEmail = await StorageService.settings.get(Constants.Settings.Email);
       const oauthToken = await StorageService.settings.get(Constants.Settings.OAuth);

@@ -1,3 +1,3 @@
-import EventBus from '../classes/event-bus';
-const service = new EventBus();
+import EventEmitter from '../classes/event-emitter';
+const service = new EventEmitter();
 export default service;

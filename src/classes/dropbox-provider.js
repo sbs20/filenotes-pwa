@@ -155,6 +155,17 @@ export default class DropboxProvider {
   }
 
   /**
+   * Returns a list of file metadata objects without updating the cursor
+   * @returns {Promise.<Array.<Metadata>>}
+   */
+  async peek() {
+    const cursor = this.cursor;
+    const list = await this.list();
+    this.cursor = cursor;
+    return list;
+  }
+
+  /**
    * Creates a directory
    * @param {string} path
    */
@@ -168,7 +179,6 @@ export default class DropboxProvider {
         throw exception;
       }
     }
-
   }
 
   /**
