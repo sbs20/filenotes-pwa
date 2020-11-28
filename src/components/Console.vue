@@ -3,12 +3,11 @@
     <navigation>
       <template v-slot:header>Console</template>
       <template v-slot:end>
-        <b-navbar-item tag="router-link" :to="{ path: '/l/' }"><b-icon icon="close"></b-icon></b-navbar-item>
+        <b-navbar-item tag="a" @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
       </template>
     </navigation>
 
     <div>
-      <textarea id="log" v-model="text" readonly></textarea>
       <button class="button" @click="clearCursor">Clear cursor</button>
       <button class="button" @click="clearLocalDeltas">Clear local actions</button>
       <button class="button" @click="clearLocalFs">Clear local filesystem</button>
@@ -19,6 +18,10 @@
       <button class="button" @click="connect1">Connect from storage</button>
       <button class="button" @click="connect2">Connect from code</button>
       <button class="button" @click="connect3">Force auth</button>
+    </div>
+
+    <div>
+      <pre id="log">{{ text }}</pre>
     </div>
   </div>
 </template>
@@ -39,6 +42,7 @@ export default {
   },
 
   created() {
+    document.addEventListener('keydown', this._onKeys);
     listeners.push(EventBus.on('console', (e) => {
       this.messages.push(e.data);
     }));
@@ -61,6 +65,7 @@ export default {
   },
 
   destroyed() {
+    document.removeEventListener('keydown', this._onKeys);
     while (listeners.length) {
       const listener = listeners.pop();
       listener.remove();
@@ -68,6 +73,16 @@ export default {
   },
 
   methods: {
+    _onKeys(event) {
+      if (event.keyCode === 27) {
+        this.close();
+      }
+    },
+
+    close() {
+      this.$router.push('/l/');
+    },
+
     clearCursor() {
       StorageService.settings.delete('cursor').then(() => {
         log.info('Cursor cleared');

@@ -2,10 +2,9 @@
   <div>
     <div class="container">
       <install></install>
-      <transition mode="out-in">
+      <transition name="fade" mode="out-in">
         <router-view></router-view>
       </transition>
-      <theme></theme>
     </div>
   </div>
 </template>
@@ -13,7 +12,6 @@
 <script>
 import { EventBus, RemoteProvider, SyncEngine } from './services';
 import Install from './components/Install';
-import Theme from './components/Theme';
 
 /** @type {Array.<function(Event):void>} */
 let listeners = [];
@@ -22,8 +20,7 @@ export default {
   name: 'App',
 
   components: {
-    Install,
-    Theme
+    Install
   },
 
   mounted() {
@@ -73,3 +70,7 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+@import './assets/css/app.scss'
+</style>

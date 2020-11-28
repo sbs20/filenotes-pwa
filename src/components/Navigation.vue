@@ -1,5 +1,5 @@
 <template>
-  <b-navbar :fixed-top="true" :shadow="true">
+  <b-navbar :fixed-top="true" :shadow="false">
     <template v-slot:brand>
       <b-navbar-item tag="a" href="/">
         <img src="../../public/img/filenotes-88.png" alt="Filenotes">

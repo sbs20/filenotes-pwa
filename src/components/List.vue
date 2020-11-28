@@ -2,17 +2,51 @@
   <div>
     <navigation>
       <template v-slot:header>
-        {{ header }}
       </template>
       <template v-slot:end>
-        <b-navbar-item tag="router-link" :to="{ path: '/console' }"><b-icon icon="console"></b-icon></b-navbar-item>
-        <b-navbar-item @click="sync"><b-icon icon="sync"></b-icon></b-navbar-item>
-        <b-navbar-item @click="mkdir"><b-icon icon="folder-plus"></b-icon></b-navbar-item>
-        <b-navbar-item @click="createText"><b-icon icon="file-plus"></b-icon></b-navbar-item>
-        <b-navbar-item><b-icon icon="microphone"></b-icon></b-navbar-item>
-        <b-navbar-item><b-icon icon="image-plus"></b-icon></b-navbar-item>
+        <b-navbar-item tag="router-link" :to="{ path: '/console' }">
+          <b-icon class="pr-4" icon="console"></b-icon>Console
+        </b-navbar-item>
+        <b-navbar-item @click="sync">
+          <b-icon class="pr-4" icon="sync"></b-icon>Sync
+        </b-navbar-item>
+        <b-navbar-item>
+          <b-icon class="pr-4" icon="cog"></b-icon>Settings
+        </b-navbar-item>
+        <b-navbar-item>
+          <b-icon class="pr-4" icon="information"></b-icon>About
+        </b-navbar-item>
       </template>
     </navigation>
+
+    <div class="pr-4" style="float: right">
+      <b-dropdown aria-role="list" :mobile-modal="false" position="is-bottom-left">
+        <button class="button is-primary" slot="trigger" slot-scope="{ active }">
+          <span>New</span>
+          <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+        </button>
+
+        <b-dropdown-item aria-role="listitem" @click="mkdir">
+          <b-icon class="pr-4" icon="folder-plus"></b-icon>Directory
+        </b-dropdown-item>
+        <b-dropdown-item aria-role="listitem" @click="mktext">
+          <b-icon class="pr-4" icon="file-plus"></b-icon>Text file
+        </b-dropdown-item>
+        <b-dropdown-item aria-role="listitem">
+          <b-icon class="pr-4" icon="microphone-plus"></b-icon>Audio file
+        </b-dropdown-item>
+        <b-dropdown-item aria-role="listitem">
+          <b-icon class="pr-4" icon="image-plus"></b-icon>Image file
+        </b-dropdown-item>
+      </b-dropdown>
+    </div>
+    <div class="pl-4 title is-4">
+      {{ header }}
+    </div>
+
+    <div class="file-entry" tabindex="1" v-for="entry in entries" v-bind:key="entry.key">
+      <list-entry :value="entry" @open="open" @rename="rename" @remove="remove" @move="move"></list-entry>
+    </div>
 
     <b-modal :active.sync="moveDialog.show" has-modal-card trap-focus
       :destroy-on-hide="true" aria-role="dialog" aria-modal>
@@ -27,10 +61,6 @@
         </footer>
       </div>
     </b-modal>
-
-    <div class="file-entry" tabindex="1" v-for="entry in entries" v-bind:key="entry.key">
-      <list-entry :value="entry" @open="open" @rename="rename" @remove="remove" @move="move"></list-entry>
-    </div>
 
   </div>
 </template>
@@ -67,6 +97,14 @@ export default {
     }
   },
 
+  created() {
+    document.addEventListener('keydown', this._onKeys);
+  },
+
+  destroyed() {
+    document.removeEventListener('keydown', this._onKeys);
+  },
+
   data() {
     this.refresh();
     return {
@@ -92,6 +130,12 @@ export default {
   },
 
   methods: {
+    _onKeys(event) {
+      if (event.keyCode === 27) {
+        this.up();
+      }
+    },
+
     refresh() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
@@ -123,7 +167,7 @@ export default {
       });
     },
 
-    createText() {
+    mktext() {
       if (this.current.tag === 'folder') {
         LocalProvider.new(this.current, 'New Text.txt').then(name => {
           if (name) {
@@ -131,7 +175,8 @@ export default {
             const content = new Uint8Array();
             const metadata = FileMetadata.create().path(path).data(content).value;
             LocalProvider.write(metadata, content).then(() => {
-              this.refresh();
+              this.open(metadata);
+              //this.refresh()
             });
           }
         });
@@ -239,6 +284,11 @@ export default {
           });
         }
       });
+    },
+
+    up() {
+      const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
+      this.open(parent);
     },
 
     sync() {

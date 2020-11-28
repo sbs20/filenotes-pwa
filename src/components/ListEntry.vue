@@ -9,7 +9,7 @@
       <div>{{ description }}&nbsp;</div>
     </div>
     <div class="media-right" v-on:click.stop>
-      <b-dropdown v-if="value.path" position="is-bottom-left" aria-role="list">
+      <b-dropdown v-if="value.path" :mobile-modal="false" position="is-bottom-left" aria-role="list">
         <b-icon icon="dots-vertical" slot="trigger"></b-icon>
         <b-dropdown-item aria-role="listitem" @click="$emit('rename', value)">Rename</b-dropdown-item>
         <b-dropdown-item aria-role="listitem" @click="$emit('move', value)">Move</b-dropdown-item>
