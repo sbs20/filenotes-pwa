@@ -60,9 +60,7 @@ export default class LocalProvider {
     };
 
     let list = await StorageService.fs.metadata.list(predicate);
-    return list.sort((a, b) => {
-      return a.tag !== b.tag ? b.tag.localeCompare(a.tag) : a.key.localeCompare(b.key);
-    });
+    return list;
   }
 
   /**

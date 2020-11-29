@@ -7,9 +7,6 @@
         <b-navbar-item tag="router-link" :to="{ path: '/console' }">
           <b-icon class="pr-4" icon="console"></b-icon>Console
         </b-navbar-item>
-        <b-navbar-item @click="sync">
-          <b-icon class="pr-4" icon="sync"></b-icon>Sync
-        </b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/settings' }">
           <b-icon class="pr-4" icon="cog"></b-icon>Settings
         </b-navbar-item>
@@ -20,10 +17,13 @@
     </navigation>
 
     <div class="pr-4" style="float: right">
+      <button class="button mr-2" @click="sync">
+        <b-icon icon="sync"></b-icon>
+      </button>
+
       <b-dropdown aria-role="list" :mobile-modal="false" position="is-bottom-left">
-        <button class="button is-primary" slot="trigger" slot-scope="{ active }">
-          <span>New</span>
-          <b-icon :icon="active ? 'menu-up' : 'menu-down'"></b-icon>
+        <button class="button is-primary" slot="trigger">
+          <b-icon icon="plus"></b-icon>
         </button>
 
         <b-dropdown-item aria-role="listitem" @click="mkdir">
@@ -71,6 +71,7 @@ import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
 import Logger from '../classes/logger';
+import MetadataComparator from '../classes/metadata-comparator';
 
 import Folders from './Folders';
 import ListItem from './ListItem';
@@ -158,6 +159,7 @@ export default {
         }
 
         LocalProvider.list(this.current).then(entries => {
+          entries.sort(MetadataComparator.byFolderThenNameAscending);
           if (this.current.key !== '') {
             const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
             parent.name = '../ (parent)';
