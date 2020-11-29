@@ -10,7 +10,7 @@
       </template>
     </navigation>
 
-    <entry ref="entry" v-model="current"></entry>
+    <file-item ref="fileItem" v-model="current"></file-item>
   </div>
 </template>
 
@@ -19,12 +19,12 @@ import FilePath from '../classes/files/file-path';
 import { LocalProvider } from '../services';
 
 import Navigation from './Navigation';
-import Entry from './Entry';
+import FileItem from './FileItem';
 
 export default {
   name: 'File',
   components: {
-    Entry,
+    FileItem,
     Navigation
   },
 
@@ -77,7 +77,7 @@ export default {
     },
 
     save() {
-      this.$refs.entry.save();
+      this.$refs.fileItem.save();
     },
   }
 };

@@ -26,10 +26,10 @@ import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/themes/prism-tomorrow.css';
 
-const log = Logger.get('File');
+const log = Logger.get('FileItem');
 
 export default {
-  name: 'Entry',
+  name: 'FileItem',
   props: {
     /** @type {Metadata} */
     value: Object

@@ -25,7 +25,7 @@ import { DateTime } from 'luxon';
 import Flash from './Flash';
 
 export default {
-  name: 'ListEntry',
+  name: 'ListItem',
 
   components: {
     Flash

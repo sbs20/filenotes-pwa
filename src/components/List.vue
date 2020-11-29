@@ -45,7 +45,7 @@
     </div>
 
     <div class="file-entry" tabindex="1" v-for="entry in entries" v-bind:key="entry.key">
-      <list-entry :value="entry" @open="open" @rename="rename" @remove="remove" @move="move"></list-entry>
+      <list-item :value="entry" @open="open" @rename="rename" @remove="remove" @move="move"></list-item>
     </div>
 
     <b-modal :active.sync="moveDialog.show" has-modal-card trap-focus
@@ -73,7 +73,7 @@ import FolderMetadata from '../classes/files/folder-metadata';
 import Logger from '../classes/logger';
 
 import Folders from './Folders';
-import ListEntry from './ListEntry';
+import ListItem from './ListItem';
 import Navigation from './Navigation';
 
 const log = Logger.get('List');
@@ -82,7 +82,7 @@ export default {
   name: 'List',
   components: {
     Folders,
-    ListEntry,
+    ListItem,
     Navigation
   },
 
