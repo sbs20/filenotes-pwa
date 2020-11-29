@@ -111,9 +111,18 @@ export default {
 <style scoped>
 #progress {
   position: fixed;
-  left: 1%;
-  right: 1%;
-  bottom: 1%;
-  width: 98%;
+  left: 0;
+  right: 0;
+  top: 3rem;
+  width: 100%;
+  z-index: 50;
+}
+</style>
+<style>
+.progress {
+  border-radius: 0;
+}
+.progress.is-small {
+  height: 0.2rem;
 }
 </style>

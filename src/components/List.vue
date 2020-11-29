@@ -10,10 +10,10 @@
         <b-navbar-item @click="sync">
           <b-icon class="pr-4" icon="sync"></b-icon>Sync
         </b-navbar-item>
-        <b-navbar-item>
+        <b-navbar-item tag="router-link" :to="{ path: '/settings' }">
           <b-icon class="pr-4" icon="cog"></b-icon>Settings
         </b-navbar-item>
-        <b-navbar-item>
+        <b-navbar-item tag="router-link" :to="{ path: '/about' }">
           <b-icon class="pr-4" icon="information"></b-icon>About
         </b-navbar-item>
       </template>

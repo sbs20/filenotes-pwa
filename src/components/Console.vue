@@ -8,16 +8,8 @@
     </navigation>
 
     <div>
-      <button class="button" @click="clearCursor">Clear cursor</button>
-      <button class="button" @click="clearLocalDeltas">Clear local actions</button>
-      <button class="button" @click="clearLocalFs">Clear local filesystem</button>
       <button class="button" @click="clearLog">Clear log</button>
-      <button class="button" @click="clearOAuthToken">Clear access token</button>
-      <button class="button" @click="nukeDatabase">Nuke database</button>
       <button class="button" @click="causeRemoteError">Force remote error</button>
-      <button class="button" @click="connect1">Connect from storage</button>
-      <button class="button" @click="connect2">Connect from code</button>
-      <button class="button" @click="connect3">Force auth</button>
     </div>
 
     <div>
@@ -28,7 +20,7 @@
 
 <script>
 import Logger from '../classes/logger';
-import { RemoteProvider, StorageService } from '../services';
+import { RemoteProvider } from '../services';
 import Navigation from './Navigation';
 
 const log = Logger.get('Console');
@@ -76,59 +68,14 @@ export default {
       this.$router.push('/l/');
     },
 
-    clearCursor() {
-      StorageService.settings.delete('cursor').then(() => {
-        log.info('Cursor cleared');
-      });
-    },
-
-    clearLocalDeltas() {
-      StorageService.fs.delta.clear().then(() => {
-        log.info('Local deltas cleared');
-      });
-    },
-
-    clearLocalFs() {
-      Promise.all([
-        StorageService.fs.metadata.clear(),
-        StorageService.fs.content.clear(),
-        StorageService.fs.delta.clear()
-      ]).then(() => {
-        log.info('Local database cleared');
-      });
-    },
-
     clearLog() {
       // TODO
     },
 
-    clearOAuthToken() {
-      StorageService.settings.delete('oauth').then(() => {
-        log.info('Access token cleared');
-      });
-    },
-
-    nukeDatabase() {
-      StorageService.deleteDatatabase().then(() => {
-        log.info('Local database deleted');
-      });
-    },
-
     causeRemoteError() {
+      log.debug('Causing an error');
       RemoteProvider.read('/non-existent-file');
     },
-
-    connect1() {
-      RemoteProvider.startFromToken().then(this.afterConnect);
-    },
-
-    connect2() {
-      RemoteProvider.startFromQueryString(window.location.search).then(this.afterConnect);
-    },
-
-    connect3() {
-      RemoteProvider.startAuthentication(window);
-    }
   }
 };
 </script>
@@ -142,7 +89,6 @@ export default {
   line-height: 1em;
   padding: 0.5em;
   width: 100%;
-  height: 24em;
 }
 pre {
     white-space: pre-wrap;
