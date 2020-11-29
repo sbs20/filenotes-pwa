@@ -1,5 +1,3 @@
-import EventBus from './event-bus';
-import Log from './log';
 import RemoteProvider from './remote-provider';
 import Storage from './storage';
 import SyncEngine from './sync-engine';
@@ -12,10 +10,8 @@ const HashService = {
 };
 
 export {
-  EventBus,
   HashService as Hasher,
   LocalProviderService as LocalProvider,
-  Log,
   RemoteProvider,
   Storage as StorageService,
   SyncEngine

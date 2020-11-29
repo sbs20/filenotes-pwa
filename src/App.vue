@@ -13,13 +13,11 @@
 </template>
 
 <script>
-import { Log, RemoteProvider, SyncEngine } from './services';
+import Logger from './classes/logger';
+import { RemoteProvider, SyncEngine } from './services';
 import Install from './components/Install';
 
-const log = Log.get('App');
-
-/** @type {Array.<function(Event):void>} */
-let listeners = [];
+const log = Logger.get('App');
 
 export default {
   name: 'App',
@@ -40,7 +38,6 @@ export default {
   mounted() {
     document.body.classList.add('app-background');
     document.body.classList.add('has-navbar-fixed-top');
-    document.documentElement.setAttribute('theme', 'dark');
   },
 
   created() {
@@ -58,10 +55,6 @@ export default {
 
   destroyed() {
     this.$root.$off('sync.start', this.sync);
-    while (listeners.length) {
-      const listener = listeners.pop();
-      listener.remove();
-    }
   },
 
   methods: {
@@ -72,8 +65,8 @@ export default {
         if (path === undefined) {
           this.$router.push('/l/');
         }
-        RemoteProvider.peek().then(metadatas => {
-          const msg = metadatas.length > 0 ? 'Remote updates pending' : 'Up to date';
+        SyncEngine.isRequired().then(required => {
+          const msg = required ? 'Sync required' : 'Up to date';
           log.info(msg);
           this.$buefy.snackbar.open(msg);
         });
@@ -89,7 +82,6 @@ export default {
 
     updateProgress(event) {
       this.progress.value = event.value;
-      console.log(event);
     },
 
     sync() {

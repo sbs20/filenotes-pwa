@@ -3,10 +3,10 @@ import FileContent from './files/file-content';
 import FileMetadata from './files/file-metadata';
 import FilePath from './files/file-path';
 import FolderMetadata from './files/folder-metadata';
-import Log from '../services/log';
+import Logger from './logger';
 import { StorageService } from '../services';
 
-const log = Log.get('LocalProvider');
+const log = Logger.get('LocalProvider');
 
 export default class LocalProvider {
 

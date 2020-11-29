@@ -1,10 +1,10 @@
 import Constants from './constants';
 import DropboxProvider from './dropbox-provider';
+import Logger from './logger';
 import QueryString from './utils/query-string';
-import Log from '../services/log';
 import StorageService from '../services/storage';
 
-const log = Log.get('DropboxManager');
+const log = Logger.get('DropboxManager');
 
 export default class DropboxManager extends DropboxProvider {
   constructor() {

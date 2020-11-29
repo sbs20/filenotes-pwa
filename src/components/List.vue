@@ -66,16 +66,17 @@
 </template>
 
 <script>
-import { LocalProvider, Log } from '../services';
+import { LocalProvider } from '../services';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
+import Logger from '../classes/logger';
 
 import Folders from './Folders';
 import ListEntry from './ListEntry';
 import Navigation from './Navigation';
 
-const log = Log.get('List');
+const log = Logger.get('List');
 
 export default {
   name: 'List',
@@ -293,7 +294,6 @@ export default {
 
     sync() {
       this.$root.$emit('sync.start');
-      //EventBus.emit('sync.request');
     }
   }
 };

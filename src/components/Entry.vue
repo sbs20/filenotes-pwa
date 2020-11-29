@@ -13,7 +13,8 @@
 import Convert from '../classes/utils/convert';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
-import { LocalProvider, Log } from '../services';
+import Logger from '../classes/logger';
+import { LocalProvider } from '../services';
 import { PrismEditor } from 'vue-prism-editor';
 
 import 'vue-prism-editor/dist/prismeditor.min.css';
@@ -25,7 +26,7 @@ import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';
 import 'prismjs/themes/prism-tomorrow.css';
 
-const log = Log.get('File');
+const log = Logger.get('File');
 
 export default {
   name: 'Entry',

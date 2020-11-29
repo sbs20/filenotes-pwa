@@ -1,11 +1,11 @@
 import EventEmitter from './event-emitter';
 import FileContent from './files/file-content';
+import Logger from './logger';
 
-import Log from '../services/log';
 import RemoteProvider from '../services/remote-provider';
 import StorageService from '../services/storage';
 
-const log = Log.get('sync.engine');
+const log = Logger.get('SyncEngine');
 
 /**
  * @returns {Promise.<Array.<Metadata>>}
@@ -128,10 +128,33 @@ export default class SyncEngine extends EventEmitter {
     this[active] = false;
   }
 
+  /**
+   * @returns {boolean}
+   */
   get active() {
     return this[active];
   }
 
+  /**
+   * @returns {Promise.<boolean>}
+   */
+  async isRequired() {
+    if (this.active) {
+      log.debug('Currently syncing.');
+      return false;
+    }
+
+    this[active] = true;
+    const localDeltas = await deltas();
+    const peek = await RemoteProvider.peek();
+    const total = localDeltas.length + peek.length;
+    this[active] = false;
+    return total > 0;
+  }
+
+  /**
+   * @returns {Promise.<void>}
+   */
   async execute() {
     if (this.active) {
       log.info('Already syncing. Terminating');

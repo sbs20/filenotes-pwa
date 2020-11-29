@@ -27,13 +27,11 @@
 </template>
 
 <script>
-import { EventBus, Log, RemoteProvider, StorageService } from '../services';
+import Logger from '../classes/logger';
+import { RemoteProvider, StorageService } from '../services';
 import Navigation from './Navigation';
 
-const log = Log.get('Console');
-
-/** @type {Array.<function(Event):void>} */
-let listeners = [];
+const log = Logger.get('Console');
 
 export default {
   name: 'Console',
@@ -43,9 +41,7 @@ export default {
 
   created() {
     document.addEventListener('keydown', this._onKeys);
-    listeners.push(EventBus.on('console', (e) => {
-      this.messages.push(e.data);
-    }));
+    Logger.subscriber = msg => this.messages.push(msg);
   },
 
   computed: {
@@ -60,16 +56,13 @@ export default {
 
   data() {
     return {
-      messages: [...log.messages]
+      messages: [...Logger.messages]
     };
   },
 
   destroyed() {
     document.removeEventListener('keydown', this._onKeys);
-    while (listeners.length) {
-      const listener = listeners.pop();
-      listener.remove();
-    }
+    Logger.subscriber = undefined;
   },
 
   methods: {
@@ -151,5 +144,7 @@ export default {
   width: 100%;
   height: 24em;
 }
-
+pre {
+    white-space: pre-wrap;
+}
 </style>
