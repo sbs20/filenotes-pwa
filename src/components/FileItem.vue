@@ -76,9 +76,31 @@ export default {
       }
     },
 
+    hasChanged() {
+      return new Promise(resolve => {
+        if (this.text) {
+          const buffer = Convert.stringToArrayBuffer(this.text);
+          const metadata = FileMetadata.create().assign(this.value).data(buffer).value;
+          LocalProvider.get(metadata.key).then(existing => {
+            if (existing && existing.hash === metadata.hash) {
+              resolve(false);
+            }
+            resolve(true);
+          });
+        } else {
+          resolve(false);
+        }
+      });
+    },
+
     highlighter(code) {
       const language = languages.md;
       return highlight(code, language);
+    },
+
+    notify(msg) {
+      log.info(msg);
+      this.$buefy.snackbar.open(msg);
     },
 
     release() {
@@ -126,6 +148,7 @@ export default {
         const metadata = FileMetadata.create().assign(this.value).data(buffer).value;
         LocalProvider.write(metadata, buffer).then((saved) => {
           if (saved) {
+            this.notify(`Saved ${metadata.name}`);
             log.debug('Saved', this.value);
             this.$emit('value', metadata);
           }

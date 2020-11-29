@@ -57,9 +57,18 @@ export default {
       }
     },
 
-    close() {
+    _close() {
       const parent = FilePath.create(this.current.key).directory;
       this.$router.push(`/l/${parent}`);
+    },
+
+    close() {
+      this.$refs.fileItem.hasChanged().then(changed => {
+        if (changed) {
+          this.save();
+        } 
+        this._close();
+      });
     },
 
     load() {
@@ -77,7 +86,7 @@ export default {
     },
 
     save() {
-      this.$refs.fileItem.save();
+      return this.$refs.fileItem.save();
     },
   }
 };
