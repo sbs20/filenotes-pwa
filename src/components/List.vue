@@ -212,8 +212,11 @@ export default {
      * @param {Metadata} entry
      */
     open(entry) {
-      const base = entry.tag === 'folder' ? '/l/' : '/f/';
-      this.$router.push(`${base}${entry.key}`);
+      if (entry.key !== this.$route.params.pathMatch) {
+        const base = entry.tag === 'folder' ? '/l/' : '/f/';
+        const path = `${base}${entry.key}`;
+        this.$router.push(path);
+      }
     },
 
     /**

@@ -7,8 +7,25 @@
       </template>
     </navigation>
 
-    <div>
-      About Filenotes
+    <div class="box">
+      <div class="columns is-mobile">
+        <div class="column is-9">
+          <div class="container">
+            <h1 class="title">
+              Filenotes
+            </h1>
+            <h2 class="subtitle">
+              Access and edit your files locally
+            </h2>
+          </div>
+          <div class="container">
+            
+          </div>
+        </div>
+        <div class="column is-3">
+          <img src="../../public/img/filenotes-88.png">
+        </div>
+      </div>
     </div>
   </div>
 </template>

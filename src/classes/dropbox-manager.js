@@ -9,8 +9,8 @@ const log = Logger.get('DropboxManager');
 export default class DropboxManager extends DropboxProvider {
   constructor() {
     super({
-      clientId: Constants.APP_ID,
-      authUrl: Constants.HOST_URL });
+      clientId: Constants.ApplicationId,
+      authUrl: Constants.HostUrl });
   }
 
   /**

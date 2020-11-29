@@ -1,6 +1,6 @@
 const Constants = {
-  APP_ID: process.env.VUE_APP_DROPBOX_CLIENT_ID,
-  HOST_URL: process.env.VUE_APP_HOST_URL,
+  ApplicationId: process.env.VUE_APP_DROPBOX_CLIENT_ID,
+  HostUrl: process.env.VUE_APP_HOST_URL,
 
   Settings: {
     Name: 'name',
@@ -8,7 +8,9 @@ const Constants = {
     OAuth: 'oauth',
     Pkce: 'pkce',
     Theme: 'theme',
-    Cursor: 'cursor'
+    Cursor: 'cursor',
+    SyncOnChange: 'sync-on-change',
+    AutoSave: 'auto-save'
   },
 
   Themes: {

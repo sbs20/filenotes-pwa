@@ -7,22 +7,92 @@
       </template>
     </navigation>
 
-    <div class="title is-4">Local files</div>
-    <div>
-      Clear local filesystem
-      <button class="button is-primary" @click="clearLocalFs">Clear</button>
-    </div>
+    <settings-section>
+      <template v-slot:title>Sync</template>
+      <template v-slot:items>
+        <settings-item>
+          <template v-slot:description>
+            Reset cursor. Filenotes will no longer know what it has synced and
+            will check every file again. Provided you have local files it will
+            still check file hashes and versions.
+          </template>
+          <template v-slot:action>
+            <button class="button is-primary" @click="clearCursor">Reset</button>          </template>
+        </settings-item>
+        <settings-item>
+          <template v-slot:description>
+            Delete local changes. This will remove records of local changes.
+            This means that they will not be uploaded. If remote files have
+            changed then they may overwrite your local files.
+          </template>
+          <template v-slot:action>
+            <button class="button is-warning" @click="clearLocalDeltas">Clear</button>          </template>
+        </settings-item>
+      </template>
+    </settings-section>
 
-    <div>      
-      <button class="button" @click="clearCursor">Clear cursor</button>
-      <button class="button" @click="clearLocalDeltas">Clear local actions</button>
-      <button class="button" @click="clearLocalFs">Clear local filesystem</button>
-      <button class="button" @click="clearOAuthToken">Clear access token</button>
-      <button class="button" @click="nukeDatabase">Nuke database</button>
+    <settings-section>
+      <template v-slot:title>Connection</template>
+      <template v-slot:items>
+        <settings-item>
+          <template v-slot:description>
+            {{ accountName }} ({{ accountEmail }})
+          </template>
+          <template v-slot:action>
+          </template>
+        </settings-item>
+        <settings-item>
+          <template v-slot:description>
+            Reset connection. This will clear your authentication token and
+            local account settings and require you to log in again.
+          </template>
+          <template v-slot:action>
+            <button class="button is-primary" @click="logout">Logout</button>
+          </template>
+        </settings-item>
+        <settings-item>
+          <template v-slot:description>
+            Force authentication.  
+          </template>
+          <template v-slot:action>
+            <button class="button is-success" @click="forceAuthentication">Login</button>
+          </template>
+        </settings-item>
+      </template>
+    </settings-section>
+
+    <settings-section>
+      <template v-slot:title>Local files</template>
+      <template v-slot:items>
+        <settings-item>
+          <template v-slot:description>Clear local filesystem</template>
+          <template v-slot:action>
+            <button class="button is-primary" @click="clearLocalFs">Clear</button>
+          </template>
+        </settings-item>
+      </template>
+    </settings-section>
+
+    <settings-section>
+      <template v-slot:title>Local storage</template>
+      <template v-slot:items>
+        <settings-item>
+          <template v-slot:description>
+            Nuke database. Completely remove all local files, pending updates
+            and connection settings.
+          </template>
+          <template v-slot:action>
+            <button class="button is-danger" @click="nukeDatabase">Nuke</button>
+          </template>
+        </settings-item>
+      </template>
+    </settings-section>
+
+    <!-- <div>      
       <button class="button" @click="connect1">Connect from storage</button>
       <button class="button" @click="connect2">Connect from code</button>
       <button class="button" @click="connect3">Force auth</button>
-    </div>
+    </div> -->
   </div>
 </template>
 
@@ -30,17 +100,30 @@
 import Logger from '../classes/logger';
 import { RemoteProvider, StorageService } from '../services';
 import Navigation from './Navigation';
+import SettingsSection from './SettingsSection';
+import SettingsItem from './SettingsItem';
+import Constants from '../classes/constants';
 
 const log = Logger.get('Settings');
 
 export default {
   name: 'Settings',
   components: {
-    Navigation
+    Navigation,
+    SettingsSection,
+    SettingsItem
   },
 
   created() {
     document.addEventListener('keydown', this._onKeys);
+    this.load();
+  },
+
+  data() {
+    return {
+      accountName: '',
+      accountEmail: ''
+    };
   },
 
   destroyed() {
@@ -54,19 +137,33 @@ export default {
       }
     },
 
+    load() {
+      StorageService.settings.get(Constants.Settings.Name).then(name => {
+        this.accountName = name;
+      });
+      StorageService.settings.get(Constants.Settings.Email).then(email => {
+        this.accountEmail = email;
+      });
+    },
+
+    notify(msg) {
+      log.info(msg);
+      this.$buefy.snackbar.open(msg);
+    },
+
     close() {
       this.$router.push('/l/');
     },
 
     clearCursor() {
       StorageService.settings.delete('cursor').then(() => {
-        log.info('Cursor cleared');
+        this.notify('Cursor cleared');
       });
     },
 
     clearLocalDeltas() {
       StorageService.fs.delta.clear().then(() => {
-        log.info('Local deltas cleared');
+        this.notify('Local deltas cleared');
       });
     },
 
@@ -76,7 +173,7 @@ export default {
         StorageService.fs.content.clear(),
         StorageService.fs.delta.clear()
       ]).then(() => {
-        log.info('Local database cleared');
+        this.notify('Local database cleared');
       });
     },
 
@@ -84,16 +181,20 @@ export default {
       // TODO
     },
 
-    clearOAuthToken() {
-      StorageService.settings.delete('oauth').then(() => {
-        log.info('Access token cleared');
+    logout() {
+      RemoteProvider.clear().then(() => {
+        this.notify('Logged out');
       });
     },
 
     nukeDatabase() {
       StorageService.deleteDatatabase().then(() => {
-        log.info('Local database deleted');
+        this.notify('Local database deleted');
       });
+    },
+
+    forceAuthentication() {
+      RemoteProvider.startAuthentication(window);
     },
 
     causeRemoteError() {
@@ -107,10 +208,11 @@ export default {
     connect2() {
       RemoteProvider.startFromQueryString(window.location.search).then(this.afterConnect);
     },
-
-    connect3() {
-      RemoteProvider.startAuthentication(window);
-    }
   }
 };
 </script>
+<style scoped>
+.float-right {
+  float: right;
+}
+</style>
