@@ -12,7 +12,7 @@
         <div class="column is-9">
           <div class="container">
             <h1 class="title">
-              Filenotes
+              Filenotes v{{ version }}
             </h1>
             <h2 class="subtitle">
               Access and edit your files locally
@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import Constants from '../classes/constants';
 import Navigation from './Navigation';
 
 export default {
@@ -41,6 +42,12 @@ export default {
 
   created() {
     document.addEventListener('keydown', this._onKeys);
+  },
+
+  data() {
+    return {
+      version: Constants.Version
+    };
   },
 
   destroyed() {
