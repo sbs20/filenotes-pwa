@@ -23,6 +23,18 @@ import FileItem from './FileItem';
 
 export default {
   name: 'File',
+
+  beforeRouteLeave(to, from, next) {
+    // Catches back button (close is not called)
+    this.beforeClose().then(close => {
+      if (close) {
+        next();
+      } else {
+        next(false);
+      }
+    });
+  },
+
   components: {
     FileItem,
     Navigation
@@ -57,17 +69,30 @@ export default {
       }
     },
 
-    _close() {
+    afterClose() {
       const parent = FilePath.create(this.current.key).directory;
       this.$router.push(`/l/${parent}`);
     },
 
+    /**
+     * @returns {Promise.<boolean>}
+     */
+    beforeClose() {
+      return new Promise(resolve => {
+        this.$refs.fileItem.hasChanged().then(changed => {
+          if (changed) {
+            this.save();
+          }
+          resolve(true);
+        });
+      });
+    },
+
     close() {
-      this.$refs.fileItem.hasChanged().then(changed => {
-        if (changed) {
-          this.save();
-        } 
-        this._close();
+      this.beforeClose().then(close => {
+        if (close) {
+          this.afterClose();
+        }
       });
     },
 

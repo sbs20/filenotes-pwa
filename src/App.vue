@@ -3,7 +3,7 @@
     <div class="container">
       <install></install>
       <div id="progress" v-if="progress.show">
-        <b-progress type="is-primary" size="is-small" :value="progress.value" show-value></b-progress>
+        <b-progress type="is-primary" size="is-small" :value="progress.value" :show-value="false"></b-progress>
       </div>
       <transition name="fade" mode="out-in">
         <router-view></router-view>
@@ -63,7 +63,7 @@ export default {
         /** @type {string} */
         const path = this.$route.params.pathMatch;
         if (path === undefined) {
-          this.$router.push('/l/');
+          this.$router.replace('/l/');
         }
         SyncEngine.isRequired().then(required => {
           const msg = required ? 'Sync required' : 'Up to date';
