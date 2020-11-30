@@ -32,7 +32,11 @@ export default {
   name: 'FileItem',
   props: {
     /** @type {Metadata} */
-    value: Object
+    value: Object,
+    autoSync: {
+      type: Boolean,
+      default: false
+    }
   },
 
   components: {
@@ -151,12 +155,19 @@ export default {
             this.notify(`Saved ${metadata.name}`);
             log.debug('Saved', this.value);
             this.$emit('value', metadata);
+            if (this.autoSync) {
+              this.sync();
+            }
           }
         });
       } else {
         log.debug('No text to save');
       }
     },
+
+    sync() {
+      this.$root.$emit('sync.start');
+    }
   }
 };
 </script>

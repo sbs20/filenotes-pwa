@@ -28,6 +28,7 @@ export default {
 
   data() {
     return {
+      autoSync: true,
       progress: {
         show: false,
         value: 0
@@ -65,11 +66,15 @@ export default {
         if (path === undefined) {
           this.$router.replace('/l/');
         }
-        SyncEngine.isRequired().then(required => {
-          const msg = required ? 'Sync required' : 'Up to date';
-          log.info(msg);
-          this.$buefy.snackbar.open(msg);
-        });
+        if (this.autoSync) {
+          this.sync();
+        } else {
+          SyncEngine.isRequired().then(required => {
+            const msg = required ? 'Sync required' : 'Up to date';
+            log.info(msg);
+            this.$buefy.snackbar.open(msg);
+          });
+        }
       } else {
         const msg = 'Not connected';
         log.info(msg);
@@ -89,14 +94,14 @@ export default {
       this.progress.show = true;
       SyncEngine.on('progress', this.updateProgress);
       SyncEngine.execute().then(() => {
-        this.$buefy.snackbar.open('Sync complete');
+        this.$buefy.snackbar.open('Up to date');
         SyncEngine.off('progress');
         this.progress.show = false;
         this.progress.value = 0;
         this.$root.$emit('sync.finish');
       }).catch(reason => {
         this.$buefy.snackbar.open({
-          message: 'Sync error',
+          message: `Sync error: ${reason}`,
           type: 'is-danger'
         });
 

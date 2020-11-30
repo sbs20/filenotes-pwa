@@ -10,7 +10,7 @@
       </template>
     </navigation>
 
-    <file-item ref="fileItem" v-model="current"></file-item>
+    <file-item ref="fileItem" :autoSync="autoSync" v-model="current"></file-item>
   </div>
 </template>
 
@@ -23,6 +23,17 @@ import FileItem from './FileItem';
 
 export default {
   name: 'File',
+
+  props: {
+    autoSave: {
+      type: Boolean,
+      default: true
+    },
+    autoSync: {
+      type: Boolean,
+      default: true
+    }
+  },
 
   beforeRouteLeave(to, from, next) {
     // Catches back button (close is not called)
@@ -81,9 +92,16 @@ export default {
       return new Promise(resolve => {
         this.$refs.fileItem.hasChanged().then(changed => {
           if (changed) {
-            this.save();
+            if (this.autoSave) {
+              this.save();
+              resolve(true);
+            } else {
+              // TODO Prompt
+              resolve(false);
+            }
+          } else {
+            resolve(true);
           }
-          resolve(true);
         });
       });
     },
@@ -111,7 +129,7 @@ export default {
     },
 
     save() {
-      return this.$refs.fileItem.save();
+      this.$refs.fileItem.save();
     },
   }
 };
