@@ -94,6 +94,16 @@ export default {
         this.progress.show = false;
         this.progress.value = 0;
         this.$root.$emit('sync.finish');
+      }).catch(reason => {
+        this.$buefy.snackbar.open({
+          message: 'Sync error',
+          type: 'is-danger'
+        });
+
+        SyncEngine.off('progress');
+        this.progress.show = false;
+        this.progress.value = 0;
+        this.$root.$emit('sync.finish');
       });
     },
 
