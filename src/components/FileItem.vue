@@ -173,17 +173,19 @@ export default {
   min-height: 12em;
   white-space: nowrap;
   overflow: auto;
+  /* caret-color: aqua; */
 }
 
-/* optional class for removing the outline */
-.prism-editor__textarea:focus {
-  outline: #2d2d2d;
-}
 </style>
 
 <style>
 .prism-editor__editor .title {
   font-size: 1rem;
+}
+
+/* Removing the outline, and show the caret (?) */
+.prism-editor__textarea:focus {
+  outline: #2d2d2d;
 }
 
 .audio-canvas {

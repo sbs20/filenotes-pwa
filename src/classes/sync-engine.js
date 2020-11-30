@@ -144,12 +144,18 @@ export default class SyncEngine extends EventEmitter {
       return false;
     }
 
-    this[active] = true;
-    const localDeltas = await deltas();
-    const peek = await RemoteProvider.peek();
-    const total = localDeltas.length + peek.length;
-    this[active] = false;
-    return total > 0;
+    try {
+      this[active] = true;
+      const localDeltas = await deltas();
+      const peek = await RemoteProvider.peek();
+      const total = localDeltas.length + peek.length;
+      this[active] = false;
+      return total > 0;
+    } catch (error) {
+      log.error('Unable to reach server', error);
+      this[active] = false;
+      throw error;
+    }
   }
 
   /**
