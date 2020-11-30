@@ -94,6 +94,7 @@ export default {
         SyncEngine.off('progress');
         this.progress.show = false;
         this.progress.value = 0;
+        this.$root.$emit('sync.finish');
       });
     },
 

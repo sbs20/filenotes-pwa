@@ -101,10 +101,12 @@ export default {
 
   created() {
     document.addEventListener('keydown', this._onKeys);
+    this.$root.$on('sync.finish', this.refresh);
   },
 
   destroyed() {
     document.removeEventListener('keydown', this._onKeys);
+    this.$root.$off('sync.finish', this.refresh);
   },
 
   data() {
