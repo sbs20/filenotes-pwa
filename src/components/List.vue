@@ -4,14 +4,17 @@
       <template v-slot:header>
       </template>
       <template v-slot:end>
+        <b-navbar-item tag="a" @click="sync">
+          <b-icon class="mr-4" icon="sync"></b-icon>Sync
+        </b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/console' }">
-          <b-icon class="pr-4" icon="console"></b-icon>Console
+          <b-icon class="mr-4" icon="console"></b-icon>Console
         </b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/settings' }">
-          <b-icon class="pr-4" icon="cog"></b-icon>Settings
+          <b-icon class="mr-4" icon="cog"></b-icon>Settings
         </b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/about' }">
-          <b-icon class="pr-4" icon="information"></b-icon>About
+          <b-icon class="mr-4" icon="information"></b-icon>About
         </b-navbar-item>
       </template>
     </navigation>
@@ -32,12 +35,12 @@
         <b-dropdown-item aria-role="listitem" @click="mktext">
           <b-icon class="pr-4" icon="file-plus"></b-icon>Text file
         </b-dropdown-item>
-        <b-dropdown-item aria-role="listitem">
+        <!-- <b-dropdown-item aria-role="listitem">
           <b-icon class="pr-4" icon="microphone-plus"></b-icon>Audio file
         </b-dropdown-item>
         <b-dropdown-item aria-role="listitem">
           <b-icon class="pr-4" icon="image-plus"></b-icon>Image file
-        </b-dropdown-item>
+        </b-dropdown-item> -->
       </b-dropdown>
     </div>
     <div class="pl-4 title is-4">

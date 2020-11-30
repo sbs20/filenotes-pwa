@@ -85,7 +85,6 @@ export default {
     },
 
     sync() {
-      this.$buefy.snackbar.open('Sync started');
       this.progress.value = 0;
       this.progress.show = true;
       SyncEngine.on('progress', this.updateProgress);
@@ -114,7 +113,7 @@ export default {
   position: fixed;
   left: 0;
   right: 0;
-  top: 3rem;
+  top: 4rem;
   width: 100%;
   z-index: 50;
 }

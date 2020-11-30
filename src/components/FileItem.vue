@@ -185,7 +185,7 @@ export default {
 
 /* Removing the outline, and show the caret (?) */
 .prism-editor__textarea:focus {
-  outline: #2d2d2d;
+  outline: none;
 }
 
 .audio-canvas {

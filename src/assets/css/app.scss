@@ -2,13 +2,15 @@
 @import "~bulma/sass/utilities/initial-variables";
 
 // See https://bulma.io/documentation/customize/variables/
-$navbar-height: 2rem;
-$navbar-padding-vertical: 10rem;
+$navbar-height: 4rem;
+//$navbar-padding-vertical: 20rem;
 $navbar-breakpoint: $tablet;
 
 .has-navbar-fixed-top {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
 }
+
+
 
 $grey-accent: hsl(0, 0%, 14%);
 $grey-darker: hsl(0, 0%, 21%);

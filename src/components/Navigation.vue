@@ -9,6 +9,7 @@
       </b-navbar-item>
     </template>
     <template v-slot:start>
+      <div></div>
     </template>
     <template v-slot:end>
       <slot name="end">
@@ -18,7 +19,7 @@
 </template>
 
 <style scoped>
-.navigation-header {
+/* .navigation-header {
   padding-top: 1.5rem;
-}
+} */
 </style>

@@ -1,4 +1,4 @@
-const SIZE = 128;
+const SIZE = 512;
 
 const singleton = {
   /** @type {Array.<string>} */
