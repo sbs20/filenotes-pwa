@@ -152,7 +152,7 @@ export default {
     },
 
     close() {
-      this.$router.push('/l/');
+      this.$router.go(-1);
     },
 
     clearCursor() {
@@ -188,7 +188,7 @@ export default {
     },
 
     nukeDatabase() {
-      StorageService.deleteDatatabase().then(() => {
+      StorageService.deleteDatabase().then(() => {
         this.notify('Local database deleted');
       });
     },

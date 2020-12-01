@@ -17,6 +17,13 @@ const Constants = {
   Themes: {
     Light: 'light',
     Dark: 'dark'
+  },
+
+  Event: {
+    Sync: {
+      Start: 'sync.start',
+      Finish: 'sync.finish'
+    }
   }
 };
 

@@ -13,7 +13,10 @@ export default class Storage {
     this.settings = new KeyValueStore(STORE_SETTINGS);
   }
 
-  deleteDatatabase() {
-    new Database().delete();
+  /**
+   * @returns {Promise.<void>}
+   */
+  async deleteDatabase() {
+    await new Database().delete();
   }
 }

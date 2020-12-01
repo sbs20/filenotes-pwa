@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import Constants from '../classes/constants';
 import Convert from '../classes/utils/convert';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
@@ -155,9 +156,7 @@ export default {
             this.notify(`Saved ${metadata.name}`);
             log.debug('Saved', this.value);
             this.$emit('value', metadata);
-            if (this.autoSync) {
-              this.sync();
-            }
+            this.sync();
           }
         });
       } else {
@@ -166,7 +165,9 @@ export default {
     },
 
     sync() {
-      this.$root.$emit('sync.start');
+      if (this.autoSync) {
+        this.$root.$emit(Constants.Event.Sync.Start);
+      }
     }
   }
 };
@@ -175,16 +176,15 @@ export default {
 <style scoped>
 /* required class */
 .editor {
-  /* background: #2d2d2d; */
   color: #ccc;
-  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
-  font-size: 1em;
-  line-height: 1.5em;
-  padding: 0.5em;
-  min-height: 12em;
+  font-family: Fira code, Fira Mono, Roboto Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  padding: 0.5rem;
+  min-height: 12rem;
   white-space: nowrap;
   overflow: auto;
-  /* caret-color: aqua; */
+  font-weight: 100;
 }
 
 </style>

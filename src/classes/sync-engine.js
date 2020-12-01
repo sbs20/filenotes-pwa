@@ -175,7 +175,7 @@ export default class SyncEngine extends EventEmitter {
     try {
       const localDeltas = await deltas();
       const peek = await RemoteProvider.peek();
-      const total = localDeltas.length + peek.length;
+      const total = (localDeltas.length * 2) + peek.length;
       const completed = count => {
         return 100 * count * (1 / total);
       };
@@ -191,12 +191,10 @@ export default class SyncEngine extends EventEmitter {
 
       const remoteDeltas = await RemoteProvider.list();
       // There doesn't appear to be rate limiting for downloads
-      await Promise.all(remoteDeltas.map(delta => applyLocal(delta).then((update) => {
-        if (update) {
-          this.emit('progress', {
-            value: completed(++index)
-          });
-        }
+      await Promise.all(remoteDeltas.map(delta => applyLocal(delta).then(() => {
+        this.emit('progress', {
+          value: completed(++index)
+        });
       })));
 
       await StorageService.settings.set('cursor', RemoteProvider.cursor);

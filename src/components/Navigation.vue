@@ -4,7 +4,7 @@
       <b-navbar-item tag="a" href="/">
         <img src="../../public/img/filenotes-88.png" alt="Filenotes">
       </b-navbar-item>
-      <b-navbar-item tag="div" class="has-text-weight-bold is-size-5">
+      <b-navbar-item tag="div" class="has-text-weight-bold is-size-4">
         <slot name="header">Filenotes</slot>
       </b-navbar-item>
     </template>

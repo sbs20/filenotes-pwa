@@ -2,14 +2,14 @@
   <div class="media" @click="$emit('open', value)">
     <div class="media-left">
       <flash :value="value"></flash>
-      <b-icon :icon="icon"></b-icon>
+      <b-icon class="pt-3" :icon="icon"></b-icon>
     </div>
     <div class="media-content">
-      <div>{{ value.name }}&nbsp;</div>
-      <div>{{ description }}&nbsp;</div>
+      <div class="is-size-5">{{ value.name }}&nbsp;</div>
+      <div class="is-size-7">{{ description }}&nbsp;</div>
     </div>
     <div class="media-right" v-on:click.stop>
-      <b-dropdown v-if="value.path" :mobile-modal="false" position="is-bottom-left" aria-role="list">
+      <b-dropdown class="pt-2" v-if="value.path" :mobile-modal="false" position="is-bottom-left" aria-role="list">
         <b-icon icon="dots-vertical" slot="trigger"></b-icon>
         <b-dropdown-item aria-role="listitem" @click="$emit('rename', value)">Rename</b-dropdown-item>
         <b-dropdown-item aria-role="listitem" @click="$emit('move', value)">Move</b-dropdown-item>
@@ -87,10 +87,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.file-entry {
-  height: 3.5rem;
-  cursor: pointer;
-}
-</style>

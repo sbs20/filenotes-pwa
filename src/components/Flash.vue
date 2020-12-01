@@ -35,7 +35,7 @@ export default {
 <style scoped>
 .flash {
   width: 0.25rem;
-  height: 3rem;
+  min-height: 3rem;
   float: left;
   margin-right: 0.75em;
 }

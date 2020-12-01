@@ -62,7 +62,7 @@ export default {
     },
 
     close() {
-      this.$router.push('/l/');
+      this.$router.go(-1);
     }
   }
 };

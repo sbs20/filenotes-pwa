@@ -2,8 +2,9 @@
   <div>
     <div class="container">
       <install></install>
-      <div id="progress" v-if="progress.show">
-        <b-progress type="is-primary" size="is-small" :value="progress.value" :show-value="false"></b-progress>
+      <div id="progress">
+        <b-progress v-if="progress.show" type="is-primary" size="is-small" :value="progress.value" :show-value="false"></b-progress>
+        <b-progress v-if="progress.status" :type="progress.status" size="is-small" :value="100" :show-value="false"></b-progress>
       </div>
       <transition name="fade" mode="out-in">
         <router-view></router-view>
@@ -13,6 +14,7 @@
 </template>
 
 <script>
+import Constants from './classes/constants';
 import Logger from './classes/logger';
 import { RemoteProvider, SyncEngine } from './services';
 import Install from './components/Install';
@@ -30,6 +32,7 @@ export default {
     return {
       autoSync: true,
       progress: {
+        status: '',
         show: false,
         value: 0
       }
@@ -42,7 +45,7 @@ export default {
   },
 
   created() {
-    this.$root.$on('sync.start', this.sync);
+    this.$root.$on(Constants.Event.Sync.Start, this.syncStart);
     document.addEventListener('isUpdateAvailable', (available) => {
       if (available) {
         const msg = 'New version available. Refresh to install';
@@ -55,7 +58,7 @@ export default {
   },
 
   destroyed() {
-    this.$root.$off('sync.start', this.sync);
+    this.$root.$off(Constants.Event.Sync.Start, this.syncStart);
   },
 
   methods: {
@@ -67,7 +70,7 @@ export default {
           this.$router.replace('/l/');
         }
         if (this.autoSync) {
-          this.sync();
+          this.syncStart();
         } else {
           SyncEngine.isRequired().then(required => {
             const msg = required ? 'Sync required' : 'Up to date';
@@ -89,26 +92,26 @@ export default {
       this.progress.value = event.value;
     },
 
-    sync() {
+    syncFinish(success) {
+      this.progress.show = false;
+      this.progress.value = 0;
+      this.$root.$emit(Constants.Event.Sync.Finish);
+      this.progress.status = success ? 'is-success' : 'is-danger';
+      setTimeout(() => this.progress.status = '', 2000);
+    },
+
+    syncStart() {
       this.progress.value = 0;
       this.progress.show = true;
       SyncEngine.on('progress', this.updateProgress);
       SyncEngine.execute().then(() => {
-        this.$buefy.snackbar.open('Up to date');
         SyncEngine.off('progress');
-        this.progress.show = false;
-        this.progress.value = 0;
-        this.$root.$emit('sync.finish');
+        this.syncFinish(true);
       }).catch(reason => {
-        this.$buefy.snackbar.open({
-          message: `Sync error: ${reason}`,
-          type: 'is-danger'
-        });
-
         SyncEngine.off('progress');
-        this.progress.show = false;
-        this.progress.value = 0;
-        this.$root.$emit('sync.finish');
+        const msg = `Sync error: ${reason}`;
+        log.error(msg);
+        this.syncFinish(false);
       });
     },
 

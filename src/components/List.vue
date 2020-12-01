@@ -4,8 +4,8 @@
       <template v-slot:header>
       </template>
       <template v-slot:end>
-        <b-navbar-item tag="a" @click="sync">
-          <b-icon class="mr-4" icon="sync"></b-icon>Sync
+        <b-navbar-item tag="a" @click="syncForce">
+          <b-icon class="mr-4" icon="sync"></b-icon>Force Sync
         </b-navbar-item>
         <b-navbar-item tag="router-link" :to="{ path: '/console' }">
           <b-icon class="mr-4" icon="console"></b-icon>Console
@@ -69,7 +69,8 @@
 </template>
 
 <script>
-import { LocalProvider } from '../services';
+import Constants from '../classes/constants';
+import { LocalProvider, StorageService } from '../services';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
@@ -104,17 +105,19 @@ export default {
 
   created() {
     document.addEventListener('keydown', this._onKeys);
-    this.$root.$on('sync.finish', this.refresh);
+    this.$root.$on(Constants.Event.Sync.Finish, this.refresh);
   },
 
   destroyed() {
     document.removeEventListener('keydown', this._onKeys);
-    this.$root.$off('sync.finish', this.refresh);
+    this.$root.$off(Constants.Event.Sync.Finish, this.refresh);
   },
 
   data() {
     this.refresh();
     return {
+      autoSync: true,
+
       /** @type {Metadata} */
       current: null,
 
@@ -183,8 +186,8 @@ export default {
             const content = new Uint8Array();
             const metadata = FileMetadata.create().path(path).data(content).value;
             LocalProvider.write(metadata, content).then(() => {
+              this.sync();
               this.open(metadata);
-              //this.refresh()
             });
           }
         });
@@ -206,6 +209,7 @@ export default {
                 console.log(`Directory '${dir}' already exists`);
               } else {
                 LocalProvider.mkdir(dir).then(() => {
+                  this.sync();
                   this.refresh();
                 });
               }
@@ -231,6 +235,7 @@ export default {
      */
     remove(entry) {
       LocalProvider.delete(entry.path).then(() => {
+        this.sync();
         this.refresh();
       });
     },
@@ -255,6 +260,7 @@ export default {
             } else {
               console.log(`move ${source} to ${destination}`);
               LocalProvider.move(source, destination).then(() => {
+                this.sync();
                 this.refresh();
               });
             }
@@ -289,6 +295,7 @@ export default {
               console.log(`Destination '${destination}' already exists`);
             } else {
               LocalProvider.move(source, destination).then(() => {
+                this.sync();
                 this.refresh();
               });
             }
@@ -303,7 +310,15 @@ export default {
     },
 
     sync() {
-      this.$root.$emit('sync.start');
+      if (this.autoSync) {
+        this.$root.$emit(Constants.Event.Sync.Start);
+      }
+    },
+
+    syncForce() {
+      StorageService.settings.delete('cursor').then(() => {
+        this.$root.$emit(Constants.Event.Sync.Start);
+      });
     }
   }
 };
@@ -317,7 +332,7 @@ export default {
   margin-right: 0.75em;
 }
 .file-entry {
-  height: 3.5rem;
+  min-height: 3.5rem;
   padding: 0 0.5rem 0 0.5rem;
   cursor: pointer;
 }
