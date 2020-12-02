@@ -1,5 +1,7 @@
 process.env.VUE_APP_VERSION = require('./package.json').version
 
+const NAME = 'Filenotes';
+
 module.exports = {
   configureWebpack: {        
     devServer: {
@@ -9,8 +11,15 @@ module.exports = {
     }
   },
 
+  pages: {
+    index: {
+      entry: 'src/main.js',
+      title: NAME
+    }
+  },
+
   pwa: {
-    name: 'Filenotes',
+    name: NAME,
     themeColor: '#ffffff',
     msTileColor: '#000000',
     appleMobileWebAppCapable: 'yes',
