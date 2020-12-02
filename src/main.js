@@ -11,6 +11,7 @@ import Buefy from 'buefy';
 
 // https://github.com/buefy/buefy/issues/1500
 import '@mdi/font/css/materialdesignicons.css';
+import 'fontsource-cascadia-code';
 
 import './registerServiceWorker';
 

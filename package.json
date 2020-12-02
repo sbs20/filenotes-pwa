@@ -1,6 +1,6 @@
 {
   "name": "filenotes-pwa",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -12,6 +12,7 @@
     "buefy": "^0.9.4",
     "core-js": "^3.6.5",
     "dropbox": "^7.1.0",
+    "fontsource-cascadia-code": "3.0.5",
     "idb": "5.0.6",
     "luxon": "^1.25.0",
     "prismjs": "1.21.0",

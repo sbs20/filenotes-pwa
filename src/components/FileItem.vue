@@ -177,9 +177,9 @@ export default {
 /* required class */
 .editor {
   color: #ccc;
-  font-family: Fira code, Fira Mono, Roboto Mono, Consolas, Menlo, Courier, monospace;
+  font-family: Cascadia Code, Roboto Mono, Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
   font-size: 1rem;
-  line-height: 1.5rem;
+  line-height: 1.75rem;
   padding: 0.5rem;
   min-height: 12rem;
   white-space: nowrap;
@@ -202,7 +202,7 @@ export default {
 .audio-canvas {
   background: #2d2d2d;
   color: #ccc;
-  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-family: Cascadia Code, Roboto Mono, Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
   font-size: 1em;
   line-height: 1.5em;
   padding: 0.5em;
