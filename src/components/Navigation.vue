@@ -1,5 +1,5 @@
 <template>
-  <b-navbar :fixed-top="true" :shadow="false">
+  <b-navbar :fixed-top="true" :shadow="false" :class="menu ? '' : 'nomenu'">
     <template v-slot:brand>
       <b-navbar-item tag="a" href="/">
         <img src="../../public/img/filenotes-88.png" alt="Filenotes">
@@ -18,8 +18,47 @@
   </b-navbar>
 </template>
 
-<style scoped>
-/* .navigation-header {
-  padding-top: 1.5rem;
-} */
+
+<script>
+export default {
+  name: 'Navigation',
+
+  props: {
+    menu: {
+      type: Boolean,
+      default: true
+    }
+  }
+};
+</script>
+
+<style>
+/**
+ * The following CSS overrides the burger / @media queries so that
+ * the navbar buttons are always visible.
+ */
+.nomenu .navbar-menu {
+  flex-grow: 1;
+  flex-shrink: 0;
+}
+
+.nomenu.navbar, .nomenu .navbar-menu, .nomenu .navbar-start, .nomenu .navbar-end {
+  align-items: stretch;
+  display: flex;
+}
+
+.nomenu .navbar-item, .nomenu .navbar-link {
+  align-items: center;
+  display: flex;
+}
+
+.nomenu .navbar-end {
+  justify-content: flex-end;
+  margin-left: auto;
+}
+
+.nomenu .navbar-burger {
+  display: none;
+}
+
 </style>

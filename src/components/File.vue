@@ -1,11 +1,11 @@
 <template>
   <div>
-    <navigation>
+    <navigation :menu="false">
       <template v-slot:header>
         {{ current.name }}
       </template>
       <template v-slot:end>
-        <b-navbar-item @click="save"><b-icon icon="content-save"></b-icon></b-navbar-item>
+        <b-navbar-item v-if="!autoSave" @click="save"><b-icon icon="content-save"></b-icon></b-navbar-item>
         <b-navbar-item @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
       </template>
     </navigation>
@@ -23,17 +23,6 @@ import FileItem from './FileItem';
 
 export default {
   name: 'File',
-
-  props: {
-    autoSave: {
-      type: Boolean,
-      default: true
-    },
-    autoSync: {
-      type: Boolean,
-      default: true
-    }
-  },
 
   beforeRouteLeave(to, from, next) {
     // Catches back button (close is not called)
@@ -53,6 +42,9 @@ export default {
 
   data() {
     return {
+      autoSave: true,
+      autoSync: true,
+
       /** @type {Metadata} */
       current: {},
     };
@@ -134,6 +126,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-</style>
