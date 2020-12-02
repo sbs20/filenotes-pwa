@@ -3,7 +3,6 @@
 
 // See https://bulma.io/documentation/customize/variables/
 $navbar-height: 4rem;
-//$navbar-padding-vertical: 20rem;
 $navbar-breakpoint: $tablet;
 
 .has-navbar-fixed-top {
@@ -108,6 +107,7 @@ $dropdown-item-hover-color: $primary;
 
 
 
+// Other
 @import "~bulma";
 @import "~buefy/src/scss/buefy";
 
@@ -186,12 +186,6 @@ $dropdown-item-hover-color: $primary;
   .navbar-dropdown {
     border: 1px solid $grey-darker;
   }
-
-  @include touch {
-    .navbar-menu {
-      background-color: $navbar-background-color;
-    }
-  }
 }
 
 .hero {
@@ -201,5 +195,15 @@ $dropdown-item-hover-color: $primary;
     .navbar-dropdown {
       border: none;
     }
+  }
+}
+
+// Custom again
+// This spaces out menu items as a dropdown
+.navbar {
+  .navbar-brand,
+  .navbar-item {
+    align-items: center;
+    height: 4rem;
   }
 }
