@@ -8,11 +8,6 @@
     </navigation>
 
     <div>
-      <button class="button" @click="clearLog">Clear log</button>
-      <button class="button" @click="causeRemoteError">Force remote error</button>
-    </div>
-
-    <div>
       <pre id="log">{{ text }}</pre>
     </div>
   </div>
@@ -20,10 +15,7 @@
 
 <script>
 import Logger from '../classes/logger';
-import { RemoteProvider } from '../services';
 import Navigation from './Navigation';
-
-const log = Logger.get('Console');
 
 export default {
   name: 'Console',
@@ -66,15 +58,6 @@ export default {
 
     close() {
       this.$router.go(-1);
-    },
-
-    clearLog() {
-      // TODO
-    },
-
-    causeRemoteError() {
-      log.debug('Causing an error');
-      RemoteProvider.read('/non-existent-file');
     },
   }
 };
