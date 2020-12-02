@@ -40,6 +40,8 @@ export default {
 .nomenu .navbar-menu {
   flex-grow: 1;
   flex-shrink: 0;
+  height: 4rem;
+  padding: 0.5rem 0;
 }
 
 .nomenu.navbar, .nomenu .navbar-menu, .nomenu .navbar-start, .nomenu .navbar-end {
@@ -50,6 +52,7 @@ export default {
 .nomenu .navbar-item, .nomenu .navbar-link {
   align-items: center;
   display: flex;
+  height: 3rem;
 }
 
 .nomenu .navbar-end {
