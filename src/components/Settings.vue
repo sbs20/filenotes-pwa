@@ -123,7 +123,7 @@
 import Logger from '../classes/logger';
 import Settings from '../classes/settings';
 import Storage from '../classes/data/storage';
-import { RemoteProvider } from '../services';
+import RemoteProvider from '../classes/remote-provider';
 import Navigation from './Navigation';
 import SettingsSection from './SettingsSection';
 import SettingsItem from './SettingsItem';
@@ -131,6 +131,7 @@ import SettingsItem from './SettingsItem';
 const log = Logger.get('Settings');
 const settings = Settings.instance();
 const storage = Storage.instance();
+const remote = RemoteProvider.instance();
 
 export default {
   name: 'Settings',
@@ -217,7 +218,7 @@ export default {
     },
 
     logout() {
-      RemoteProvider.clear().then(() => {
+      remote.clear().then(() => {
         this.notify('Logged out');
       });
     },
@@ -229,19 +230,19 @@ export default {
     },
 
     forceAuthentication() {
-      RemoteProvider.startAuthentication(window);
+      remote.startAuthentication(window);
     },
 
     causeRemoteError() {
-      RemoteProvider.read('/non-existent-file');
+      remote.read('/non-existent-file');
     },
 
     connect1() {
-      RemoteProvider.startFromToken().then(this.afterConnect);
+      remote.startFromToken().then(this.afterConnect);
     },
 
     connect2() {
-      RemoteProvider.startFromQueryString(window.location.search).then(this.afterConnect);
+      remote.startFromQueryString(window.location.search).then(this.afterConnect);
     },
   },
 

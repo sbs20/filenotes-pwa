@@ -17,7 +17,7 @@
 import Constants from './classes/constants';
 import Logger from './classes/logger';
 import SyncEngine from './classes/sync-engine';
-import { RemoteProvider } from './services';
+import RemoteProvider from './classes/remote-provider';
 import Install from './components/Install';
 
 const log = Logger.get('App');
@@ -118,7 +118,7 @@ export default {
     },
 
     start() {
-      RemoteProvider.start(window).then(this.onConnect);
+      RemoteProvider.instance().start(window).then(this.onConnect);
     },
   }
 };

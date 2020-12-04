@@ -1,11 +1,11 @@
 import EventEmitter from './event-emitter';
 import FileContent from './files/file-content';
 import Logger from './logger';
+import RemoteProvider from './remote-provider';
 import Storage from './data/storage';
 
-import RemoteProvider from '../services/remote-provider';
-
 const storage = Storage.instance();
+const remote = RemoteProvider.instance();
 const log = Logger.get('SyncEngine');
 
 /**
@@ -35,7 +35,7 @@ async function applyLocal(metadata) {
   switch (metadata.tag) {
     case 'file': {
       if (local === undefined || metadata.hash !== local.hash) {
-        const buffer = await RemoteProvider.read(metadata.key);
+        const buffer = await remote.read(metadata.key);
         const content = FileContent.create(metadata.key, buffer);
         await storage.fs.content.writeAll([content]);   
         await storage.fs.metadata.writeAll([metadata]);
@@ -84,7 +84,7 @@ async function applyRemote(metadata) {
     case 'file': {
       /** @type {Content} */
       const content = await storage.fs.content.read(metadata.key);
-      const response = await RemoteProvider.write(metadata, content.data);
+      const response = await remote.write(metadata, content.data);
       if (response.key === metadata.key) {
         // Write the response in order to get the revision update
         await storage.fs.metadata.writeAll([response]);
@@ -103,12 +103,12 @@ async function applyRemote(metadata) {
     }
 
     case 'folder':
-      await RemoteProvider.mkdir(metadata.path);
+      await remote.mkdir(metadata.path);
       log.info(`created remote directory: ${metadata.key}`);
       break;
 
     case 'deleted':
-      await RemoteProvider.delete(metadata.path);
+      await remote.delete(metadata.path);
       log.info(`deleted remote file: ${metadata.key}`);  
       break;
 
@@ -149,7 +149,7 @@ export default class SyncEngine extends EventEmitter {
     try {
       this[active] = true;
       const localDeltas = await deltas();
-      const peek = await RemoteProvider.peek();
+      const peek = await remote.peek();
       const total = localDeltas.length + peek.length;
       this[active] = false;
       return total > 0;
@@ -172,11 +172,11 @@ export default class SyncEngine extends EventEmitter {
     this[active] = true;
     log.info('Started');
     const cursor = await storage.settings.get('cursor');
-    RemoteProvider.cursor = cursor;
+    remote.cursor = cursor;
 
     try {
       const localDeltas = await deltas();
-      const peek = await RemoteProvider.peek();
+      const peek = await remote.peek();
       const total = (localDeltas.length * 2) + peek.length;
       const completed = count => {
         return 100 * count * (1 / total);
@@ -191,7 +191,7 @@ export default class SyncEngine extends EventEmitter {
         });
       }
 
-      const remoteDeltas = await RemoteProvider.list();
+      const remoteDeltas = await remote.list();
       // There doesn't appear to be rate limiting for downloads
       await Promise.all(remoteDeltas.map(delta => applyLocal(delta).then(() => {
         this.emit('progress', {
@@ -199,7 +199,7 @@ export default class SyncEngine extends EventEmitter {
         });
       })));
 
-      await storage.settings.set('cursor', RemoteProvider.cursor);
+      await storage.settings.set('cursor', remote.cursor);
       log.info('Finished');
       this[active] = false;
     } catch (error) {

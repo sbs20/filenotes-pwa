@@ -7,6 +7,8 @@ import Storage from './data/storage';
 const storage = Storage.instance();
 const log = Logger.get('DropboxManager');
 
+let instance = null;
+
 export default class DropboxManager extends DropboxProvider {
   constructor() {
     super({
@@ -127,5 +129,15 @@ export default class DropboxManager extends DropboxProvider {
       log.info(`Logged in as ${this.accountName} (${this.accountEmail}) (cached)`);
       return true;
     }
+  }
+
+  /**
+   * @returns {DropboxManager}
+   */
+  static instance() {
+    if (instance === null) {
+      instance = new DropboxManager();
+    }
+    return instance;
   }
 }

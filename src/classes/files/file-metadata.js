@@ -1,6 +1,6 @@
 import BaseMetadata from './base-metadata';
 import FilePath from './file-path';
-import { Hasher } from '../../services';
+import RemoteProvider from '../remote-provider';
 
 export default class FileMetadata extends BaseMetadata {
 
@@ -44,7 +44,7 @@ export default class FileMetadata extends BaseMetadata {
   data(data) {
     return this.assign({
       size: data.byteLength,
-      hash: Hasher.hash(data),
+      hash: RemoteProvider.hash(data),
       modified: new Date().toISOString()
     });
   }
