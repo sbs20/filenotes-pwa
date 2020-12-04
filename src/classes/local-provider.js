@@ -4,12 +4,13 @@ import FileMetadata from './files/file-metadata';
 import FilePath from './files/file-path';
 import FolderMetadata from './files/folder-metadata';
 import Logger from './logger';
-import { StorageService } from '../services';
+import Storage from './data/storage';
 
+const storage = Storage.instance();
 const log = Logger.get('LocalProvider');
+let provider = null;
 
 export default class LocalProvider {
-
   /**
    * Gets an available filename in a given directory
    * @param {Metadata} directory
@@ -33,7 +34,7 @@ export default class LocalProvider {
    * @returns {Promise.<Metadata>} - Promise<Metadata>
    */
   async get(path) {
-    return await StorageService.fs.metadata.read(path.toLowerCase());
+    return await storage.fs.metadata.read(path.toLowerCase());
   }
 
   /**
@@ -43,8 +44,8 @@ export default class LocalProvider {
    */
   async mkdir(path) {
     const metadata = FolderMetadata.create(path);
-    await StorageService.fs.metadata.writeAll([metadata]);
-    await StorageService.fs.delta.writeAll([metadata]);    
+    await storage.fs.metadata.writeAll([metadata]);
+    await storage.fs.delta.writeAll([metadata]);    
   }
 
   /**
@@ -59,7 +60,7 @@ export default class LocalProvider {
       return fileKey.startsWith(dirKey) && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
     };
 
-    let list = await StorageService.fs.metadata.list(predicate);
+    let list = await storage.fs.metadata.list(predicate);
     return list;
   }
 
@@ -69,7 +70,7 @@ export default class LocalProvider {
    * @returns {Promise.<ArrayBuffer>} - Promise<ArrayBuffer>
    */
   async read(path) {
-    const content = await StorageService.fs.content.read(path.toLowerCase());
+    const content = await storage.fs.content.read(path.toLowerCase());
     return content === undefined ? new Uint8Array().buffer : content.data;
   }
 
@@ -84,12 +85,12 @@ export default class LocalProvider {
       const content = FileContent.create(metadata.path, data);
 
       // See what's stored locally already
-      const current = await StorageService.fs.metadata.read(metadata.key);
+      const current = await storage.fs.metadata.read(metadata.key);
       if (current === undefined || current.hash !== metadata.hash) {
         log.debug(`${metadata.key} has changed`);
-        await StorageService.fs.metadata.writeAll([metadata]);
-        await StorageService.fs.content.writeAll([content]);
-        await StorageService.fs.delta.writeAll([metadata]);
+        await storage.fs.metadata.writeAll([metadata]);
+        await storage.fs.content.writeAll([content]);
+        await storage.fs.delta.writeAll([metadata]);
         return true;
       }
 
@@ -103,16 +104,16 @@ export default class LocalProvider {
    * @param {string} path 
    */
   async delete(path) {
-    const metadata = await StorageService.fs.metadata.read(path.toLowerCase());
+    const metadata = await storage.fs.metadata.read(path.toLowerCase());
     const keys = [path.toLowerCase()];
     if (metadata.tag === 'folder') {
       const descendents = await this.list(metadata, true);
       descendents.map(m => m.key).forEach(key => keys.push(key));
     }
 
-    await StorageService.fs.metadata.deleteAll(keys);
-    await StorageService.fs.content.deleteAll(keys);
-    await StorageService.fs.delta.writeAll([DeletedMetadata.create(path)]);
+    await storage.fs.metadata.deleteAll(keys);
+    await storage.fs.content.deleteAll(keys);
+    await storage.fs.delta.writeAll([DeletedMetadata.create(path)]);
   }
 
   /**
@@ -122,8 +123,8 @@ export default class LocalProvider {
    */
   async move(sourcePath, destinationPath) {
     log.debug(`mv ${sourcePath} ${destinationPath}`);
-    const source = await StorageService.fs.metadata.read(sourcePath.toLowerCase());
-    const destination = await StorageService.fs.metadata.read(destinationPath.toLowerCase());
+    const source = await storage.fs.metadata.read(sourcePath.toLowerCase());
+    const destination = await storage.fs.metadata.read(destinationPath.toLowerCase());
     if (destination) {
       throw new Error(`${destination.path} already exists`);
     }
@@ -137,14 +138,24 @@ export default class LocalProvider {
       }));
 
       this.mkdir(destinationPath);
-      await StorageService.fs.metadata.deleteAll([sourcePath]);
-      await StorageService.fs.delta.writeAll([DeletedMetadata.create(sourcePath)]);
+      await storage.fs.metadata.deleteAll([sourcePath]);
+      await storage.fs.delta.writeAll([DeletedMetadata.create(sourcePath)]);
 
     } else {
-      const content = await StorageService.fs.content.read(sourcePath.toLowerCase());
+      const content = await storage.fs.content.read(sourcePath.toLowerCase());
       const destination = FileMetadata.create().assign(source).path(destinationPath).value;
       await this.write(destination, content.data);
       await this.delete(sourcePath);  
     }
+  }
+
+  /**
+   * @returns {LocalProvider}
+   */
+  static instance() {
+    if (provider === null) {
+      provider = new LocalProvider();
+    }
+    return provider;
   }
 }

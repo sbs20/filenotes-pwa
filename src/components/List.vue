@@ -72,12 +72,13 @@
 
 <script>
 import Constants from '../classes/constants';
-import { LocalProvider, StorageService } from '../services';
+import LocalProvider from '../classes/local-provider';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
 import Logger from '../classes/logger';
 import MetadataComparator from '../classes/metadata-comparator';
+import Settings from '../classes/settings';
 
 import Folders from './Folders';
 import ListItem from './ListItem';
@@ -85,6 +86,7 @@ import Navigation from './Navigation';
 import SortOptions from './SortOptions';
 
 const log = Logger.get('List');
+const fs = LocalProvider.instance();
 
 export default {
   name: 'List',
@@ -144,10 +146,9 @@ export default {
       this.refresh();
     },
     sortBy() {
-      StorageService.settings.set(Constants.Settings.SortBy, this.sortBy)
-        .then(() => {
-          this.refresh();
-        });
+      Settings.instance().sortBy.set(this.sortBy).then(() => {
+        this.refresh();
+      });
     }
   },
 
@@ -161,7 +162,7 @@ export default {
     refresh() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
-      LocalProvider.get(path).then(current => {
+      fs.get(path).then(current => {
         if (current === undefined && path.length > 0) {
           this.$router.push('/l/');
           return;
@@ -178,8 +179,8 @@ export default {
           this.$router.push(`/f/${this.current.key}`);
         }
 
-        LocalProvider.list(this.current).then(entries => {
-          StorageService.settings.get(Constants.Settings.SortBy).then(sortBy => {
+        fs.list(this.current).then(entries => {
+          Settings.instance().sortBy.get().then(sortBy => {
             /** @type {function(Metadata, Metadata):number} */
             const sorter = MetadataComparator.get(sortBy);
             entries.sort(sorter);
@@ -204,11 +205,11 @@ export default {
           trapFocus: true,
           onConfirm: (value) => {
             const dir = `${this.current.path}/${value}`;
-            LocalProvider.get(dir).then(existing => {
+            fs.get(dir).then(existing => {
               if (existing !== undefined) {
                 console.log(`Directory '${dir}' already exists`);
               } else {
-                LocalProvider.mkdir(dir).then(() => {
+                fs.mkdir(dir).then(() => {
                   this.sync();
                   this.refresh();
                 });
@@ -221,12 +222,12 @@ export default {
 
     mktext() {
       if (this.current.tag === 'folder') {
-        LocalProvider.new(this.current, 'New Text.txt').then(name => {
+        fs.new(this.current, 'New Text.txt').then(name => {
           if (name) {
             const path = `${this.current.path}/${name}`;
             const content = new Uint8Array();
             const metadata = FileMetadata.create().path(path).data(content).value;
-            LocalProvider.write(metadata, content).then(() => {
+            fs.write(metadata, content).then(() => {
               this.open(metadata);
               // Don't sync new files. Wait until they're saved.
             });
@@ -249,12 +250,12 @@ export default {
         if (sourceDir.toLowerCase() !== destinationDir.toLowerCase()) {
           const source = this.moveDialog.entry.key;
           const destination = `${this.moveDialog.folder}/${this.moveDialog.entry.name}`;
-          LocalProvider.get(destination).then(existing => {
+          fs.get(destination).then(existing => {
             if (existing !== undefined) {
               console.log(`Destination '${destination}' already exists`);
             } else {
               console.log(`move ${source} to ${destination}`);
-              LocalProvider.move(source, destination).then(() => {
+              fs.move(source, destination).then(() => {
                 this.sync();
                 this.refresh();
               });
@@ -286,7 +287,7 @@ export default {
      * @param {Metadata} entry
      */
     remove(entry) {
-      LocalProvider.delete(entry.path).then(() => {
+      fs.delete(entry.path).then(() => {
         this.sync();
         this.refresh();
       });
@@ -306,11 +307,11 @@ export default {
         onConfirm: (value) => {
           const source = entry.key;
           const destination = `${this.current.path}/${value}`;
-          LocalProvider.get(destination).then(existing => {
+          fs.get(destination).then(existing => {
             if (existing !== undefined) {
               console.log(`Destination '${destination}' already exists`);
             } else {
-              LocalProvider.move(source, destination).then(() => {
+              fs.move(source, destination).then(() => {
                 this.sync();
                 this.refresh();
               });
@@ -327,7 +328,7 @@ export default {
     },
 
     syncForce() {
-      StorageService.settings.delete('cursor').then(() => {
+      Settings.instance().cursor.delete().then(() => {
         this.$root.$emit(Constants.Event.Sync.Start);
       });
     },

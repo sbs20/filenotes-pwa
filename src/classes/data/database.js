@@ -10,7 +10,6 @@ export const STORE_SETTINGS = 'settings';
 export const STORE_FS_METADATA = 'fs.metadata';
 export const STORE_FS_CONTENT = 'fs.content';
 export const STORE_FS_DELTA = 'fs.delta';
-export const STORE_QUEUE = 'queue';
 
 export default class Database {
   constructor() {
@@ -27,7 +26,6 @@ export default class Database {
         db.createObjectStore(STORE_FS_METADATA, { keyPath: 'key' });
         db.createObjectStore(STORE_FS_CONTENT, { keyPath: 'key' });
         db.createObjectStore(STORE_FS_DELTA, { keyPath: 'key' });
-        db.createObjectStore(STORE_QUEUE, { autoIncrement: true });
       },
       blocked() {
         console.log('blocked');

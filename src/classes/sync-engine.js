@@ -1,17 +1,18 @@
 import EventEmitter from './event-emitter';
 import FileContent from './files/file-content';
 import Logger from './logger';
+import Storage from './data/storage';
 
 import RemoteProvider from '../services/remote-provider';
-import StorageService from '../services/storage';
 
+const storage = Storage.instance();
 const log = Logger.get('SyncEngine');
 
 /**
  * @returns {Promise.<Array.<Metadata>>}
  */
 async function deltas() {
-  const deltas = await StorageService.fs.delta.list();
+  const deltas = await storage.fs.delta.list();
   const sorted = [];
   deltas.filter(m => m.tag === 'deleted')
     .sort((m1, m2) => m2.key.length - m1.key.length)
@@ -30,18 +31,18 @@ async function deltas() {
  * @returns {Promise.<boolean>}
  */
 async function applyLocal(metadata) {
-  const local = await StorageService.fs.metadata.read(metadata.key);
+  const local = await storage.fs.metadata.read(metadata.key);
   switch (metadata.tag) {
     case 'file': {
       if (local === undefined || metadata.hash !== local.hash) {
         const buffer = await RemoteProvider.read(metadata.key);
         const content = FileContent.create(metadata.key, buffer);
-        await StorageService.fs.content.writeAll([content]);   
-        await StorageService.fs.metadata.writeAll([metadata]);
+        await storage.fs.content.writeAll([content]);   
+        await storage.fs.metadata.writeAll([metadata]);
         log.info(`downloaded: ${metadata.key}`);
         return true;
       } else if (metadata.revision !== local.revision) {
-        await StorageService.fs.metadata.writeAll([metadata]);
+        await storage.fs.metadata.writeAll([metadata]);
         log.debug(`revision update: ${metadata.key}`);
         return true;
       } else {
@@ -52,7 +53,7 @@ async function applyLocal(metadata) {
 
     case 'folder':
       if (local === undefined) {
-        await StorageService.fs.metadata.writeAll([metadata]);
+        await storage.fs.metadata.writeAll([metadata]);
         log.info(`created local directory: ${metadata.key}`);
         return true;
       }
@@ -60,8 +61,8 @@ async function applyLocal(metadata) {
 
     case 'deleted':
       if (local !== undefined) {
-        await StorageService.fs.metadata.deleteAll([metadata.key]);
-        await StorageService.fs.content.deleteAll([metadata.key]);        
+        await storage.fs.metadata.deleteAll([metadata.key]);
+        await storage.fs.content.deleteAll([metadata.key]);        
         log.info(`deleted local entry: ${metadata.key}`);
         return true;
       }
@@ -82,20 +83,20 @@ async function applyRemote(metadata) {
   switch (metadata.tag) {
     case 'file': {
       /** @type {Content} */
-      const content = await StorageService.fs.content.read(metadata.key);
+      const content = await storage.fs.content.read(metadata.key);
       const response = await RemoteProvider.write(metadata, content.data);
       if (response.key === metadata.key) {
         // Write the response in order to get the revision update
-        await StorageService.fs.metadata.writeAll([response]);
+        await storage.fs.metadata.writeAll([response]);
         log.info(`uploaded file: ${metadata.key}`);
       } else {
         // Write metadata and content to new locations
-        await StorageService.fs.metadata.writeAll([response]);
+        await storage.fs.metadata.writeAll([response]);
         content.key = response.key;
-        await StorageService.fs.content.writeAll([content]);
+        await storage.fs.content.writeAll([content]);
         // Delete the old locations
-        await StorageService.fs.metadata.deleteAll([metadata.key]);
-        await StorageService.fs.content.deleteAll([metadata.key]);
+        await storage.fs.metadata.deleteAll([metadata.key]);
+        await storage.fs.content.deleteAll([metadata.key]);
         log.info(`uploaded conflict: ${metadata.key} as ${response.key}`);
       }
       break;
@@ -116,11 +117,12 @@ async function applyRemote(metadata) {
   }
 
   // If we got here we can delete the local delta
-  await StorageService.fs.delta.deleteAll([metadata.key]);
+  await storage.fs.delta.deleteAll([metadata.key]);
   return true;
 }
 
 const active = Symbol();
+let instance = null;
 
 export default class SyncEngine extends EventEmitter {
   constructor() {
@@ -169,7 +171,7 @@ export default class SyncEngine extends EventEmitter {
 
     this[active] = true;
     log.info('Started');
-    const cursor = await StorageService.settings.get('cursor');
+    const cursor = await storage.settings.get('cursor');
     RemoteProvider.cursor = cursor;
 
     try {
@@ -197,7 +199,7 @@ export default class SyncEngine extends EventEmitter {
         });
       })));
 
-      await StorageService.settings.set('cursor', RemoteProvider.cursor);
+      await storage.settings.set('cursor', RemoteProvider.cursor);
       log.info('Finished');
       this[active] = false;
     } catch (error) {
@@ -205,5 +207,15 @@ export default class SyncEngine extends EventEmitter {
       this[active] = false;
       throw error;
     }
+  }
+
+  /**
+   * @returns {SyncEngine}
+   */
+  static instance() {
+    if (instance === null) {
+      instance = new SyncEngine();
+    }
+    return instance;
   }
 }

@@ -16,10 +16,12 @@
 <script>
 import Constants from './classes/constants';
 import Logger from './classes/logger';
-import { RemoteProvider, SyncEngine } from './services';
+import SyncEngine from './classes/sync-engine';
+import { RemoteProvider } from './services';
 import Install from './components/Install';
 
 const log = Logger.get('App');
+const sync = SyncEngine.instance();
 
 export default {
   name: 'App',
@@ -72,7 +74,7 @@ export default {
         if (this.autoSync) {
           this.syncStart();
         } else {
-          SyncEngine.isRequired().then(required => {
+          sync.isRequired().then(required => {
             const msg = required ? 'Sync required' : 'Up to date';
             log.info(msg);
             this.$buefy.snackbar.open(msg);
@@ -103,12 +105,12 @@ export default {
     syncStart() {
       this.progress.value = 0;
       this.progress.show = true;
-      SyncEngine.on('progress', this.updateProgress);
-      SyncEngine.execute().then(() => {
-        SyncEngine.off('progress');
+      sync.on('progress', this.updateProgress);
+      sync.execute().then(() => {
+        sync.off('progress');
         this.syncFinish(true);
       }).catch(reason => {
-        SyncEngine.off('progress');
+        sync.off('progress');
         const msg = `Sync error: ${reason}`;
         log.error(msg);
         this.syncFinish(false);

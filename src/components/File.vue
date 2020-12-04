@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { LocalProvider } from '../services';
+import LocalProvider from '../classes/local-provider';
 import Navigation from './Navigation';
 import FileItem from './FileItem';
 
@@ -107,7 +107,7 @@ export default {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
       this.type = 'unknown';
-      LocalProvider.get(path).then(current => {
+      LocalProvider.instance().get(path).then(current => {
         if (current === undefined || current.tag !== 'file') {
           this.$router.push('/l/');
           return;

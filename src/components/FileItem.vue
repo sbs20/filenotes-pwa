@@ -15,7 +15,7 @@ import Convert from '../classes/utils/convert';
 import FilePath from '../classes/files/file-path';
 import FileMetadata from '../classes/files/file-metadata';
 import Logger from '../classes/logger';
-import { LocalProvider } from '../services';
+import LocalProvider from '../classes/local-provider';
 import { PrismEditor } from 'vue-prism-editor';
 
 import 'vue-prism-editor/dist/prismeditor.min.css';
@@ -28,6 +28,7 @@ import 'prismjs/components/prism-markdown';
 import 'prismjs/themes/prism-tomorrow.css';
 
 const log = Logger.get('FileItem');
+const fs = LocalProvider.instance();
 
 export default {
   name: 'FileItem',
@@ -86,7 +87,7 @@ export default {
         if (this.text) {
           const buffer = Convert.stringToArrayBuffer(this.text);
           const metadata = FileMetadata.create().assign(this.value).data(buffer).value;
-          LocalProvider.get(metadata.key).then(existing => {
+          fs.get(metadata.key).then(existing => {
             if (existing && existing.hash === metadata.hash) {
               resolve(false);
             }
@@ -122,7 +123,7 @@ export default {
       const metadata = this.value;
       if (metadata && metadata.key) {
         const type = FilePath.create(metadata.path).type;
-        LocalProvider.read(metadata.key).then(buffer => {
+        fs.read(metadata.key).then(buffer => {
           this.release();
           this.text = null;
           switch (type) {
@@ -151,7 +152,7 @@ export default {
       if (this.text) {
         const buffer = Convert.stringToArrayBuffer(this.text);
         const metadata = FileMetadata.create().assign(this.value).data(buffer).value;
-        LocalProvider.write(metadata, buffer).then((saved) => {
+        fs.write(metadata, buffer).then((saved) => {
           if (saved) {
             this.notify(`Saved ${metadata.name}`);
             log.debug('Saved', this.value);

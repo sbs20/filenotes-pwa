@@ -12,12 +12,34 @@
       <template v-slot:items>
         <settings-item>
           <template v-slot:description>
+            Autosave. Automatically saves notes when you close.
+          </template>
+          <template v-slot:action>
+            <div class="field">
+              <b-switch v-model="autoSave"></b-switch>
+            </div>
+          </template>
+        </settings-item>
+        <settings-item>
+          <template v-slot:description>
+            Autosync. Automatically syncs notes.
+          </template>
+          <template v-slot:action>
+            <div class="field">
+              <b-switch v-model="autoSync"></b-switch>
+            </div>
+          </template>
+        </settings-item>
+
+        <settings-item>
+          <template v-slot:description>
             Reset cursor. Filenotes will no longer know what it has synced and
             will check every file again. Provided you have local files it will
             still check file hashes and versions.
           </template>
           <template v-slot:action>
-            <button class="button is-primary" @click="clearCursor">Reset</button>          </template>
+            <button class="button is-primary" @click="clearCursor">Reset</button>
+          </template>
         </settings-item>
         <settings-item>
           <template v-slot:description>
@@ -26,7 +48,8 @@
             changed then they may overwrite your local files.
           </template>
           <template v-slot:action>
-            <button class="button is-warning" @click="clearLocalDeltas">Clear</button>          </template>
+            <button class="button is-warning" @click="clearLocalDeltas">Clear</button>
+          </template>
         </settings-item>
       </template>
     </settings-section>
@@ -98,13 +121,16 @@
 
 <script>
 import Logger from '../classes/logger';
-import { RemoteProvider, StorageService } from '../services';
+import Settings from '../classes/settings';
+import Storage from '../classes/data/storage';
+import { RemoteProvider } from '../services';
 import Navigation from './Navigation';
 import SettingsSection from './SettingsSection';
 import SettingsItem from './SettingsItem';
-import Constants from '../classes/constants';
 
 const log = Logger.get('Settings');
+const settings = Settings.instance();
+const storage = Storage.instance();
 
 export default {
   name: 'Settings',
@@ -120,9 +146,18 @@ export default {
   },
 
   data() {
+    settings.autoSave.get().then(value => {
+      this.autoSave = value;
+    });
+    settings.autoSync.get().then(value => {
+      this.autoSync = value;
+    });
+
     return {
       accountName: '',
-      accountEmail: ''
+      accountEmail: '',
+      autoSave: true,
+      autoSync: true
     };
   },
 
@@ -138,10 +173,10 @@ export default {
     },
 
     load() {
-      StorageService.settings.get(Constants.Settings.Name).then(name => {
+      settings.name.get().then(name => {
         this.accountName = name;
       });
-      StorageService.settings.get(Constants.Settings.Email).then(email => {
+      settings.email.get().then(email => {
         this.accountEmail = email;
       });
     },
@@ -156,22 +191,22 @@ export default {
     },
 
     clearCursor() {
-      StorageService.settings.delete('cursor').then(() => {
+      settings.cursor.delete().then(() => {
         this.notify('Cursor cleared');
       });
     },
 
     clearLocalDeltas() {
-      StorageService.fs.delta.clear().then(() => {
+      storage.fs.delta.clear().then(() => {
         this.notify('Local deltas cleared');
       });
     },
 
     clearLocalFs() {
       Promise.all([
-        StorageService.fs.metadata.clear(),
-        StorageService.fs.content.clear(),
-        StorageService.fs.delta.clear()
+        storage.fs.metadata.clear(),
+        storage.fs.content.clear(),
+        storage.fs.delta.clear()
       ]).then(() => {
         this.notify('Local database cleared');
       });
@@ -188,7 +223,7 @@ export default {
     },
 
     nukeDatabase() {
-      StorageService.deleteDatabase().then(() => {
+      storage.deleteDatabase().then(() => {
         this.notify('Local database deleted');
       });
     },
@@ -208,6 +243,20 @@ export default {
     connect2() {
       RemoteProvider.startFromQueryString(window.location.search).then(this.afterConnect);
     },
+  },
+
+  watch: {
+    autoSave() {
+      settings.autoSave.set(this.autoSave).then(() => {
+        this.notify(`Autosave: ${this.autoSave ? 'on' : 'off'}`);
+      });
+    },
+
+    autoSync() {
+      settings.autoSync.set(this.autoSync).then(() => {
+        this.notify(`Autosync: ${this.autoSync ? 'on' : 'off'}`);
+      });
+    }
   }
 };
 </script>

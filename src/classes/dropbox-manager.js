@@ -2,8 +2,9 @@ import Constants from './constants';
 import DropboxProvider from './dropbox-provider';
 import Logger from './logger';
 import QueryString from './utils/query-string';
-import StorageService from '../services/storage';
+import Storage from './data/storage';
 
+const storage = Storage.instance();
 const log = Logger.get('DropboxManager');
 
 export default class DropboxManager extends DropboxProvider {
@@ -18,9 +19,9 @@ export default class DropboxManager extends DropboxProvider {
    * @returns {Promise.<boolean>}
    */
   async hasConnected() {
-    const oauth = await StorageService.settings.get(Constants.Settings.OAuth);
-    const name = await StorageService.settings.get(Constants.Settings.Name);
-    const email = await StorageService.settings.get(Constants.Settings.Email);
+    const oauth = await storage.settings.get(Constants.Settings.OAuth);
+    const name = await storage.settings.get(Constants.Settings.Name);
+    const email = await storage.settings.get(Constants.Settings.Email);
     return oauth && name && email;
   }
 
@@ -28,10 +29,10 @@ export default class DropboxManager extends DropboxProvider {
    * Clears all authentication data from settings
    */
   async clear() {
-    await StorageService.settings.delete(Constants.Settings.Pkce);
-    await StorageService.settings.delete(Constants.Settings.OAuth);
-    await StorageService.settings.delete(Constants.Settings.Name);
-    await StorageService.settings.delete(Constants.Settings.Email);
+    await storage.settings.delete(Constants.Settings.Pkce);
+    await storage.settings.delete(Constants.Settings.OAuth);
+    await storage.settings.delete(Constants.Settings.Name);
+    await storage.settings.delete(Constants.Settings.Email);
   }
 
   /**
@@ -39,14 +40,14 @@ export default class DropboxManager extends DropboxProvider {
    * @returns {Promise.<boolean>} Promise<boolean>
    */
   async startFromToken() {
-    const oauthToken = await StorageService.settings.get(Constants.Settings.OAuth);
+    const oauthToken = await storage.settings.get(Constants.Settings.OAuth);
     if (oauthToken && oauthToken.refresh_token) {
       this.refreshToken = oauthToken.refresh_token;
       if (await this.connect()) {
         log.debug('Connected using stored access token');
         log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
-        await StorageService.settings.set(Constants.Settings.Name, this.accountName);
-        await StorageService.settings.set(Constants.Settings.Email, this.accountEmail);
+        await storage.settings.set(Constants.Settings.Name, this.accountName);
+        await storage.settings.set(Constants.Settings.Email, this.accountEmail);
         return true;
       }
     }
@@ -63,17 +64,17 @@ export default class DropboxManager extends DropboxProvider {
     const code = QueryString.parse(queryString).code;
     if (code) {
       /** @type {PkceParameters} */
-      const pkceParams = await StorageService.settings.get(Constants.Settings.Pkce);
+      const pkceParams = await storage.settings.get(Constants.Settings.Pkce);
       if (pkceParams) {
         pkceParams.code = code;
         const oauthToken = await this.pkceFinish(pkceParams);
         if (oauthToken && await this.connect()) {
           log.debug('Connected using url access token');
           log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
-          await StorageService.settings.set(Constants.Settings.OAuth, oauthToken);
-          await StorageService.settings.set(Constants.Settings.Name, this.accountName);
-          await StorageService.settings.set(Constants.Settings.Email, this.accountEmail);
-          await StorageService.settings.delete(Constants.Settings.Pkce);
+          await storage.settings.set(Constants.Settings.OAuth, oauthToken);
+          await storage.settings.set(Constants.Settings.Name, this.accountName);
+          await storage.settings.set(Constants.Settings.Email, this.accountEmail);
+          await storage.settings.delete(Constants.Settings.Pkce);
           return true;
         }  
       }
@@ -96,7 +97,7 @@ export default class DropboxManager extends DropboxProvider {
     // Initiate sign in
     await this.clear();
     const params = this.pkceStart();
-    await StorageService.settings.set(Constants.Settings.Pkce, params);
+    await storage.settings.set(Constants.Settings.Pkce, params);
     window.location.href = params.url;
     return false;
   }
@@ -116,10 +117,10 @@ export default class DropboxManager extends DropboxProvider {
       }
       this.startAuthentication(window);
     } else {
-      this.cursor = await StorageService.settings.get(Constants.Settings.Cursor);
-      this.accountName = await StorageService.settings.get(Constants.Settings.Name);
-      this.accountEmail = await StorageService.settings.get(Constants.Settings.Email);
-      const oauthToken = await StorageService.settings.get(Constants.Settings.OAuth);
+      this.cursor = await storage.settings.get(Constants.Settings.Cursor);
+      this.accountName = await storage.settings.get(Constants.Settings.Name);
+      this.accountEmail = await storage.settings.get(Constants.Settings.Email);
+      const oauthToken = await storage.settings.get(Constants.Settings.OAuth);
       if (oauthToken && oauthToken.refresh_token) {
         this.refreshToken = oauthToken.refresh_token;
       }

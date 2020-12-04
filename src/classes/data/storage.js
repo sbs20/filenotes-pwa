@@ -3,6 +3,8 @@ import ContentStore from './content-store';
 import FileStore from './file-store';
 import KeyValueStore from './key-value-store';
 
+let storage = null;
+
 export default class Storage {
   constructor() {
     this.fs = {
@@ -18,5 +20,15 @@ export default class Storage {
    */
   async deleteDatabase() {
     await new Database().delete();
+  }
+
+  /**
+   * @returns {Storage}
+   */
+  static instance() {
+    if (storage === null) {
+      storage = new Storage();
+    }
+    return storage;
   }
 }

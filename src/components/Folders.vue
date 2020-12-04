@@ -20,7 +20,7 @@
 <script>
 import FilePath from '../classes/files/file-path';
 import FolderMetadata from '../classes/files/folder-metadata';
-import { LocalProvider } from '../services';
+import LocalProvider from '../classes/local-provider';
 
 export default {
   name: 'Folders',
@@ -49,7 +49,7 @@ export default {
      */
     open(entry) {
       /** @type {string} */
-      LocalProvider.get(entry.path).then(current => {
+      LocalProvider.instance().get(entry.path).then(current => {
         current = current || {
           tag: 'folder',
           key: '',
@@ -64,7 +64,7 @@ export default {
           return;
         }
 
-        LocalProvider.list(current).then(entries => {
+        LocalProvider.instance().list(current).then(entries => {
           if (current.key !== '') {
             const parent = FolderMetadata.create(FilePath.create(current.path).directory);
             parent.name = '../ (parent)';
@@ -77,17 +77,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-/* .md-list {
-  width: 100%;
-  max-width: 100%;
-  display: inline-block;
-  vertical-align: top;
-  border: 1px solid rgba(#000, .12);
-} */
-
-/* .folder-item {
-  min-height: 2.5rem;
-} */
-</style>
