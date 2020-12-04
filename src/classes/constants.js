@@ -11,12 +11,24 @@ const Constants = {
     Theme: 'theme',
     Cursor: 'cursor',
     SyncOnChange: 'sync-on-change',
-    AutoSave: 'auto-save'
+    AutoSave: 'auto-save',
+    SortBy: 'sort-by'
   },
 
   Themes: {
     Light: 'light',
     Dark: 'dark'
+  },
+
+  SortBy: {
+    FolderThenNameAsc: 'folder-name-asc',
+    FolderThenNameDesc: 'folder-name-desc',
+    NameAsc: 'name-asc',
+    NameDesc: 'name-desc',
+    SizeAsc: 'size-asc',
+    SizeDesc: 'size-desc',
+    ModifiedAsc: 'modified-asc',
+    ModifiedDesc: 'modified-desc'
   },
 
   Event: {

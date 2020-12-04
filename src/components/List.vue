@@ -24,6 +24,8 @@
         <b-icon icon="sync"></b-icon>
       </button>
 
+      <sort-options v-model="sortBy"></sort-options>
+
       <b-dropdown aria-role="list" :mobile-modal="false" position="is-bottom-left">
         <button class="button is-primary" slot="trigger">
           <b-icon icon="plus"></b-icon>
@@ -80,6 +82,7 @@ import MetadataComparator from '../classes/metadata-comparator';
 import Folders from './Folders';
 import ListItem from './ListItem';
 import Navigation from './Navigation';
+import SortOptions from './SortOptions';
 
 const log = Logger.get('List');
 
@@ -88,7 +91,8 @@ export default {
   components: {
     Folders,
     ListItem,
-    Navigation
+    Navigation,
+    SortOptions
   },
 
   computed: {
@@ -129,13 +133,21 @@ export default {
         entry: null,
         folder: null,
         callback: () => {}
-      }
+      },
+
+      sortBy: null
     };
   },
 
   watch: {
     $route() {
       this.refresh();
+    },
+    sortBy() {
+      StorageService.settings.set(Constants.Settings.SortBy, this.sortBy)
+        .then(() => {
+          this.refresh();
+        });
     }
   },
 
@@ -167,31 +179,19 @@ export default {
         }
 
         LocalProvider.list(this.current).then(entries => {
-          entries.sort(MetadataComparator.byFolderThenNameAscending);
-          if (this.current.key !== '') {
-            const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
-            parent.name = '../ (parent)';
-            entries.splice(0, 0, parent);
-          }
-          this.entries = entries;
+          StorageService.settings.get(Constants.Settings.SortBy).then(sortBy => {
+            /** @type {function(Metadata, Metadata):number} */
+            const sorter = MetadataComparator.get(sortBy);
+            entries.sort(sorter);
+            if (this.current.key !== '') {
+              const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
+              parent.name = '../ (parent)';
+              entries.splice(0, 0, parent);
+            }
+            this.entries = entries;
+          });
         });
       });
-    },
-
-    mktext() {
-      if (this.current.tag === 'folder') {
-        LocalProvider.new(this.current, 'New Text.txt').then(name => {
-          if (name) {
-            const path = `${this.current.path}/${name}`;
-            const content = new Uint8Array();
-            const metadata = FileMetadata.create().path(path).data(content).value;
-            LocalProvider.write(metadata, content).then(() => {
-              this.sync();
-              this.open(metadata);
-            });
-          }
-        });
-      }
     },
 
     mkdir() {
@@ -219,25 +219,20 @@ export default {
       }
     },
 
-    /**
-     * @param {Metadata} entry
-     */
-    open(entry) {
-      if (entry.key !== this.$route.params.pathMatch) {
-        const base = entry.tag === 'folder' ? '/l/' : '/f/';
-        const path = `${base}${entry.key}`;
-        this.$router.push(path);
+    mktext() {
+      if (this.current.tag === 'folder') {
+        LocalProvider.new(this.current, 'New Text.txt').then(name => {
+          if (name) {
+            const path = `${this.current.path}/${name}`;
+            const content = new Uint8Array();
+            const metadata = FileMetadata.create().path(path).data(content).value;
+            LocalProvider.write(metadata, content).then(() => {
+              this.open(metadata);
+              // Don't sync new files. Wait until they're saved.
+            });
+          }
+        });
       }
-    },
-
-    /**
-     * @param {Metadata} entry
-     */
-    remove(entry) {
-      LocalProvider.delete(entry.path).then(() => {
-        this.sync();
-        this.refresh();
-      });
     },
 
     /**
@@ -279,6 +274,27 @@ export default {
     /**
      * @param {Metadata} entry
      */
+    open(entry) {
+      if (entry.key !== this.$route.params.pathMatch) {
+        const base = entry.tag === 'folder' ? '/l/' : '/f/';
+        const path = `${base}${entry.key}`;
+        this.$router.push(path);
+      }
+    },
+
+    /**
+     * @param {Metadata} entry
+     */
+    remove(entry) {
+      LocalProvider.delete(entry.path).then(() => {
+        this.sync();
+        this.refresh();
+      });
+    },
+
+    /**
+     * @param {Metadata} entry
+     */
     rename(entry) {
       this.$buefy.dialog.prompt({
         message: 'Filename',
@@ -304,11 +320,6 @@ export default {
       });
     },
 
-    up() {
-      const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
-      this.open(parent);
-    },
-
     sync() {
       if (this.autoSync) {
         this.$root.$emit(Constants.Event.Sync.Start);
@@ -319,7 +330,12 @@ export default {
       StorageService.settings.delete('cursor').then(() => {
         this.$root.$emit(Constants.Event.Sync.Start);
       });
-    }
+    },
+
+    up() {
+      const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
+      this.open(parent);
+    },
   }
 };
 </script>
