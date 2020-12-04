@@ -16,8 +16,11 @@
 
 <script>
 import LocalProvider from '../classes/local-provider';
+import Settings from '../classes/settings';
 import Navigation from './Navigation';
 import FileItem from './FileItem';
+
+const settings = Settings.instance();
 
 export default {
   name: 'File',
@@ -39,6 +42,13 @@ export default {
   },
 
   data() {
+    settings.autoSave.get().then(value => {
+      this.autoSave = value;
+    });
+    settings.autoSync.get().then(value => {
+      this.autoSync = value;
+    });
+
     return {
       autoSave: true,
       autoSync: true,

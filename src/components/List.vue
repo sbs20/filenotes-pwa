@@ -87,6 +87,7 @@ import SortOptions from './SortOptions';
 
 const log = Logger.get('List');
 const fs = LocalProvider.instance();
+const settings = Settings.instance();
 
 export default {
   name: 'List',
@@ -120,6 +121,10 @@ export default {
   },
 
   data() {
+    settings.autoSync.get().then(value => {
+      this.autoSync = value;
+    });
+
     this.refresh();
     return {
       autoSync: true,
@@ -146,7 +151,7 @@ export default {
       this.refresh();
     },
     sortBy() {
-      Settings.instance().sortBy.set(this.sortBy).then(() => {
+      settings.sortBy.set(this.sortBy).then(() => {
         this.refresh();
       });
     }
@@ -180,7 +185,7 @@ export default {
         }
 
         fs.list(this.current).then(entries => {
-          Settings.instance().sortBy.get().then(sortBy => {
+          settings.sortBy.get().then(sortBy => {
             /** @type {function(Metadata, Metadata):number} */
             const sorter = MetadataComparator.get(sortBy);
             entries.sort(sorter);
@@ -328,7 +333,7 @@ export default {
     },
 
     syncForce() {
-      Settings.instance().cursor.delete().then(() => {
+      settings.cursor.delete().then(() => {
         this.$root.$emit(Constants.Event.Sync.Start);
       });
     },
