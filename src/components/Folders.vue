@@ -4,7 +4,7 @@
       <h2>Location: {{ current.path || "/" }}</h2>
     </div>
 
-    <div v-for="entry in entries" v-bind:key="entry.key">
+    <div class="mt-3" v-for="entry in entries" v-bind:key="entry.key">
       <div class="media" @click="open(entry)" style="cursor: pointer;">
         <div class="media-left">
           <b-icon icon="folder"></b-icon>
@@ -79,11 +79,15 @@ export default {
 </script>
 
 <style scoped>
-.md-list {
+/* .md-list {
   width: 100%;
   max-width: 100%;
   display: inline-block;
   vertical-align: top;
   border: 1px solid rgba(#000, .12);
-}
+} */
+
+/* .folder-item {
+  min-height: 2.5rem;
+} */
 </style>

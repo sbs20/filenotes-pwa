@@ -36,7 +36,9 @@ const Constants = {
       Start: 'sync.start',
       Finish: 'sync.finish'
     }
-  }
+  },
+
+  ParentDirectory: '../ (parent)'
 };
 
 export default Constants;

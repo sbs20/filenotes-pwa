@@ -49,7 +49,7 @@
       {{ header }}
     </div>
 
-    <div class="file-entry" tabindex="1" v-for="entry in entries" v-bind:key="entry.key">
+    <div class="list-item" tabindex="1" v-for="entry in entries" v-bind:key="entry.key">
       <list-item :value="entry" @open="open" @rename="rename" @remove="remove" @move="move"></list-item>
     </div>
 
@@ -171,7 +171,7 @@ export default {
           tag: 'folder',
           key: '',
           path: '',
-          name: '../ (parent)'
+          name: Constants.ParentDirectory
         };
 
         if (this.current.tag === 'file') {
@@ -347,7 +347,7 @@ export default {
   float: left;
   margin-right: 0.75em;
 }
-.file-entry {
+.list-item {
   min-height: 3.5rem;
   padding: 0 0.5rem 0 0.5rem;
   cursor: pointer;

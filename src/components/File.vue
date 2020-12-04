@@ -15,9 +15,7 @@
 </template>
 
 <script>
-import FilePath from '../classes/files/file-path';
 import { LocalProvider } from '../services';
-
 import Navigation from './Navigation';
 import FileItem from './FileItem';
 
@@ -73,8 +71,7 @@ export default {
     },
 
     afterClose() {
-      const parent = FilePath.create(this.current.key).directory;
-      this.$router.push(`/l/${parent}`);
+      this.$router.go(-1);
     },
 
     /**

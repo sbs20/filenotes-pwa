@@ -1,6 +1,6 @@
 <template>
   <b-dropdown position="is-bottom-left">
-    <button class="button is-primary" type="button" slot="trigger">
+    <button class="button is-secondary" type="button" slot="trigger">
       <b-icon icon="sort"></b-icon>
     </button>
     <b-dropdown-item v-for="option in sortOptions" :key="option.key" aria-role="listitem" @click="update(option)">

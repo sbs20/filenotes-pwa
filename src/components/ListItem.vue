@@ -9,12 +9,10 @@
       <div class="is-size-7">{{ description }}&nbsp;</div>
     </div>
     <div class="media-right" v-on:click.stop>
-      <b-dropdown class="pt-2" v-if="value.path" :mobile-modal="false" position="is-bottom-left" aria-role="list">
-        <b-icon icon="dots-vertical" slot="trigger"></b-icon>
-        <b-dropdown-item aria-role="listitem" @click="$emit('rename', value)">Rename</b-dropdown-item>
-        <b-dropdown-item aria-role="listitem" @click="$emit('move', value)">Move</b-dropdown-item>
-        <b-dropdown-item aria-role="listitem" @click="$emit('remove', value)">Delete</b-dropdown-item>
-      </b-dropdown>
+      <list-item-action v-if="showAction"
+        @rename="$emit('rename', value)"
+        @remove="$emit('remove', value)"
+        @move="$emit('move', value)"></list-item-action>
     </div>
   </div>
 </template>
@@ -23,12 +21,15 @@
 import FilePath from '../classes/files/file-path';
 import { DateTime } from 'luxon';
 import Flash from './Flash';
+import ListItemAction from './ListItemAction';
+import Constants from '../classes/constants';
 
 export default {
   name: 'ListItem',
 
   components: {
-    Flash
+    Flash,
+    ListItemAction
   },
 
   props: {
@@ -83,6 +84,10 @@ export default {
       } else {
         return `${Math.round(100.0 * entry.size / mb) / 100.0} MB`;
       }
+    },
+
+    showAction() {
+      return this.value.name !== Constants.ParentDirectory;
     }
   },
 };
