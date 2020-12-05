@@ -65,6 +65,38 @@ export default class LocalProvider {
   }
 
   /**
+   * Returns a list of file metadata objects
+   * @param {string|RegExp} [query]
+   * @param {Metadata} [directory]
+   * @param {boolean} [recursive]
+   * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
+   */
+  async search(query, directory, recursive) {
+    const predicate = directory === undefined ? undefined : (fileKey) => {
+      const dirKey = directory.key + '/';
+      return fileKey.startsWith(dirKey)
+        && FilePath.create(fileKey).type === 'text'
+        && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
+    };
+
+    let list = await storage.fs.metadata.list(predicate);
+
+    const matches = await storage.fs.content.list((key, content) => {
+      if (!list.includes(key)) {
+        return false;
+      }
+      const text = Buffer.from(content.data).toString();
+      if (typeof(query) === 'string') {
+        query = new RegExp(`/${query}/i`);
+      }
+      return text.match(query);
+    });
+
+    const results = list.filter(metadata => matches.includes(metadata.key));
+    return results;
+  }
+
+  /**
    * Returns the file data as an ArrayBuffer
    * @param {string} path
    * @returns {Promise.<ArrayBuffer>} - Promise<ArrayBuffer>

@@ -3,10 +3,11 @@ import FileStore from './file-store';
 export default class ContentStore extends FileStore {
   /**
    * Returns a list of file content objects
-   * @returns {Promise.<Array.<Content>>} Promise<Metadata[]>
+   * @param {function(string, Content):boolean} [predicate]
+   * @returns {Promise.<Array.<Content>>} Promise<Content[]>
    */
-  async list() {
-    return await super.list();
+  async list(predicate) {
+    return await super.list(predicate);
   }
 
   /**
