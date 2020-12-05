@@ -1,0 +1,93 @@
+<template>
+  <div>
+    <prism-editor v-if="text" class="editor" v-model="text"
+      :highlight="highlighter" :line-numbers="false" @input="update"></prism-editor>
+  </div>
+</template>
+
+<script>
+import { PrismEditor } from 'vue-prism-editor';
+
+import 'vue-prism-editor/dist/prismeditor.min.css';
+
+// import highlighting library
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/themes/prism-tomorrow.css';
+
+export default {
+  name: 'TextEditor',
+
+  components: {
+    PrismEditor
+  },
+
+  props: {
+    /** @type {Buffer} */
+    value: Buffer,
+  },
+
+  created() {
+    this.load();
+  },
+
+  data() {
+    return {
+      /** @type {string} */
+      text: null
+    };
+  },
+
+  watch: {
+    value() {
+      this.load();
+    }
+  },
+
+  methods: {
+    load() {
+      if (this.value) {
+        this.text = this.value.toString();
+      }
+    },
+
+    highlighter(code) {
+      const language = languages.md;
+      return highlight(code, language);
+    },
+
+    update() {
+      this.$emit('input', Buffer.from(this.text));
+    }
+  }
+};
+</script>
+
+<style scoped>
+/* required class */
+.editor {
+  color: #ccc;
+  font-family: Cascadia Code, Roboto Mono, Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-size: 1rem;
+  line-height: 1.75rem;
+  padding: 0.5rem;
+  min-height: 12rem;
+  white-space: nowrap;
+  overflow: auto;
+  font-weight: 100;
+}
+
+</style>
+
+<style>
+.prism-editor__editor .title {
+  font-size: 1rem;
+}
+
+/* Removing the outline, and show the caret (?) */
+.prism-editor__textarea:focus {
+  outline: none;
+}
+</style>
