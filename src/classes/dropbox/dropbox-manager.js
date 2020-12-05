@@ -1,8 +1,8 @@
-import Constants from './constants';
+import Constants from '../constants';
 import DropboxProvider from './dropbox-provider';
-import Logger from './logger';
-import QueryString from './utils/query-string';
-import Settings from './settings';
+import Logger from '../logger';
+import QueryString from '../utils/query-string';
+import Settings from '../settings';
 
 const settings = Settings.instance();
 const log = Logger.get('DropboxManager');
