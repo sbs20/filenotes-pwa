@@ -2,7 +2,7 @@
   <div>
     <navigation :menu="false">
       <template v-slot:header>
-        {{ current.name }}
+        {{ metadata.name }}
       </template>
       <template v-slot:end>
         <b-navbar-item v-if="!autoSave" @click="save"><b-icon icon="content-save"></b-icon></b-navbar-item>
@@ -63,7 +63,7 @@ export default {
       buffer: null,
 
       /** @type {Metadata} */
-      current: {},
+      metadata: {},
 
       /** @type {FileType} */
       type: 'unknown',
@@ -100,6 +100,7 @@ export default {
         if (this.changed()) {
           if (this.autoSave) {
             this.save();
+            this.sync();
             resolve(true);
           } else {
             // TODO Prompt
@@ -112,8 +113,8 @@ export default {
     },
 
     changed() {
-      const metadata = FileMetadata.create().assign(this.current).data(this.buffer).value;
-      return this.current.hash !== metadata.hash;
+      const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
+      return this.metadata.hash !== metadata.hash;
     },
 
     close() {
@@ -124,15 +125,15 @@ export default {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
       this.type = 'unknown';
-      fs.get(path).then(current => {
-        if (current === undefined || current.tag !== 'file') {
+      fs.get(path).then(metadata => {
+        if (metadata === undefined || metadata.tag !== 'file') {
           this.$router.push('/l/');
           return;
         }
 
-        this.current = current;
-        fs.read(current.key).then(buffer => {
-          this.type = FilePath.create(current.path).type;
+        this.metadata = metadata;
+        fs.read(metadata.key).then(buffer => {
+          this.type = FilePath.create(metadata.path).type;
           this.buffer = Buffer.from(buffer);
         });
       });
@@ -144,13 +145,12 @@ export default {
     },
 
     save() {
-      const metadata = FileMetadata.create().assign(this.current).data(this.buffer).value;
+      const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
       fs.write(metadata, this.buffer).then((saved) => {
         if (saved) {
           this.notify(`Saved ${metadata.name}`);
-          //log.debug('Saved', this.value);
-          //this.$emit('value', metadata);
-          this.sync();
+          // TODO distinguish between has changed since save (prompt), vs has ever changed (sync)
+          this.metadata = metadata;
         }
       });
     },
