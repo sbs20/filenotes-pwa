@@ -30,7 +30,7 @@ export default {
   data() {
     return {
       buffer: null
-    }
+    };
   },
 
   created() {
@@ -52,6 +52,7 @@ export default {
     _onKeys(event) {
       if (event.keyCode === 83 /* s */ && event.ctrlKey) {
         this.$emit('save');
+        event.preventDefault();
       }
     },
 

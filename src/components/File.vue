@@ -10,23 +10,29 @@
       </template>
     </navigation>
 
-    <file-item ref="fileItem" :autoSync="autoSync" v-model="current"></file-item>
+    <file-editor :type="type" v-model="buffer" @save="save"></file-editor>
   </div>
 </template>
 
 <script>
+import Constants from '../classes/constants';
+import FileMetadata from '../classes/files/file-metadata';
+import FilePath from '../classes/files/file-path';
 import LocalProvider from '../classes/local-provider';
+import Logger from '../classes/logger';
 import Settings from '../classes/settings';
 import Navigation from './Navigation';
-import FileItem from './FileItem';
+import FileEditor from './FileEditor';
 
+const log = Logger.get('File');
+const fs = LocalProvider.instance();
 const settings = Settings.instance();
 
 export default {
   name: 'File',
 
   beforeRouteLeave(to, from, next) {
-    // Catches back button (close is not called)
+    // Catches back navigation
     this.beforeClose().then(close => {
       if (close) {
         next();
@@ -37,7 +43,7 @@ export default {
   },
 
   components: {
-    FileItem,
+    FileEditor,
     Navigation
   },
 
@@ -53,8 +59,14 @@ export default {
       autoSave: true,
       autoSync: true,
 
+      /** @type {Buffer} */
+      buffer: null,
+
       /** @type {Metadata} */
       current: {},
+
+      /** @type {FileType} */
+      type: 'unknown',
     };
   },
 
@@ -80,56 +92,74 @@ export default {
       }
     },
 
-    afterClose() {
-      this.$router.go(-1);
-    },
-
     /**
      * @returns {Promise.<boolean>}
      */
     beforeClose() {
       return new Promise(resolve => {
-        this.$refs.fileItem.hasChanged().then(changed => {
-          if (changed) {
-            if (this.autoSave) {
-              this.save();
-              resolve(true);
-            } else {
-              // TODO Prompt
-              resolve(false);
-            }
-          } else {
+        if (this.changed()) {
+          if (this.autoSave) {
+            this.save();
             resolve(true);
+          } else {
+            // TODO Prompt
+            resolve(false);
           }
-        });
+        } else {
+          resolve(true);
+        }
       });
     },
 
+    changed() {
+      const metadata = FileMetadata.create().assign(this.current).data(this.buffer).value;
+      return this.current.hash !== metadata.hash;
+    },
+
     close() {
-      this.beforeClose().then(close => {
-        if (close) {
-          this.afterClose();
-        }
-      });
+      this.$router.go(-1);
     },
 
     load() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
       this.type = 'unknown';
-      LocalProvider.instance().get(path).then(current => {
+      fs.get(path).then(current => {
         if (current === undefined || current.tag !== 'file') {
           this.$router.push('/l/');
           return;
         }
 
         this.current = current;
+        fs.read(current.key).then(buffer => {
+          this.type = FilePath.create(current.path).type;
+          this.buffer = Buffer.from(buffer);
+        });
       });
     },
 
-    save() {
-      this.$refs.fileItem.save();
+    notify(msg) {
+      log.info(msg);
+      this.$buefy.snackbar.open(msg);
     },
+
+    save() {
+      const metadata = FileMetadata.create().assign(this.current).data(this.buffer).value;
+      fs.write(metadata, this.buffer).then((saved) => {
+        if (saved) {
+          this.notify(`Saved ${metadata.name}`);
+          //log.debug('Saved', this.value);
+          //this.$emit('value', metadata);
+          this.sync();
+        }
+      });
+    },
+
+    sync() {
+      if (this.autoSync) {
+        this.$root.$emit(Constants.Event.Sync.Start);
+      }
+    }
   }
 };
 </script>
