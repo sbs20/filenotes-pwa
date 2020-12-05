@@ -6,6 +6,7 @@ import Console from './components/Console';
 import File from './components/File';
 import List from './components/List';
 import Settings from './components/Settings';
+import Start from './components/Start';
 import VueAudioVisual from 'vue-audio-visual';
 import Buefy from 'buefy';
 
@@ -26,6 +27,7 @@ const router = new VueRouter({
     { path: '/console', component: Console },
     { path: '/f/*', component: File },
     { path: '/l/*', component: List },
+    { path: '/start', component: Start },
     { path: '/settings', component: Settings },
   ]
 });

@@ -230,7 +230,7 @@ export default {
     },
 
     forceAuthentication() {
-      remote.startAuthentication(window);
+      remote.authenticate(window);
     },
 
     causeRemoteError() {

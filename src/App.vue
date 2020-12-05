@@ -118,7 +118,13 @@ export default {
     },
 
     start() {
-      RemoteProvider.instance().start(window).then(this.onConnect);
+      RemoteProvider.instance().start(window).then(connected => {
+        if (connected) {
+          this.onConnect(connected);
+        } else {
+          this.$router.replace('/start');
+        }
+      });
     },
   }
 };

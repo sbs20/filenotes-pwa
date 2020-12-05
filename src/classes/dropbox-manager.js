@@ -90,7 +90,7 @@ export default class DropboxManager extends DropboxProvider {
    * @param {Window} window
    * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async startAuthentication(window) {
+  async authenticate(window) {
     if (window === undefined) {
       log.error('window parameter must be specified');
       throw new Error('window parameter must be specified');
@@ -109,15 +109,15 @@ export default class DropboxManager extends DropboxProvider {
    * @param {Window} window
    * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async start(window, force) {
-    if (!await this.hasConnected() || force) {
+  async start(window) {
+    if (!await this.hasConnected()) {
       if (await this.startFromToken()) {
         return true;
       }
       if (await this.startFromQueryString(window.location.search)) {
         return true;
       }
-      this.startAuthentication(window);
+      return false;
     } else {
       this.cursor = await settings.cursor.get();
       this.accountName = await settings.name.get();
