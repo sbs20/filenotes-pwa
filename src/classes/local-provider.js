@@ -114,6 +114,7 @@ export default class LocalProvider {
     await storage.fs.metadata.deleteAll(keys);
     await storage.fs.content.deleteAll(keys);
     await storage.fs.delta.writeAll([DeletedMetadata.create(path)]);
+    keys.forEach(key => log.info(`rm ${key}`));
   }
 
   /**

@@ -57,7 +57,7 @@ export default {
     },
 
     load() {
-      if (this.value) {
+      if (this.value !== undefined) {
         this.buffer = this.value;
       }
     },

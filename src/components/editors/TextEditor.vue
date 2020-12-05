@@ -1,6 +1,6 @@
 <template>
   <div>
-    <prism-editor v-if="text" class="editor" v-model="text"
+    <prism-editor v-if="text !== null" class="editor" v-model="text"
       :highlight="highlighter" :line-numbers="false" @input="update"></prism-editor>
   </div>
 </template>

@@ -166,6 +166,7 @@ export default {
 
         this.metadata = metadata;
         fs.read(metadata.key).then(buffer => {
+          buffer = buffer || new Uint8Array(0);
           this.type = FilePath.create(metadata.path).type;
           this.originalHash = metadata.hash;
           this.savedHash = metadata.hash;
