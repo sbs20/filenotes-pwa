@@ -11,6 +11,22 @@
     </navigation>
 
     <file-editor :type="type" v-model="buffer" @save="save"></file-editor>
+
+    <b-modal :active.sync="showClose" has-modal-card trap-focus
+      :destroy-on-hide="true" aria-role="dialog" aria-modal>
+      <div class="modal-card">
+        <header class="modal-card-head">Save?</header>
+        <section class="modal-card-body">
+          {{ metadata.name }} has changed. Do you want to save before closing?
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button" @click="onCloseDialog('cancel')">Cancel</button>
+          <button class="button is-danger" @click="onCloseDialog('close')">No</button>
+          <button class="button is-success" @click="onCloseDialog('save-close')">Yes</button>
+        </footer>
+      </div>
+    </b-modal>
+
   </div>
 </template>
 
@@ -32,14 +48,19 @@ export default {
   name: 'File',
 
   beforeRouteLeave(to, from, next) {
-    // Catches back navigation
-    this.beforeClose().then(close => {
-      if (close) {
-        next();
+    if (this.forceClose || this.isSaved()) {
+      next();
+    } else {
+      next(false);
+      if (this.autoSave) {
+        this.save().then(() => {
+          this.sync();
+          this.close();
+        });
       } else {
-        next(false);
+        this.showClose = true;
       }
-    });
+    }
   },
 
   components: {
@@ -58,6 +79,8 @@ export default {
     return {
       autoSave: true,
       autoSync: true,
+      forceClose: false,
+      showClose: false,
 
       /** @type {Buffer} */
       buffer: null,
@@ -78,11 +101,11 @@ export default {
 
   created() {
     this.load();
-    document.addEventListener('keydown', this._onKeys);
+    document.addEventListener('keyup', this._onKeys);
   },
 
   destroyed() {
-    document.removeEventListener('keydown', this._onKeys);
+    document.removeEventListener('keyup', this._onKeys);
   },
 
   watch: {
@@ -94,35 +117,37 @@ export default {
   methods: {
     _onKeys(event) {
       if (event.keyCode === 27) {
+        event.preventDefault();
+        event.stopPropagation();
         this.close();
       }
     },
 
-    /**
-     * @returns {Promise.<boolean>}
-     */
-    beforeClose() {
-      return new Promise(resolve => {
-        if (this.unsaved()) {
-          if (this.autoSave) {
-            this.save().then(() => {
-              this.sync();
-              resolve(true);
-            });
-          } else {
-            // TODO Prompt
-            resolve(false);
-          }
-        } else {
-          this.sync();
-          resolve(true);
-        }
-      });
+    isSaved() {
+      const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
+      return this.savedHash === metadata.hash;
     },
 
-    unsaved() {
-      const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
-      return this.savedHash !== metadata.hash;
+    onCloseDialog(action) {
+      this.showClose = false;
+      switch (action) {
+        case 'save-close':
+          this.save().then(() => {
+            this.sync();
+            this.close();
+          });
+          break;
+
+        case 'close':
+          this.forceClose = true;
+          this.close();
+          break;
+
+        case 'cancel':
+        default:
+          // do nothing
+          break;
+      }
     },
 
     close() {

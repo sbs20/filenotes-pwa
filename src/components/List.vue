@@ -215,7 +215,7 @@ export default {
                 console.log(`Directory '${dir}' already exists`);
               } else {
                 fs.mkdir(dir).then(() => {
-                  this.sync();
+                  this.syncAuto();
                   this.refresh();
                 });
               }
@@ -261,7 +261,7 @@ export default {
             } else {
               console.log(`move ${source} to ${destination}`);
               fs.move(source, destination).then(() => {
-                this.sync();
+                this.syncAuto();
                 this.refresh();
               });
             }
@@ -293,7 +293,7 @@ export default {
      */
     remove(entry) {
       fs.delete(entry.path).then(() => {
-        this.sync();
+        this.syncAuto();
         this.refresh();
       });
     },
@@ -317,7 +317,7 @@ export default {
               console.log(`Destination '${destination}' already exists`);
             } else {
               fs.move(source, destination).then(() => {
-                this.sync();
+                this.syncAuto();
                 this.refresh();
               });
             }
@@ -327,14 +327,18 @@ export default {
     },
 
     sync() {
+      this.$root.$emit(Constants.Event.Sync.Start);
+    },
+
+    syncAuto() {
       if (this.autoSync) {
-        this.$root.$emit(Constants.Event.Sync.Start);
+        this.sync();
       }
     },
 
     syncForce() {
       settings.cursor.delete().then(() => {
-        this.$root.$emit(Constants.Event.Sync.Start);
+        this.sync();
       });
     },
 
