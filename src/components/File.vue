@@ -62,6 +62,12 @@ export default {
       /** @type {Buffer} */
       buffer: null,
 
+      /** @type {string} */
+      savedHash: null,
+
+      /** @type {string} */
+      originalHash: null,
+
       /** @type {Metadata} */
       metadata: {},
 
@@ -97,24 +103,26 @@ export default {
      */
     beforeClose() {
       return new Promise(resolve => {
-        if (this.changed()) {
+        if (this.unsaved()) {
           if (this.autoSave) {
-            this.save();
-            this.sync();
-            resolve(true);
+            this.save().then(() => {
+              this.sync();
+              resolve(true);
+            });
           } else {
             // TODO Prompt
             resolve(false);
           }
         } else {
+          this.sync();
           resolve(true);
         }
       });
     },
 
-    changed() {
+    unsaved() {
       const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
-      return this.metadata.hash !== metadata.hash;
+      return this.savedHash !== metadata.hash;
     },
 
     close() {
@@ -134,6 +142,8 @@ export default {
         this.metadata = metadata;
         fs.read(metadata.key).then(buffer => {
           this.type = FilePath.create(metadata.path).type;
+          this.originalHash = metadata.hash;
+          this.savedHash = metadata.hash;
           this.buffer = Buffer.from(buffer);
         });
       });
@@ -145,18 +155,21 @@ export default {
     },
 
     save() {
-      const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
-      fs.write(metadata, this.buffer).then((saved) => {
-        if (saved) {
-          this.notify(`Saved ${metadata.name}`);
-          // TODO distinguish between has changed since save (prompt), vs has ever changed (sync)
-          this.metadata = metadata;
-        }
+      return new Promise(resolve => {
+        const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
+        fs.write(metadata, this.buffer).then((saved) => {
+          if (saved) {
+            this.notify(`Saved ${metadata.name}`);
+            this.metadata = metadata;
+            this.savedHash = metadata.hash;
+          }
+          resolve();
+        });
       });
     },
 
     sync() {
-      if (this.autoSync) {
+      if (this.autoSync && this.savedHash !== this.originalHash) {
         this.$root.$emit(Constants.Event.Sync.Start);
       }
     }
