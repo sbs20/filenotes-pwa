@@ -67,8 +67,7 @@ export default {
     onConnect(connected) {
       if (connected) {
         /** @type {string} */
-        const path = this.$route.params.pathMatch;
-        if (path === undefined) {
+        if (this.$route.matched.length === 0) {
           this.$router.replace('/l/');
         }
         if (this.autoSync) {

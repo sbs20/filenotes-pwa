@@ -24,6 +24,10 @@
         <b-icon icon="sync"></b-icon>
       </button>
 
+      <button class="button mr-2" @click="$router.push(`/search`)">
+        <b-icon icon="magnify"></b-icon>
+      </button>
+
       <sort-options v-model="sortBy"></sort-options>
 
       <b-dropdown aria-role="list" :mobile-modal="false" position="is-bottom-left">
@@ -349,17 +353,3 @@ export default {
   }
 };
 </script>
-
-<style scoped>
-.flash {
-  width: 0.25rem;
-  height: 3rem;
-  float: left;
-  margin-right: 0.75em;
-}
-.list-item {
-  min-height: 3.5rem;
-  padding: 0 0.5rem 0 0.5rem;
-  cursor: pointer;
-}
-</style>

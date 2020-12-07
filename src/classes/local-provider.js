@@ -72,27 +72,32 @@ export default class LocalProvider {
    * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
   async search(query, directory, recursive) {
-    const predicate = directory === undefined ? undefined : (fileKey) => {
-      const dirKey = directory.key + '/';
-      return fileKey.startsWith(dirKey)
-        && FilePath.create(fileKey).type === 'text'
-        && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
-    };
+    if (typeof(query) === 'string') {
+      query = new RegExp(query, 'i');
+    }
 
-    let list = await storage.fs.metadata.list(predicate);
-
-    const matches = await storage.fs.content.list((key, content) => {
-      if (!list.includes(key)) {
-        return false;
+    const index = {};
+    const searchable = {};
+    const results = [];
+    (await this.list(directory, recursive)).forEach(m => {
+      index[m.key] = m;
+      if (m.name.match(query)) {
+        results.push(m);
+      } else if (FilePath.create(m.path).type === 'text') {
+        searchable[m.key] = true;
       }
-      const text = Buffer.from(content.data).toString();
-      if (typeof(query) === 'string') {
-        query = new RegExp(`/${query}/i`);
-      }
-      return text.match(query);
     });
 
-    const results = list.filter(metadata => matches.includes(metadata.key));
+    await storage.fs.content.list((key, content) => {
+      if (key in searchable) {
+        const text = Buffer.from(content.data).toString();
+        if (text.match(query)) {
+          results.push(index[key]);
+        }  
+      }
+      return false;
+    });
+
     return results;
   }
 

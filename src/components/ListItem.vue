@@ -1,15 +1,19 @@
 <template>
-  <div class="media" @click="$emit('open', value)">
+  <div class="media list-item" @click="$emit('open', value)">
     <div class="media-left">
-      <flash :value="value"></flash>
-      <b-icon class="pt-3" :icon="icon"></b-icon>
+      <flash v-model="value.key"></flash>
+      <file-icon :value="value"></file-icon>
     </div>
     <div class="media-content">
       <div class="is-size-5">{{ value.name }}&nbsp;</div>
-      <div class="is-size-7">{{ description }}&nbsp;</div>
+      <div class="is-size-7">
+        <span v-if="value.tag === 'file'">
+          <file-size v-model="value.size"></file-size> (<date-time v-model="value.modified"></date-time>)
+        </span>&nbsp;
+      </div>
     </div>
     <div class="media-right" v-on:click.stop>
-      <list-item-action v-if="showAction"
+      <list-item-action v-if="actions"
         @rename="$emit('rename', value)"
         @remove="$emit('remove', value)"
         @move="$emit('move', value)"></list-item-action>
@@ -18,8 +22,9 @@
 </template>
 
 <script>
-import FilePath from '../classes/files/file-path';
-import { DateTime } from 'luxon';
+import DateTime from './DateTime';
+import FileIcon from './FileIcon';
+import FileSize from './FileSize';
 import Flash from './Flash';
 import ListItemAction from './ListItemAction';
 import Constants from '../classes/constants';
@@ -28,67 +33,35 @@ export default {
   name: 'ListItem',
 
   components: {
+    DateTime,
+    FileIcon,
+    FileSize,
     Flash,
     ListItemAction
   },
 
   props: {
     /** @type {Metadata} */
-    value: Object
+    value: Object,
+
+    showActions: {
+      type: Boolean,
+      default: true
+    }
   },
 
   computed: {
-    description() {
-      const entry = this.value;
-      if (entry.tag === 'folder') {
-        return '';
-      }
-
-      return `${this.size} (${this.modified})`; 
-    },
-
-    icon() {
-      const entry = this.value;
-      if (entry.tag === 'folder') {
-        return 'folder';
-      }
-
-      switch (FilePath.create(entry.path).type) {
-        case 'audio':
-          return 'microphone';
-        case 'image':
-          return 'image';
-        case 'text':
-        default:
-          return 'text';
-      }
-    },
-
-    modified() {
-      const dt = DateTime.fromISO(this.value.modified);
-      return dt.toLocaleString(DateTime.DATETIME_MED);
-    },
-
-    size() {
-      const entry = this.value;
-      const kb = 1 << 10;
-      const mb = kb << 10;
-      if (entry.size < 0) {
-        return '0';
-      } else if (entry.size === 1) {
-        return '1 Byte';
-      } else if (entry.size < kb << 1) {
-        return `${entry.size} Bytes`;
-      } else if (entry.size < mb << 1) {
-        return `${Math.ceil(entry.size / kb)} KB`;
-      } else {
-        return `${Math.round(100.0 * entry.size / mb) / 100.0} MB`;
-      }
-    },
-
-    showAction() {
-      return this.value.name !== Constants.ParentDirectory;
+    actions() {
+      return this.showActions && this.value.name !== Constants.ParentDirectory;
     }
   },
 };
 </script>
+
+<style scoped>
+.list-item {
+  min-height: 3.5rem;
+  padding: 0 0.5rem 0 0.5rem;
+  cursor: pointer;
+}
+</style>

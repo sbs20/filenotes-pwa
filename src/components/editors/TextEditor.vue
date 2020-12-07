@@ -69,22 +69,24 @@ export default {
 /* required class */
 .editor {
   color: #ccc;
-  font-family: Cascadia Code, Roboto Mono, Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-family: Cascadia Code, Courier, monospace;
   font-size: 1rem;
   line-height: 1.75rem;
   padding: 0.5rem;
   min-height: 12rem;
-  white-space: nowrap;
-  overflow: auto;
   font-weight: 100;
 }
-
 </style>
 
 <style>
 .prism-editor__editor .title {
   font-size: 1rem;
 }
+
+/* .prism-editor__textarea {
+  white-space: nowrap;
+  overflow: auto;
+} */
 
 /* Removing the outline, and show the caret (?) */
 .prism-editor__textarea:focus {

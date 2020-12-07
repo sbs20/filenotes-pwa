@@ -13,14 +13,13 @@ export default {
   name: 'Flash',
 
   props: {
-    /** @type {Metadata} */
-    value: Object
+    value: String
   },
 
   computed: {
     colour() {
       /** @type {string} */
-      const name = this.value.name;
+      const name = this.value || '';
       const sum = Array.from(name).reduce((acc, char) => {
         acc += char.charCodeAt(0);
         return acc;
