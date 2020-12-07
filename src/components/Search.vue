@@ -9,16 +9,13 @@
       </template>
     </navigation>
 
-    <div class="block">
+    <div class="block pl-2 pr-2">
       <b-field>
         <b-input ref="queryInput" v-model="query" placeholder="Search..."></b-input>
       </b-field>
       <span v-if="query">
         Showing {{ results.length }} results for '{{ query }}'
       </span>
-    </div>
-
-    <div class="block">
     </div>
 
     <div class="list-item" tabindex="1" v-for="entry in results" v-bind:key="entry.key">
