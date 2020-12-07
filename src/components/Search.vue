@@ -11,9 +11,11 @@
 
     <div class="block">
       <b-field>
-        <b-input v-model="query" placeholder="Search..."></b-input>
+        <b-input ref="queryInput" v-model="query" placeholder="Search..."></b-input>
       </b-field>
-      Showing {{ results.length }} results
+      <span v-if="query">
+        Showing {{ results.length }} results for '{{ query }}'
+      </span>
     </div>
 
     <div class="block">
@@ -40,7 +42,7 @@ const fs = LocalProvider.instance();
 const settings = Settings.instance();
 
 export default {
-  name: 'List',
+  name: 'Search',
   components: {
     ListItem,
     Navigation,
@@ -49,6 +51,10 @@ export default {
   created() {
     document.addEventListener('keydown', this._onKeys);
     this.search();
+  },
+
+  mounted() {
+    this.$refs.queryInput.focus();
   },
 
   data() {
