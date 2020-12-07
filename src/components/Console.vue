@@ -68,12 +68,12 @@ export default {
   background-color: rgba(0, 0, 0, 0);
   resize: none;
   color: #ccc;
-  font-family: Fira code, Fira Mono, Consolas, Menlo, Courier, monospace;
+  font-family: Cascadia Code, Courier, monospace;
   line-height: 1em;
   padding: 0.5em;
   width: 100%;
 }
 pre {
-    white-space: pre-wrap;
+  white-space: pre-wrap;
 }
 </style>
