@@ -26,8 +26,8 @@ const router = new VueRouter({
   routes: [
     { path: '/about', component: About },
     { path: '/console', component: Console },
-    { path: '/f/*', component: File },
-    { path: '/l/*', component: List },
+    { path: '/file*', component: File },
+    { path: '/list*', component: List },
     { path: '/search/:query', component: Search },
     { path: '/search', component: Search },
     { path: '/start', component: Start },

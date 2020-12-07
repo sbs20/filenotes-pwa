@@ -68,7 +68,7 @@ export default {
       if (connected) {
         /** @type {string} */
         if (this.$route.matched.length === 0) {
-          this.$router.replace('/l/');
+          this.$router.replace('/list');
         }
         if (this.autoSync) {
           this.syncStart();

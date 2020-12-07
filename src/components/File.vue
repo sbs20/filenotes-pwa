@@ -160,7 +160,7 @@ export default {
       this.type = 'unknown';
       fs.get(path).then(metadata => {
         if (metadata === undefined || metadata.tag !== 'file') {
-          this.$router.push('/l/');
+          this.$router.push('/list');
           return;
         }
 

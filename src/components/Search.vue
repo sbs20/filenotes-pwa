@@ -118,7 +118,7 @@ export default {
      */
     open(entry) {
       if (entry.key !== this.$route.params.pathMatch) {
-        const base = entry.tag === 'folder' ? '/l/' : '/f/';
+        const base = entry.tag === 'folder' ? '/list' : '/file';
         const path = `${base}${entry.key}`;
         this.$router.push(path);
       }

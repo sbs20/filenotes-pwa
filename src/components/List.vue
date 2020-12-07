@@ -173,7 +173,7 @@ export default {
       const path = this.$route.params.pathMatch;
       fs.get(path).then(current => {
         if (current === undefined && path.length > 0) {
-          this.$router.push('/l/');
+          this.$router.push('/list');
           return;
         }
 
@@ -185,7 +185,7 @@ export default {
         };
 
         if (this.current.tag === 'file') {
-          this.$router.push(`/f/${this.current.key}`);
+          this.$router.push(`/file${this.current.key}`);
         }
 
         fs.list(this.current).then(entries => {
@@ -286,7 +286,7 @@ export default {
      */
     open(entry) {
       if (entry.key !== this.$route.params.pathMatch) {
-        const base = entry.tag === 'folder' ? '/l/' : '/f/';
+        const base = entry.tag === 'folder' ? '/list' : '/file';
         const path = `${base}${entry.key}`;
         this.$router.push(path);
       }
