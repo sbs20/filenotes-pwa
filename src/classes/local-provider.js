@@ -21,7 +21,7 @@ export default class LocalProvider {
     const existing = await this.list(directory, false);
     let candidate = name;
     let index = 0;
-    while (existing.filter(m => m.name === candidate).length > 0) {
+    while (existing.filter(m => m.name.toLowerCase() === candidate.toLowerCase()).length > 0) {
       index++;
       const file = FilePath.create(name);
       candidate = `${file.stem} (${index}).${file.extension}`;
