@@ -44,6 +44,64 @@ const log = Logger.get('File');
 const fs = LocalProvider.instance();
 const settings = Settings.instance();
 
+const helpers = {
+  /**
+   * @param {FileType} type
+   */
+  defaultExtension(type) {
+    switch (type) {
+      case 'text':
+        return 'txt';
+      case 'audio':
+        return 'mp3';
+      case 'image':
+        return 'jpg';
+      default:
+        return 'unknown';
+    }
+  },
+
+  /**
+   * @param {BufferLike} buffer 
+   * @param {FileType} type
+   */
+  defaultName(buffer, type) {
+    let name = undefined;
+    if (type === 'text') {
+      if (!Buffer.isBuffer(buffer)) {
+        buffer = Buffer.from(buffer);
+      }
+      let end = Math.min(28, buffer.length);
+      const content = buffer.slice(0, end).toString();
+      const indexEnd = content.indexOf('\n');
+      end = indexEnd === -1 ? undefined : indexEnd;
+      let line = content.substr(0, end);
+      line = line.replace(/[^a-z0-9 ]/ig, '').trim();
+      name = line.length ? line : undefined;
+    }
+
+    if (name === undefined) {
+      name = 'New';
+    }
+
+    const extension = this.defaultExtension(type);
+    return `${name}.${extension}`;
+  },
+
+  /**
+   * @param {Metadata} directory
+   * @param {string} name
+   * @param {BufferLike} buffer
+   * @returns {Metadata}
+   */
+  async createMetadata(directory, name, buffer) {
+    return FileMetadata.create()
+      .path(`${directory.path}/${name}`)
+      .data(buffer)
+      .value;
+  }
+};
+
 export default {
   name: 'File',
 
@@ -90,6 +148,9 @@ export default {
 
       /** @type {string} */
       originalHash: null,
+
+      /** @type {Metadata} */
+      directory: null,
 
       /** @type {Metadata} */
       metadata: {},
@@ -159,18 +220,27 @@ export default {
       const path = this.$route.params.pathMatch;
       this.type = 'unknown';
       fs.get(path).then(metadata => {
-        if (metadata === undefined || metadata.tag !== 'file') {
+        if (metadata === undefined) {
+          this.forceClose = true;
           this.$router.push('/list');
           return;
         }
 
-        this.metadata = metadata;
-        fs.read(metadata.key).then(buffer => {
-          this.type = FilePath.create(metadata.path).type;
-          this.originalHash = metadata.hash;
-          this.savedHash = metadata.hash;
-          this.buffer = Buffer.from(buffer);
-        });
+        this.type = this.$route.query.type;
+        if (metadata.tag === 'folder' && this.type) {
+          this.directory = metadata;
+          this.originalHash = '';
+          this.savedHash = '';
+          this.buffer = Buffer.alloc(0);
+        } else {
+          this.metadata = metadata;
+          fs.read(metadata.key).then(buffer => {
+            this.type = FilePath.create(metadata.path).type;
+            this.originalHash = metadata.hash;
+            this.savedHash = metadata.hash;
+            this.buffer = Buffer.from(buffer);
+          });
+        }
       });
     },
 
@@ -179,9 +249,29 @@ export default {
       this.$buefy.snackbar.open(msg);
     },
 
-    save() {
+    /**
+     * @returns {Promise.<Metadata>}
+     */
+    asMetadata() {
       return new Promise(resolve => {
-        const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
+        if (this.metadata.name === undefined) {
+          const name = helpers.defaultName(this.buffer, this.type);
+          fs.new(this.directory, name).then(name => {
+            const metadata = helpers.createMetadata(this.directory, name, this.buffer);
+            resolve(metadata);
+          });
+        } else {
+          const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
+          resolve(metadata);
+        }
+      });
+    },
+
+    /**
+     * @returns {Promise.<Metadata>}
+     */
+    saveMetadata(metadata) {
+      return new Promise(resolve => {
         fs.write(metadata, this.buffer).then((saved) => {
           if (saved) {
             this.notify(`Saved ${metadata.name}`);
@@ -190,6 +280,15 @@ export default {
           }
           resolve();
         });
+      });
+    },
+
+    /**
+     * @returns {Promise.<void>}
+     */
+    save() {
+      return this.asMetadata().then(metadata => {
+        return this.saveMetadata(metadata);
       });
     },
 

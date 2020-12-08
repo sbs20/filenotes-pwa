@@ -231,16 +231,9 @@ export default {
 
     mktext() {
       if (this.current.tag === 'folder') {
-        fs.new(this.current, 'New Text.txt').then(name => {
-          if (name) {
-            const path = `${this.current.path}/${name}`;
-            const content = new Uint8Array();
-            const metadata = FileMetadata.create().path(path).data(content).value;
-            fs.write(metadata, content).then(() => {
-              this.open(metadata);
-              // Don't sync new files. Wait until they're saved.
-            });
-          }
+        this.open({
+          tag: 'file',
+          key: `${this.current.path}?type=text`
         });
       }
     },
