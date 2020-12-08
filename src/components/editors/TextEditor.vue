@@ -1,6 +1,6 @@
 <template>
   <div>
-    <prism-editor v-if="text !== null" class="editor" v-model="text"
+    <prism-editor v-if="text !== null" ref="editor" class="editor" v-model="text"
       :highlight="highlighter" :line-numbers="false" @input="update"></prism-editor>
   </div>
 </template>
@@ -31,6 +31,13 @@ export default {
 
   created() {
     this.load();
+  },
+
+  mounted() {
+    /** @type {HTMLInputElement} */
+    const textarea = this.$refs.editor.$refs.textarea;
+    textarea.setSelectionRange(0, 0);
+    textarea.focus();
   },
 
   data() {
