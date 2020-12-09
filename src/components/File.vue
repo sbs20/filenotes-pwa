@@ -12,7 +12,7 @@
 
     <file-editor :type="type" v-model="buffer" @save="perform('save')"></file-editor>
 
-    <b-modal :active.sync="showClose" has-modal-card trap-focus
+    <b-modal :active.sync="dialog.close.show" has-modal-card trap-focus
       :destroy-on-hide="true" aria-role="dialog" aria-modal
       :on-cancel="() => onCloseDialog()">
       <div class="modal-card">
@@ -28,14 +28,14 @@
       </div>
     </b-modal>
 
-    <b-modal :active.sync="showSave" has-modal-card trap-focus
+    <b-modal :active.sync="dialog.save.show" has-modal-card trap-focus
       :destroy-on-hide="true" aria-role="dialog" aria-modal
       :on-cancel="() => onSaveDialog(false)">
       <div class="modal-card">
         <header class="modal-card-head">Save?</header>
         <section class="modal-card-body">
           <b-field>
-            <b-input ref="filename" v-model="saveFilename"></b-input>
+            <b-input ref="filename" v-model="dialog.save.filename"></b-input>
           </b-field>
         </section>
         <footer class="modal-card-foot">
@@ -62,60 +62,18 @@ const log = Logger.get('File');
 const fs = LocalProvider.instance();
 const settings = Settings.instance();
 
-const helpers = {
-  /**
-   * @param {BufferLike} buffer 
-   * @param {FileType} type
-   */
-  defaultName(buffer, type) {
-    let name = undefined;
-    if (type === 'text') {
-      if (!Buffer.isBuffer(buffer)) {
-        buffer = Buffer.from(buffer);
-      }
-      let end = Math.min(28, buffer.length);
-      const content = buffer.slice(0, end).toString();
-      const indexEnd = content.indexOf('\n');
-      end = indexEnd === -1 ? undefined : indexEnd;
-      let line = content.substr(0, end);
-      line = line.replace(/[^a-z0-9 ]/ig, '').trim();
-      name = line.length ? line : undefined;
-    }
-
-    if (name === undefined) {
-      name = 'New';
-    }
-
-    const extension = FilePath.defaultExtension(type);
-    return `${name}.${extension}`;
-  },
-
-  /**
-   * @param {Metadata} directory
-   * @param {string} name
-   * @param {BufferLike} buffer
-   * @returns {Metadata}
-   */
-  async createMetadata(directory, name, buffer) {
-    return FileMetadata.create()
-      .path(`${directory.path}/${name}`)
-      .data(buffer)
-      .value;
-  }
-};
-
 export default {
   name: 'File',
 
   beforeRouteLeave(to, from, next) {
-    if (this.forceClose || this.isSaved()) {
+    if (this.discard || this.isSaved()) {
       next();
     } else {
       next(false);
       if (this.autoSave) {
         this.perform('save', 'sync', 'close');
       } else {
-        this.showClose = true;
+        this.dialog.close.show = true;
       }
     }
   },
@@ -140,12 +98,18 @@ export default {
       autoName: true,
       autoSave: true,
       autoSync: true,
-      forceClose: false,
-      showClose: false,
-      showSave: false,
+      discard: false,
       isNew: false,
 
-      saveFilename: null,
+      dialog: {
+        close: {
+          show: false
+        },
+        save: {
+          show: false,
+          filename: null
+        }
+      },
 
       /** @type {Array.<FileAction>} */
       actions: [],
@@ -187,7 +151,7 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (this.showSave || this.showClose) {
+      if (this.dialog.save.show || this.dialog.close.show) {
         return;
       }
 
@@ -198,6 +162,33 @@ export default {
       }
     },
 
+    /**
+     * @param {BufferLike} buffer 
+     * @param {FileType} type
+     */
+    _defaultName(buffer, type) {
+      let name = undefined;
+      if (type === 'text') {
+        if (!Buffer.isBuffer(buffer)) {
+          buffer = Buffer.from(buffer);
+        }
+        let end = Math.min(28, buffer.length);
+        const content = buffer.slice(0, end).toString();
+        const indexEnd = content.indexOf('\n');
+        end = indexEnd === -1 ? undefined : indexEnd;
+        let line = content.substr(0, end);
+        line = line.replace(/[^a-z0-9 ]/ig, '').trim();
+        name = line.length ? line : undefined;
+      }
+
+      if (name === undefined) {
+        name = 'New';
+      }
+
+      const extension = FilePath.defaultExtension(type);
+      return `${name}.${extension}`;
+    },
+    
     isSaved() {
       const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
       return this.savedHash === metadata.hash;
@@ -212,10 +203,10 @@ export default {
       const perform = action => () => {
         switch (action) {
           case 'name':
-            this.metadata.name = this.saveFilename;
+            this.metadata.name = this.dialog.save.filename;
             return Promise.resolve();
           case 'discard':
-            this.forceClose = true;
+            this.discard = true;
             this.close();
             return Promise.resolve();
           case 'close':
@@ -247,7 +238,7 @@ export default {
      * @param {Array.<FileAction>} actions
      */
     onCloseDialog(...actions) {
-      this.showClose = false;
+      this.dialog.close.show = false;
       this.perform(...actions);
     },
 
@@ -255,9 +246,9 @@ export default {
      * @param {boolean} ok
      */
     onSaveDialog(ok) {
-      this.showSave = false;
+      this.dialog.save.show = false;
       if (!ok) {
-        this.saveFilename = null;
+        this.dialog.save.filename = null;
         this.actions = [];
         return;
       }
@@ -276,8 +267,7 @@ export default {
       this.type = 'unknown';
       fs.get(path).then(metadata => {
         if (metadata === undefined) {
-          this.forceClose = true;
-          this.$router.push('/list');
+          this.perform('discard');
           return;
         }
 
@@ -311,16 +301,20 @@ export default {
     createMetadata() {
       return new Promise((resolve, reject) => {
         if (this.isNew) {
-          if (!this.autoName && this.saveFilename === null) {
-            this.saveFilename = helpers.defaultName(this.buffer, this.type);
-            this.showSave = true;
+          const defaultName = this._defaultName(this.buffer, this.type);
+          if (!this.autoName && this.dialog.save.filename === null) {
+            this.dialog.save.filename = defaultName;
+            this.dialog.save.show = true;
             reject('Interrupt for dialog');
             return;
           }
 
-          let name = this.saveFilename || helpers.defaultName(this.buffer, this.type);
+          let name = this.dialog.save.filename || defaultName;
           fs.new(this.directory, name).then(name => {
-            const metadata = helpers.createMetadata(this.directory, name, this.buffer);
+            const metadata = FileMetadata.create()
+              .path(`${this.directory.path}/${name}`)
+              .data(this.buffer)
+              .value;
             resolve(metadata);
           });
         } else {
