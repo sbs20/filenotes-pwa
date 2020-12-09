@@ -121,6 +121,13 @@ export default class LocalProvider {
    * @returns {Promise.<boolean>} Whether the file was saved
    */
   async write(metadata, data) {
+    if (metadata === undefined) {
+      throw new Error('Metadata is undefined');
+    }
+    if (metadata.name && metadata.name.trim().length === 0) {
+      throw new Error('Metadata must have a name');
+    }
+
     if (data) {
       const content = FileContent.create(metadata.path, data);
 
@@ -135,8 +142,8 @@ export default class LocalProvider {
       }
 
       log.debug(`${metadata.key} has not changed`);
-      return false;
     }
+    return false;
   }
 
   /**
