@@ -20,9 +20,25 @@
           {{ metadata.name }} has changed. Do you want to save before closing?
         </section>
         <footer class="modal-card-foot">
-          <button class="button" @click="onCloseDialog('cancel')">Cancel</button>
-          <button class="button is-danger" @click="onCloseDialog('close')">No</button>
-          <button class="button is-success" @click="onCloseDialog('save-close')">Yes</button>
+          <button class="button" @click="perform('hide')">Cancel</button>
+          <button class="button is-danger" @click="perform('hide', 'discard')">No</button>
+          <button class="button is-success" @click="perform('hide', 'save', 'sync', 'close')">Yes</button>
+        </footer>
+      </div>
+    </b-modal>
+
+    <b-modal :active.sync="showSave" has-modal-card trap-focus
+      :destroy-on-hide="true" aria-role="dialog" aria-modal>
+      <div class="modal-card">
+        <header class="modal-card-head">Save?</header>
+        <section class="modal-card-body">
+          <b-field>
+            <b-input ref="filename" v-model="saveFilename"></b-input>
+          </b-field>
+        </section>
+        <footer class="modal-card-foot">
+          <button class="button" @click="perform('hide')">Cancel</button>
+          <button class="button is-success" @click="perform('hide')">Ok</button>
         </footer>
       </div>
     </b-modal>
@@ -46,22 +62,6 @@ const settings = Settings.instance();
 
 const helpers = {
   /**
-   * @param {FileType} type
-   */
-  defaultExtension(type) {
-    switch (type) {
-      case 'text':
-        return 'txt';
-      case 'audio':
-        return 'mp3';
-      case 'image':
-        return 'jpg';
-      default:
-        return 'unknown';
-    }
-  },
-
-  /**
    * @param {BufferLike} buffer 
    * @param {FileType} type
    */
@@ -84,7 +84,7 @@ const helpers = {
       name = 'New';
     }
 
-    const extension = this.defaultExtension(type);
+    const extension = FilePath.defaultExtension(type);
     return `${name}.${extension}`;
   },
 
@@ -111,10 +111,7 @@ export default {
     } else {
       next(false);
       if (this.autoSave) {
-        this.save().then(() => {
-          this.sync();
-          this.close();
-        });
+        this.perform('save', 'sync', 'close');
       } else {
         this.showClose = true;
       }
@@ -127,6 +124,9 @@ export default {
   },
 
   data() {
+    settings.autoName.get().then(value => {
+      this.autoName = value;
+    });
     settings.autoSave.get().then(value => {
       this.autoSave = value;
     });
@@ -135,10 +135,14 @@ export default {
     });
 
     return {
+      autoName: true,
       autoSave: true,
       autoSync: true,
       forceClose: false,
       showClose: false,
+      showSave: false,
+
+      saveFilename: null,
 
       /** @type {Buffer} */
       buffer: null,
@@ -189,26 +193,39 @@ export default {
       return this.savedHash === metadata.hash;
     },
 
-    onCloseDialog(action) {
-      this.showClose = false;
-      switch (action) {
-        case 'save-close':
-          this.save().then(() => {
-            this.sync();
+    /**
+     * @param {Array.<FileAction>}
+     * @returns {Promise.<void>}
+     */
+    perform(...actions) {
+      const perform = action => () => {
+        switch (action) {
+          case 'hide':
+            this.showClose = false;
+            return Promise.resolve();
+          case 'discard':
+            this.forceClose = true;
             this.close();
-          });
-          break;
+            return Promise.resolve();
+          case 'close':
+            this.close();
+            return Promise.resolve();
+          case 'save':
+            return this.save();
+          case 'sync':
+            this.sync();
+            return Promise.resolve();
+          default:
+            return Promise.reject('Unknown action');
+        }
+      };
 
-        case 'close':
-          this.forceClose = true;
-          this.close();
-          break;
-
-        case 'cancel':
-        default:
-          // do nothing
-          break;
+      let promise = Promise.resolve();
+      for (const action of actions) {
+        promise = promise.then(perform(action));
       }
+
+      return promise;
     },
 
     close() {
