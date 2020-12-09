@@ -67,6 +67,7 @@ export default {
 
   beforeRouteLeave(to, from, next) {
     if (this.discard || this.isSaved()) {
+      this.perform('sync');
       next();
     } else {
       next(false);

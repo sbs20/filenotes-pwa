@@ -34,6 +34,7 @@ const Constants = {
 
   Event: {
     Sync: {
+      Listen: 'sync.listen',
       Start: 'sync.start',
       Finish: 'sync.finish'
     }

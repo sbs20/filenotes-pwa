@@ -18,9 +18,12 @@ import Constants from './classes/constants';
 import Logger from './classes/logger';
 import SyncEngine from './classes/sync-engine';
 import RemoteProvider from './classes/remote-provider';
+import Settings from './classes/settings';
+
 import Install from './components/Install';
 
 const log = Logger.get('App');
+const settings = Settings.instance();
 const sync = SyncEngine.instance();
 
 export default {
@@ -32,7 +35,6 @@ export default {
 
   data() {
     return {
-      autoSync: true,
       progress: {
         status: '',
         show: false,
@@ -48,6 +50,7 @@ export default {
 
   created() {
     this.$root.$on(Constants.Event.Sync.Start, this.syncStart);
+    this.$root.$on(Constants.Event.Sync.Listen, this.syncListen);
     document.addEventListener('isUpdateAvailable', (available) => {
       if (available) {
         const msg = 'New version available. Refresh to install';
@@ -61,6 +64,7 @@ export default {
 
   destroyed() {
     this.$root.$off(Constants.Event.Sync.Start, this.syncStart);
+    this.$root.$off(Constants.Event.Sync.Listen, this.syncListen);
   },
 
   methods: {
@@ -70,15 +74,18 @@ export default {
         if (this.$route.matched.length === 0) {
           this.$router.replace('/list');
         }
-        if (this.autoSync) {
-          this.syncStart();
-        } else {
-          sync.isRequired().then(required => {
-            const msg = required ? 'Sync required' : 'Up to date';
-            log.info(msg);
-            this.$buefy.snackbar.open(msg);
-          });
-        }
+
+        settings.autoSync.get().then(enabled => {
+          if (enabled) {
+            this.syncStart();
+          } else {
+            sync.isRequired().then(required => {
+              const msg = required ? 'Sync required' : 'Up to date';
+              log.info(msg);
+              this.$buefy.snackbar.open(msg);
+            });
+          }
+        });
       } else {
         const msg = 'Not connected';
         log.info(msg);
@@ -99,10 +106,45 @@ export default {
       this.$root.$emit(Constants.Event.Sync.Finish);
       this.progress.status = success ? 'is-success' : 'is-danger';
       setTimeout(() => this.progress.status = '', 2000);
+
+      settings.autoSync.get().then(enabled => {
+        if (enabled) {
+          this.$root.$emit(Constants.Event.Sync.Listen);
+        }
+      });
+    },
+
+    syncListen() {
+      log.debug('Listening for updates');
+      RemoteProvider.instance().poll().then(changes => {
+        if (changes) {
+          if (sync.active) {
+            log.debug('Already syncing. Ignore change');
+            return;
+          }
+
+          settings.autoSync.get().then(enabled => {
+            if (enabled) {
+              this.syncStart();
+            }
+          });
+
+        } else {
+          log.debug('Poll finished with no changes');
+          settings.autoSync.get().then(enabled => {
+            if (enabled) {
+              this.$root.$emit(Constants.Event.Sync.Listen);
+            }
+          });
+        }
+      }).catch(reason => {
+        log.debug(`syncListen: ${reason}`);
+      });
     },
 
     syncStart() {
       this.progress.value = 0;
+      this.progress.status = '';
       this.progress.show = true;
       sync.on('progress', this.updateProgress);
       sync.execute().then(() => {

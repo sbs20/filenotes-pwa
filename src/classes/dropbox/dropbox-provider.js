@@ -4,6 +4,8 @@ import extend from '../utils/extend';
 import { Dropbox } from 'dropbox';
 import { sha256Sync } from '../utils/sha256';
 
+const LONG_POLL_TIMEOUT = 30;
+
 const MAP = {
   '.tag': 'tag',
   'id': 'id',
@@ -30,6 +32,7 @@ export default class DropboxProvider {
 
     /** @type {string} */
     this.cursor = null;
+    this.polling = false;
     this.adapter = new FieldAdapter(MAP);
     this.connected = false;
 
@@ -163,6 +166,24 @@ export default class DropboxProvider {
     const list = await this.list();
     this.cursor = cursor;
     return list;
+  }
+
+  /**
+   * Returns when there's an update
+   * @returns {Promise.<boolean>} changes
+   */
+  async poll() {
+    if (this.polling) {
+      throw new Error('Already polling');
+    }
+
+    this.polling = true;
+    const response = await this.client.filesListFolderLongpoll({ cursor: this.cursor, timeout: LONG_POLL_TIMEOUT });
+    this.polling = false;
+    if (response.result.changes !== undefined) {
+      return response.result.changes;
+    }
+    throw new Error(`Polling error: ${response.result}`);
   }
 
   /**
