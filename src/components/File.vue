@@ -5,30 +5,32 @@
         {{ metadata.name }}
       </template>
       <template v-slot:end>
-        <b-navbar-item v-if="!autoSave" @click="save"><b-icon icon="content-save"></b-icon></b-navbar-item>
+        <b-navbar-item v-if="!autoSave" @click="perform('save')"><b-icon icon="content-save"></b-icon></b-navbar-item>
         <b-navbar-item @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
       </template>
     </navigation>
 
-    <file-editor :type="type" v-model="buffer" @save="save"></file-editor>
+    <file-editor :type="type" v-model="buffer" @save="perform('save')"></file-editor>
 
     <b-modal :active.sync="showClose" has-modal-card trap-focus
-      :destroy-on-hide="true" aria-role="dialog" aria-modal>
+      :destroy-on-hide="true" aria-role="dialog" aria-modal
+      :on-cancel="() => onCloseDialog()">
       <div class="modal-card">
         <header class="modal-card-head">Save?</header>
         <section class="modal-card-body">
           {{ metadata.name }} has changed. Do you want to save before closing?
         </section>
         <footer class="modal-card-foot">
-          <button class="button" @click="perform('hide')">Cancel</button>
-          <button class="button is-danger" @click="perform('hide', 'discard')">No</button>
-          <button class="button is-success" @click="perform('hide', 'save', 'sync', 'close')">Yes</button>
+          <button class="button" @click="onCloseDialog()">Cancel</button>
+          <button class="button is-danger" @click="onCloseDialog('discard')">No</button>
+          <button class="button is-success" @click="onCloseDialog('save', 'sync', 'close')">Yes</button>
         </footer>
       </div>
     </b-modal>
 
     <b-modal :active.sync="showSave" has-modal-card trap-focus
-      :destroy-on-hide="true" aria-role="dialog" aria-modal>
+      :destroy-on-hide="true" aria-role="dialog" aria-modal
+      :on-cancel="() => onSaveDialog(false)">
       <div class="modal-card">
         <header class="modal-card-head">Save?</header>
         <section class="modal-card-body">
@@ -37,8 +39,8 @@
           </b-field>
         </section>
         <footer class="modal-card-foot">
-          <button class="button" @click="perform('hide')">Cancel</button>
-          <button class="button is-success" @click="perform('hide')">Ok</button>
+          <button class="button" @click="onSaveDialog(false)">Cancel</button>
+          <button class="button is-success" @click="onSaveDialog(true)">Ok</button>
         </footer>
       </div>
     </b-modal>
@@ -141,8 +143,12 @@ export default {
       forceClose: false,
       showClose: false,
       showSave: false,
+      isNew: false,
 
       saveFilename: null,
+
+      /** @type {Array.<FileAction>} */
+      actions: [],
 
       /** @type {Buffer} */
       buffer: null,
@@ -181,6 +187,10 @@ export default {
 
   methods: {
     _onKeys(event) {
+      if (this.showSave || this.showClose) {
+        return;
+      }
+
       if (event.keyCode === 27) {
         event.preventDefault();
         event.stopPropagation();
@@ -194,14 +204,15 @@ export default {
     },
 
     /**
-     * @param {Array.<FileAction>}
+     * @param {Array.<FileAction>} actions
      * @returns {Promise.<void>}
      */
     perform(...actions) {
+      this.actions = actions;
       const perform = action => () => {
         switch (action) {
-          case 'hide':
-            this.showClose = false;
+          case 'name':
+            this.metadata.name = this.saveFilename;
             return Promise.resolve();
           case 'discard':
             this.forceClose = true;
@@ -216,7 +227,7 @@ export default {
             this.sync();
             return Promise.resolve();
           default:
-            return Promise.reject('Unknown action');
+            return Promise.reject(`Unknown action: ${action}`);
         }
       };
 
@@ -225,7 +236,34 @@ export default {
         promise = promise.then(perform(action));
       }
 
-      return promise;
+      return promise.then(() => {
+        this.actions = [];
+      }).catch(reason => {
+        log.debug(`Perform terminated: ${reason}`);
+      });
+    },
+
+    /**
+     * @param {Array.<FileAction>} actions
+     */
+    onCloseDialog(...actions) {
+      this.showClose = false;
+      this.perform(...actions);
+    },
+
+    /**
+     * @param {boolean} ok
+     */
+    onSaveDialog(ok) {
+      this.showSave = false;
+      if (!ok) {
+        this.saveFilename = null;
+        this.actions = [];
+        return;
+      }
+
+      const actions = this.actions.length ? this.actions : ['save'];
+      this.perform(...actions);
     },
 
     close() {
@@ -245,6 +283,7 @@ export default {
 
         this.type = this.$route.query.type;
         if (metadata.tag === 'folder' && this.type) {
+          this.isNew = true;
           this.directory = metadata;
           this.originalHash = '';
           this.savedHash = '';
@@ -269,10 +308,17 @@ export default {
     /**
      * @returns {Promise.<Metadata>}
      */
-    asMetadata() {
-      return new Promise(resolve => {
-        if (this.metadata.name === undefined) {
-          const name = helpers.defaultName(this.buffer, this.type);
+    createMetadata() {
+      return new Promise((resolve, reject) => {
+        if (this.isNew) {
+          if (!this.autoName && this.saveFilename === null) {
+            this.saveFilename = helpers.defaultName(this.buffer, this.type);
+            this.showSave = true;
+            reject('Interrupt for dialog');
+            return;
+          }
+
+          let name = this.saveFilename || helpers.defaultName(this.buffer, this.type);
           fs.new(this.directory, name).then(name => {
             const metadata = helpers.createMetadata(this.directory, name, this.buffer);
             resolve(metadata);
@@ -294,6 +340,7 @@ export default {
             this.notify(`Saved ${metadata.name}`);
             this.metadata = metadata;
             this.savedHash = metadata.hash;
+            this.isNew = false;
           }
           resolve();
         });
@@ -304,7 +351,7 @@ export default {
      * @returns {Promise.<void>}
      */
     save() {
-      return this.asMetadata().then(metadata => {
+      return this.createMetadata().then(metadata => {
         return this.saveMetadata(metadata);
       });
     },
