@@ -171,17 +171,12 @@ export default {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
       fs.get(path).then(current => {
-        if (current === undefined && path.length > 0) {
+        if (current === undefined) {
           this.$router.push('/list');
           return;
         }
 
-        this.current = current || {
-          tag: 'folder',
-          key: '',
-          path: '',
-          name: Constants.ParentDirectory
-        };
+        this.current = current;
 
         if (this.current.tag === 'file') {
           this.$router.push(`/file${this.current.key}`);
@@ -194,7 +189,7 @@ export default {
             entries.sort(sorter);
             if (this.current.key !== '') {
               const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
-              parent.name = '../ (parent)';
+              parent.name = Constants.ParentDirectory;
               entries.splice(0, 0, parent);
             }
             this.entries = entries;

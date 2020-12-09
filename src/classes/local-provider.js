@@ -34,6 +34,9 @@ export default class LocalProvider {
    * @returns {Promise.<Metadata>} - Promise<Metadata>
    */
   async get(path) {
+    if (path === '') {
+      return FolderMetadata.create('');
+    }
     return await storage.fs.metadata.read(path.toLowerCase());
   }
 
