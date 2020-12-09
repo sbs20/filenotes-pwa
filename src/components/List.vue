@@ -78,7 +78,6 @@
 import Constants from '../classes/constants';
 import LocalProvider from '../classes/local-provider';
 import FilePath from '../classes/files/file-path';
-import FileMetadata from '../classes/files/file-metadata';
 import FolderMetadata from '../classes/files/folder-metadata';
 import Logger from '../classes/logger';
 import MetadataComparator from '../classes/metadata-comparator';

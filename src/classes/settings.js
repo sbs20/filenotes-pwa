@@ -40,6 +40,7 @@ export default class Settings {
    * Constructor
    */
   constructor() {
+    this.autoName = new StoredProperty(Constants.Settings.AutoName, true);
     this.autoSave = new StoredProperty(Constants.Settings.AutoSave, true);
     this.autoSync = new StoredProperty(Constants.Settings.AutoSync, true);
     this.oauth = new StoredProperty(Constants.Settings.OAuth);

@@ -10,6 +10,7 @@ const Constants = {
     Pkce: 'pkce',
     Theme: 'theme',
     Cursor: 'cursor',
+    AutoName: 'auto-name',
     AutoSync: 'auto-sync',
     AutoSave: 'auto-save',
     SortBy: 'sort-by'

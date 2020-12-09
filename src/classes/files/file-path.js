@@ -117,4 +117,21 @@ export default class FilePath {
   static create(path) {
     return new FilePath(path);
   }
+
+  /**
+   * @param {FileType} type
+   * @returns {string} The default extension without a preceding dot
+   */
+  static defaultExtension(type) {
+    switch (type) {
+      case 'text':
+        return 'txt';
+      case 'audio':
+        return 'mp3';
+      case 'image':
+        return 'jpg';
+      default:
+        return 'unknown';
+    }
+  }
 }

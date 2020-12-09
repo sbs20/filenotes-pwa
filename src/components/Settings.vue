@@ -8,8 +8,18 @@
     </navigation>
 
     <settings-section>
-      <template v-slot:title>Sync</template>
+      <template v-slot:title>Behaviour</template>
       <template v-slot:items>
+        <settings-item>
+          <template v-slot:description>
+            Autoname. Automatically names notes when you save.
+          </template>
+          <template v-slot:action>
+            <div class="field">
+              <b-switch v-model="autoName"></b-switch>
+            </div>
+          </template>
+        </settings-item>
         <settings-item>
           <template v-slot:description>
             Autosave. Automatically saves notes when you close.
@@ -30,7 +40,12 @@
             </div>
           </template>
         </settings-item>
+      </template>
+    </settings-section>
 
+    <settings-section>
+      <template v-slot:title>Sync</template>
+      <template v-slot:items>
         <settings-item>
           <template v-slot:description>
             Reset cursor. Filenotes will no longer know what it has synced and
@@ -147,16 +162,10 @@ export default {
   },
 
   data() {
-    settings.autoSave.get().then(value => {
-      this.autoSave = value;
-    });
-    settings.autoSync.get().then(value => {
-      this.autoSync = value;
-    });
-
     return {
       accountName: '',
       accountEmail: '',
+      autoName: true,
       autoSave: true,
       autoSync: true
     };
@@ -174,6 +183,15 @@ export default {
     },
 
     load() {
+      settings.autoName.get().then(value => {
+        this.autoName = value;
+      });
+      settings.autoSave.get().then(value => {
+        this.autoSave = value;
+      });
+      settings.autoSync.get().then(value => {
+        this.autoSync = value;
+      });
       settings.name.get().then(name => {
         this.accountName = name;
       });
@@ -247,6 +265,12 @@ export default {
   },
 
   watch: {
+    autoName() {
+      settings.autoName.set(this.autoName).then(() => {
+        this.notify(`Autoname: ${this.autoName ? 'on' : 'off'}`);
+      });
+    },
+
     autoSave() {
       settings.autoSave.set(this.autoSave).then(() => {
         this.notify(`Autosave: ${this.autoSave ? 'on' : 'off'}`);
