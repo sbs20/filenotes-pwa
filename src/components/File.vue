@@ -1,50 +1,17 @@
 <template>
   <div>
-    <navigation :menu="false">
-      <template v-slot:header>
-        {{ metadata.name }}
-      </template>
-      <template v-slot:end>
-        <b-navbar-item v-if="!autoSave" @click="perform('save')"><b-icon icon="content-save"></b-icon></b-navbar-item>
-        <b-navbar-item @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
-      </template>
-    </navigation>
+    <v-toolbar class="elevation-0" dense>
+      <v-toolbar-title>{{ metadata.name }}</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn v-if="!autoSave" @click="perform('save')" icon><v-icon>mdi-content-save</v-icon></v-btn>
+      <v-btn @click="close" icon><v-icon>mdi-close</v-icon></v-btn>
+    </v-toolbar>
 
     <file-editor :type="type" v-model="buffer" @save="perform('save')"></file-editor>
 
-    <b-modal :active.sync="dialog.close.show" has-modal-card trap-focus
-      :destroy-on-hide="true" aria-role="dialog" aria-modal
-      :on-cancel="() => onCloseDialog()">
-      <div class="modal-card">
-        <header class="modal-card-head">Save?</header>
-        <section class="modal-card-body">
-          {{ metadata.name }} has changed. Do you want to save before closing?
-        </section>
-        <footer class="modal-card-foot">
-          <button class="button" @click="onCloseDialog()">Cancel</button>
-          <button class="button is-danger" @click="onCloseDialog('discard')">No</button>
-          <button class="button is-success" @click="onCloseDialog('save', 'sync', 'close')">Yes</button>
-        </footer>
-      </div>
-    </b-modal>
+    <confirm-yes-no-cancel ref="confirmYesNoCancel"></confirm-yes-no-cancel>
 
-    <b-modal :active.sync="dialog.save.show" has-modal-card trap-focus
-      :destroy-on-hide="true" aria-role="dialog" aria-modal
-      :on-cancel="() => onSaveDialog(false)">
-      <div class="modal-card">
-        <header class="modal-card-head">Save?</header>
-        <section class="modal-card-body">
-          <b-field>
-            <b-input ref="filename" v-model="dialog.save.filename"></b-input>
-          </b-field>
-        </section>
-        <footer class="modal-card-foot">
-          <button class="button" @click="onSaveDialog(false)">Cancel</button>
-          <button class="button is-success" @click="onSaveDialog(true)">Ok</button>
-        </footer>
-      </div>
-    </b-modal>
-
+    <prompt ref="prompt"></prompt>
   </div>
 </template>
 
@@ -55,8 +22,10 @@ import FilePath from '../classes/files/file-path';
 import LocalProvider from '../classes/local-provider';
 import Logger from '../classes/logger';
 import Settings from '../classes/settings';
-import Navigation from './Navigation';
+
+import ConfirmYesNoCancel from './ConfirmYesNoCancel';
 import FileEditor from './FileEditor';
+import Prompt from './Prompt';
 
 const log = Logger.get('File');
 const fs = LocalProvider.instance();
@@ -74,14 +43,19 @@ export default {
       if (this.autoSave) {
         this.perform('save', 'sync', 'close');
       } else {
-        this.dialog.close.show = true;
+        this.$refs.confirmYesNoCancel.open({
+          message: 'Do you want to save before closing?',
+          onYes: () => this.perform('save', 'sync', 'close'),
+          onNo: () => this.perform('discard')
+        });
       }
     }
   },
 
   components: {
+    ConfirmYesNoCancel,
     FileEditor,
-    Navigation
+    Prompt
   },
 
   data() {
@@ -101,16 +75,7 @@ export default {
       autoSync: true,
       discard: false,
       isNew: false,
-
-      dialog: {
-        close: {
-          show: false
-        },
-        save: {
-          show: false,
-          filename: null
-        }
-      },
+      filename: null,
 
       /** @type {Array.<FileAction>} */
       actions: [],
@@ -152,10 +117,6 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (this.dialog.save.show || this.dialog.close.show) {
-        return;
-      }
-
       if (event.keyCode === 27) {
         event.preventDefault();
         event.stopPropagation();
@@ -203,9 +164,6 @@ export default {
       this.actions = actions;
       const perform = action => () => {
         switch (action) {
-          case 'name':
-            this.metadata.name = this.dialog.save.filename;
-            return Promise.resolve();
           case 'discard':
             this.discard = true;
             this.close();
@@ -233,29 +191,6 @@ export default {
       }).catch(reason => {
         log.debug(`Perform terminated: ${reason}`);
       });
-    },
-
-    /**
-     * @param {Array.<FileAction>} actions
-     */
-    onCloseDialog(...actions) {
-      this.dialog.close.show = false;
-      this.perform(...actions);
-    },
-
-    /**
-     * @param {boolean} ok
-     */
-    onSaveDialog(ok) {
-      this.dialog.save.show = false;
-      if (!ok) {
-        this.dialog.save.filename = null;
-        this.actions = [];
-        return;
-      }
-
-      const actions = this.actions.length ? this.actions : ['save'];
-      this.perform(...actions);
     },
 
     close() {
@@ -293,7 +228,7 @@ export default {
 
     notify(msg) {
       log.info(msg);
-      this.$buefy.snackbar.open(msg);
+      this.$root.$emit(Constants.Event.Snackbar, msg);
     },
 
     /**
@@ -303,14 +238,26 @@ export default {
       return new Promise((resolve, reject) => {
         if (this.isNew) {
           const defaultName = this._defaultName(this.buffer, this.type);
-          if (!this.autoName && this.dialog.save.filename === null) {
-            this.dialog.save.filename = defaultName;
-            this.dialog.save.show = true;
+          if (!this.autoName && this.filename === null) {
+            this.$refs.prompt.open({
+              message: 'Enter a filename',
+              value: defaultName,
+              onCancel: () => {
+                this.filename = null;
+                this.actions = [];
+              },
+              onConfirm: (value) => {
+                this.filename = value;
+                const actions = this.actions.length ? this.actions : ['save'];
+                this.perform(...actions);
+              }
+            });
+
             reject('Interrupt for dialog');
             return;
           }
 
-          let name = this.dialog.save.filename || defaultName;
+          let name = this.filename || defaultName;
           fs.new(this.directory, name).then(name => {
             const metadata = FileMetadata.create()
               .path(`${this.directory.path}/${name}`)

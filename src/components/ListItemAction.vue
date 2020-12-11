@@ -1,10 +1,14 @@
 <template>
-  <b-dropdown class="pt-2" :mobile-modal="false" position="is-bottom-left" aria-role="list">
-    <b-icon icon="dots-vertical" slot="trigger"></b-icon>
-    <b-dropdown-item aria-role="listitem" @click="$emit('rename')">Rename</b-dropdown-item>
-    <b-dropdown-item aria-role="listitem" @click="$emit('move')">Move</b-dropdown-item>
-    <b-dropdown-item aria-role="listitem" @click="$emit('remove')">Delete</b-dropdown-item>
-  </b-dropdown>  
+  <v-menu class="pt-2" offset-y aria-role="list">
+    <template v-slot:activator="{ on }">
+      <v-icon v-on="on">mdi-dots-vertical</v-icon>
+    </template>
+    <v-list>
+      <v-list-item @click="$emit('rename')">Rename</v-list-item>
+      <v-list-item @click="$emit('move')">Move</v-list-item>
+      <v-list-item @click="$emit('remove')">Remove</v-list-item>
+    </v-list>
+  </v-menu>  
 </template>
 
 <script>

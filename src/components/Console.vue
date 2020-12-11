@@ -1,12 +1,5 @@
 <template>
   <div>
-    <navigation>
-      <template v-slot:header>Console</template>
-      <template v-slot:end>
-        <b-navbar-item tag="a" @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
-      </template>
-    </navigation>
-
     <div>
       <pre id="log">{{ text }}</pre>
     </div>
@@ -15,13 +8,9 @@
 
 <script>
 import Logger from '../classes/logger';
-import Navigation from './Navigation';
 
 export default {
   name: 'Console',
-  components: {
-    Navigation
-  },
 
   created() {
     document.addEventListener('keydown', this._onKeys);

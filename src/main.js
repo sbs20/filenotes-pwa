@@ -1,5 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import Vuetify from 'vuetify';
+
 import App from './App.vue';
 import About from './components/About';
 import Console from './components/Console';
@@ -9,9 +11,8 @@ import Settings from './components/Settings';
 import Search from './components/Search';
 import Start from './components/Start';
 import VueAudioVisual from 'vue-audio-visual';
-import Buefy from 'buefy';
 
-// https://github.com/buefy/buefy/issues/1500
+import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import 'fontsource-cascadia-code';
 
@@ -20,7 +21,7 @@ import './registerServiceWorker';
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(VueAudioVisual);
-Vue.use(Buefy);
+Vue.use(Vuetify);
 
 const router = new VueRouter({
   routes: [
@@ -36,6 +37,7 @@ const router = new VueRouter({
 });
 
 new Vue({
+  vuetify: new Vuetify({}),
   router: router,
   render: h => h(App),
 }).$mount('#app');

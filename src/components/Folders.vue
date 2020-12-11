@@ -1,19 +1,12 @@
 <template>
-  <div class="is-relative">
-    <div v-if="current">
-      <h2>Location: {{ current.path || "/" }}</h2>
-    </div>
-
-    <div class="mt-3" v-for="entry in entries" v-bind:key="entry.key">
-      <div class="media" @click="open(entry)" style="cursor: pointer;">
-        <div class="media-left">
-          <b-icon icon="folder"></b-icon>
-        </div>
-        <div class="media-content">
-          <div>{{ entry.name }}&nbsp;</div>
-        </div>
-      </div>
-    </div>
+  <div>
+    <div v-if="current" class="text-h4">Location: {{ current.path || "/" }}</div>
+    <v-row v-for="entry in entries" v-bind:key="entry.key" @click="open(entry)" style="cursor: pointer;">
+      <v-col>
+        <v-icon class="float-left">mdi-folder</v-icon>
+        <div class="ml-3 float-left">{{ entry.name }}&nbsp;</div>
+      </v-col>
+    </v-row>
   </div>
 </template>
 

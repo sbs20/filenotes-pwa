@@ -1,10 +1,10 @@
 <template>
-  <div class="columns is-mobile">
-    <div class="column is-9">
+  <v-row>
+    <v-col cols="9">
       <div class="pt-2"><slot name="description"></slot></div>
-    </div>
-    <div class="column is-3">
+    </v-col>
+    <v-col cols="3">
       <slot name="action"></slot>
-    </div>
-  </div>
+    </v-col>
+  </v-row>
 </template>

@@ -1,8 +1,8 @@
 <template>
-  <div class="box">
-    <div class="title is-4">
-      <slot name="title"></slot>
-    </div>
-    <slot name="items"></slot>
-  </div>
+  <v-card elevation="2" class="mb-4" rounded="0">
+    <v-card-title><slot name="title"></slot></v-card-title>
+    <v-card-text>
+      <slot name="items"></slot>
+    </v-card-text>
+  </v-card>
 </template>

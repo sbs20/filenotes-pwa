@@ -1,16 +1,25 @@
 <template>
-  <div>
-    <div class="container">
+  <v-app>
+    <navigation-drawer v-on:sync-force="syncForce"></navigation-drawer>
+
+    <v-main>
       <install></install>
       <div id="progress">
-        <b-progress v-if="progress.show" type="is-primary" size="is-small" :value="progress.value" :show-value="false"></b-progress>
-        <b-progress v-if="progress.status" :type="progress.status" size="is-small" :value="100" :show-value="false"></b-progress>
+        <v-progress-linear v-if="progress.show" v-model="progress.value"></v-progress-linear>
+        <v-progress-linear v-if="progress.status" :color="progress.status" :value="100"></v-progress-linear>
       </div>
-      <transition name="fade" mode="out-in">
-        <router-view></router-view>
-      </transition>
-    </div>
-  </div>
+      <v-container fluid>
+        <transition name="fade" mode="out-in">
+          <router-view></router-view>
+        </transition>
+      </v-container>
+    </v-main>
+
+    <v-snackbar v-model="snackbar.show" :timeout="snackbar.timeout">
+      {{ snackbar.text }}
+      <v-btn :color="snackbar.color" text @click="snackbar.show = false">Ok</v-btn>
+    </v-snackbar>
+  </v-app>
 </template>
 
 <script>
@@ -21,6 +30,7 @@ import RemoteProvider from './classes/remote-provider';
 import Settings from './classes/settings';
 
 import Install from './components/Install';
+import NavigationDrawer from './components/NavigationDrawer';
 
 const log = Logger.get('App');
 const settings = Settings.instance();
@@ -30,7 +40,8 @@ export default {
   name: 'App',
 
   components: {
-    Install
+    Install,
+    NavigationDrawer
   },
 
   data() {
@@ -39,23 +50,29 @@ export default {
         status: '',
         show: false,
         value: 0
+      },
+      snackbar: {
+        color: 'green',
+        show: false,
+        text: '',
+        timeout: 2000
       }
     };
   },
 
   mounted() {
     document.body.classList.add('app-background');
-    document.body.classList.add('has-navbar-fixed-top');
   },
 
   created() {
+    this.$root.$on(Constants.Event.Snackbar, this.openSnackbar);
     this.$root.$on(Constants.Event.Sync.Start, this.syncStart);
     this.$root.$on(Constants.Event.Sync.Listen, this.syncListen);
     document.addEventListener('isUpdateAvailable', (available) => {
       if (available) {
         const msg = 'New version available. Refresh to install';
         log.info(msg);
-        this.$buefy.snackbar.open(msg);
+        this.openSnackbar(msg);
       }
     });
 
@@ -63,6 +80,7 @@ export default {
   },
 
   destroyed() {
+    this.$root.$off(Constants.Event.Snackbar, this.openSnackbar);
     this.$root.$off(Constants.Event.Sync.Start, this.syncStart);
     this.$root.$off(Constants.Event.Sync.Listen, this.syncListen);
   },
@@ -82,18 +100,26 @@ export default {
             sync.isRequired().then(required => {
               const msg = required ? 'Sync required' : 'Up to date';
               log.info(msg);
-              this.$buefy.snackbar.open(msg);
+              this.openSnackbar(msg);
             });
           }
         });
       } else {
         const msg = 'Not connected';
         log.info(msg);
-        this.$buefy.snackbar.open({
-          message: msg,
-          type: 'is-warning'
+        this.openSnackbar({
+          text: msg,
+          color: 'amber'
         });
       }
+    },
+
+    openSnackbar(event) {
+      if (typeof(event) === 'string') {
+        event = { text: event };
+      }
+      Object.assign(this.snackbar, event);
+      this.snackbar.show = true;
     },
 
     updateProgress(event) {
@@ -104,7 +130,7 @@ export default {
       this.progress.show = false;
       this.progress.value = 0;
       this.$root.$emit(Constants.Event.Sync.Finish);
-      this.progress.status = success ? 'is-success' : 'is-danger';
+      this.progress.status = success ? 'green' : 'red';
       setTimeout(() => this.progress.status = '', 2000);
 
       settings.autoSync.get().then(enabled => {
@@ -139,6 +165,12 @@ export default {
         }
       }).catch(reason => {
         log.debug(`syncListen: ${reason}`);
+      });
+    },
+
+    syncForce() {
+      settings.cursor.delete().then(() => {
+        this.syncStart();
       });
     },
 
@@ -182,7 +214,7 @@ export default {
   right: 0;
   top: 4rem;
   width: 100%;
-  z-index: 50;
+  z-index: 5;
 }
 </style>
 <style>

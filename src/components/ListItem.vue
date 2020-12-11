@@ -1,18 +1,18 @@
 <template>
-  <div class="media list-item" @click="$emit('open', value)">
-    <div class="media-left">
+  <div class="list-item" @click="$emit('open', value)">
+    <div class="float-left">
       <flash v-model="value.key"></flash>
       <file-icon :value="value"></file-icon>
     </div>
-    <div class="media-content">
-      <div class="is-size-5">{{ value.name }}&nbsp;</div>
-      <div class="is-size-7">
+    <div class="float-left pl-2">
+      <div class="text-h6">{{ value.name }}&nbsp;</div>
+      <div class="text-caption">
         <span v-if="value.tag === 'file'">
           <file-size v-model="value.size"></file-size> (<date-time v-model="value.modified"></date-time>)
         </span>&nbsp;
       </div>
     </div>
-    <div class="media-right" v-on:click.stop>
+    <div class="float-right" v-on:click.stop>
       <list-item-action v-if="actions"
         @rename="$emit('rename', value)"
         @remove="$emit('remove', value)"

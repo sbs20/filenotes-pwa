@@ -1,16 +1,18 @@
 <template>
-  <b-modal :active.sync="show" has-modal-card trap-focus
-    :destroy-on-hide="true" aria-role="dialog" aria-modal>
-    <div class="modal-card">
-      <header class="modal-card-head">Install</header>
-      <section class="modal-card-body">
+  <v-dialog v-model="show" aria-role="dialog" aria-modal>
+    <v-card>
+      <v-card-title class="headline">
+        Install
+      </v-card-title>
+      <v-card-text>
         Do you want to install Filenotes?
-      </section>
-      <footer class="modal-card-foot">
-        <button class="button is-primary" @click.prevent="install">Yes</button>
-      </footer>
-    </div>
-  </b-modal>
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer></v-spacer>
+        <v-btn text @click.prevent="Install">Yes</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <script>

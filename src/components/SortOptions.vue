@@ -1,12 +1,14 @@
 <template>
-  <b-dropdown position="is-bottom-left">
-    <button class="button is-secondary" type="button" slot="trigger">
-      <b-icon icon="sort"></b-icon>
-    </button>
-    <b-dropdown-item v-for="option in sortOptions" :key="option.key" aria-role="listitem" @click="update(option)">
-      {{ option.text }}
-    </b-dropdown-item>
-  </b-dropdown>
+  <v-menu class="pt-2" offset-y aria-role="list">
+    <template v-slot:activator="{ on }">
+      <v-icon v-on="on">mdi-sort</v-icon>
+    </template>
+    <v-list>
+      <v-list-item v-for="option in sortOptions" :key="option.key" aria-role="listitem" @click="update(option)">
+        {{ option.text }}
+      </v-list-item>
+    </v-list>
+  </v-menu>  
 </template>
 
 <script>

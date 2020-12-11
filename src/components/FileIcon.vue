@@ -1,5 +1,5 @@
 <template>
-  <b-icon class="pt-3" :icon="icon"></b-icon>
+  <v-icon class="pt-1">mdi-{{icon}}</v-icon>
 </template>
 
 <script>

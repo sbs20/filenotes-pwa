@@ -33,6 +33,7 @@ const Constants = {
   },
 
   Event: {
+    Snackbar: 'snackbar',
     Sync: {
       Listen: 'sync.listen',
       Start: 'sync.start',

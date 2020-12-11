@@ -86,8 +86,9 @@ export default {
 </style>
 
 <style>
-.prism-editor__editor .title {
-  font-size: 1rem;
+pre.prism-editor__editor .title {
+  font-family: Cascadia Code, Courier, monospace !important;
+  font-size: 1rem !important;
 }
 
 /* .prism-editor__textarea {

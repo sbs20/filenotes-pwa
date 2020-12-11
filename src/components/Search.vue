@@ -1,22 +1,6 @@
 <template>
   <div>
-    <navigation>
-      <template v-slot:header>
-        Search
-      </template>
-      <template v-slot:end>
-        <b-navbar-item tag="a" @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
-      </template>
-    </navigation>
-
-    <div class="block pl-2 pr-2">
-      <b-field>
-        <b-input ref="queryInput" v-model="query" placeholder="Search..."></b-input>
-      </b-field>
-      <span v-if="query">
-        Showing {{ results.length }} results for '{{ query }}'
-      </span>
-    </div>
+    <v-text-field autofocus v-model="query" placeholder="Search..."></v-text-field>
 
     <div class="list-item" tabindex="1" v-for="entry in results" v-bind:key="entry.key">
       <list-item :value="entry" @open="open" :show-actions="false"></list-item>
@@ -32,7 +16,6 @@ import MetadataComparator from '../classes/metadata-comparator';
 import Settings from '../classes/settings';
 
 import ListItem from './ListItem';
-import Navigation from './Navigation';
 
 const log = Logger.get('List');
 const fs = LocalProvider.instance();
@@ -42,16 +25,11 @@ export default {
   name: 'Search',
   components: {
     ListItem,
-    Navigation,
   },
 
   created() {
     document.addEventListener('keydown', this._onKeys);
     this.search();
-  },
-
-  mounted() {
-    this.$refs.queryInput.focus();
   },
 
   data() {

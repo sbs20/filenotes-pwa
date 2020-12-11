@@ -1,12 +1,5 @@
 <template>
   <div>
-    <navigation>
-      <template v-slot:header>Settings</template>
-      <template v-slot:end>
-        <b-navbar-item tag="a" @click="close"><b-icon icon="close"></b-icon></b-navbar-item>
-      </template>
-    </navigation>
-
     <settings-section>
       <template v-slot:title>Behaviour</template>
       <template v-slot:items>
@@ -16,7 +9,7 @@
           </template>
           <template v-slot:action>
             <div class="field">
-              <b-switch v-model="autoName"></b-switch>
+              <v-switch v-model="autoName"></v-switch>
             </div>
           </template>
         </settings-item>
@@ -26,7 +19,7 @@
           </template>
           <template v-slot:action>
             <div class="field">
-              <b-switch v-model="autoSave"></b-switch>
+              <v-switch v-model="autoSave"></v-switch>
             </div>
           </template>
         </settings-item>
@@ -36,7 +29,7 @@
           </template>
           <template v-slot:action>
             <div class="field">
-              <b-switch v-model="autoSync"></b-switch>
+              <v-switch v-model="autoSync"></v-switch>
             </div>
           </template>
         </settings-item>
@@ -53,7 +46,7 @@
             still check file hashes and versions.
           </template>
           <template v-slot:action>
-            <button class="button is-primary" @click="clearCursor">Reset</button>
+            <v-btn color="primary" @click="clearCursor">Reset</v-btn>
           </template>
         </settings-item>
         <settings-item>
@@ -63,7 +56,7 @@
             changed then they may overwrite your local files.
           </template>
           <template v-slot:action>
-            <button class="button is-warning" @click="clearLocalDeltas">Clear</button>
+            <v-btn color="warning" @click="clearLocalDeltas">Clear</v-btn>
           </template>
         </settings-item>
       </template>
@@ -85,7 +78,7 @@
             local account settings and require you to log in again.
           </template>
           <template v-slot:action>
-            <button class="button is-primary" @click="logout">Logout</button>
+            <v-btn color="primary" @click="logout">Logout</v-btn>
           </template>
         </settings-item>
         <settings-item>
@@ -93,7 +86,7 @@
             Force authentication.  
           </template>
           <template v-slot:action>
-            <button class="button is-success" @click="forceAuthentication">Login</button>
+            <v-btn color="success" @click="forceAuthentication">Login</v-btn>
           </template>
         </settings-item>
       </template>
@@ -105,7 +98,7 @@
         <settings-item>
           <template v-slot:description>Clear local filesystem</template>
           <template v-slot:action>
-            <button class="button is-primary" @click="clearLocalFs">Clear</button>
+            <v-btn color="primary" @click="clearLocalFs">Clear</v-btn>
           </template>
         </settings-item>
       </template>
@@ -120,17 +113,11 @@
             and connection settings.
           </template>
           <template v-slot:action>
-            <button class="button is-danger" @click="nukeDatabase">Nuke</button>
+            <v-btn color="error" @click="nukeDatabase">Nuke</v-btn>
           </template>
         </settings-item>
       </template>
     </settings-section>
-
-    <!-- <div>      
-      <button class="button" @click="connect1">Connect from storage</button>
-      <button class="button" @click="connect2">Connect from code</button>
-      <button class="button" @click="connect3">Force auth</button>
-    </div> -->
   </div>
 </template>
 
@@ -139,9 +126,9 @@ import Logger from '../classes/logger';
 import Settings from '../classes/settings';
 import Storage from '../classes/data/storage';
 import RemoteProvider from '../classes/remote-provider';
-import Navigation from './Navigation';
 import SettingsSection from './SettingsSection';
 import SettingsItem from './SettingsItem';
+import Constants from '../classes/constants';
 
 const log = Logger.get('Settings');
 const settings = Settings.instance();
@@ -151,7 +138,6 @@ const remote = RemoteProvider.instance();
 export default {
   name: 'Settings',
   components: {
-    Navigation,
     SettingsSection,
     SettingsItem
   },
@@ -202,7 +188,7 @@ export default {
 
     notify(msg) {
       log.info(msg);
-      this.$buefy.snackbar.open(msg);
+      this.$root.$emit(Constants.Event.Snackbar, msg);
     },
 
     close() {
