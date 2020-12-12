@@ -94,7 +94,7 @@ pre.prism-editor__editor .title {
   font-family: Cascadia Code, Courier, monospace !important;
   font-size: 1rem !important;
   line-height: 1.75rem;
-  letter-spacing: -0.02rem;
+  letter-spacing: -0.02rem !important;
 }
 
 /* .prism-editor__textarea {
