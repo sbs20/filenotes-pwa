@@ -49,6 +49,7 @@ export default class Settings {
     this.email = new StoredProperty(Constants.Settings.Email, '');
     this.cursor = new StoredProperty(Constants.Settings.Cursor, '');
     this.sortBy = new StoredProperty(Constants.Settings.SortBy);
+    this.theme = new StoredProperty(Constants.Settings.Theme, Constants.Themes.Light);
   }
 
   /**

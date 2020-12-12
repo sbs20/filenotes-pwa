@@ -2,11 +2,12 @@
   <div>
     <list-new @directory="mkdir" @text="mktext"></list-new>
 
-    <v-toolbar class="elevation-0 mb-4" dense>
-      <v-toolbar-title class="text-h5">{{ header }}</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <sort-options v-model="sortBy"></sort-options>
-    </v-toolbar>
+    <div class="d-flex flex-row mb-4">
+      <div class="text-h5">{{ header }}</div>
+      <div class="d-flex ml-auto">
+        <sort-options v-model="sortBy"></sort-options>
+      </div>
+    </div>
 
     <div>
       <list-item tabindex="1"

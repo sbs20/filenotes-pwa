@@ -1,8 +1,18 @@
 <template>
   <div>
     <settings-section>
-      <template v-slot:title>Behaviour</template>
+      <template v-slot:title>Behaviour and UI</template>
       <template v-slot:items>
+        <settings-item>
+          <template v-slot:description>
+            Theme.
+          </template>
+          <template v-slot:action>
+            <div class="field">
+              <v-select label="Theme" :items="themes" v-model="theme"></v-select>
+            </div>
+          </template>
+        </settings-item>
         <settings-item>
           <template v-slot:description>
             Autoname. Automatically names notes when you save.
@@ -153,7 +163,18 @@ export default {
       accountEmail: '',
       autoName: true,
       autoSave: true,
-      autoSync: true
+      autoSync: true,
+      theme: Constants.Themes.Light,
+      themes: [
+        {
+          text: 'Light',
+          value: Constants.Themes.Light
+        },
+        {
+          text: 'Dark',
+          value: Constants.Themes.Dark
+        }
+      ]
     };
   },
 
@@ -183,6 +204,9 @@ export default {
       });
       settings.email.get().then(email => {
         this.accountEmail = email;
+      });
+      settings.theme.get().then(theme => {
+        this.theme = theme;
       });
     },
 
@@ -267,6 +291,14 @@ export default {
       settings.autoSync.set(this.autoSync).then(() => {
         this.notify(`Autosync: ${this.autoSync ? 'on' : 'off'}`);
       });
+    },
+
+    theme() {
+      settings.theme.set(this.theme).then(() => {
+        //this.notify(`Autosync: ${this.autoSync ? 'on' : 'off'}`);
+        this.$root.$emit(Constants.Event.App.Reload);
+      });
+
     }
   }
 };

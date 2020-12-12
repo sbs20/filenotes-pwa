@@ -66,6 +66,7 @@ export default {
   },
 
   created() {
+    this.$root.$on(Constants.Event.App.Reload, this.start);
     this.$root.$on(Constants.Event.Snackbar, this.openSnackbar);
     this.$root.$on(Constants.Event.Sync.Start, this.syncStart);
     this.$root.$on(Constants.Event.Sync.Listen, this.syncListen);
@@ -81,6 +82,7 @@ export default {
   },
 
   destroyed() {
+    this.$root.$off(Constants.Event.App.Reload, this.start);
     this.$root.$off(Constants.Event.Snackbar, this.openSnackbar);
     this.$root.$off(Constants.Event.Sync.Start, this.syncStart);
     this.$root.$off(Constants.Event.Sync.Listen, this.syncListen);
@@ -192,6 +194,10 @@ export default {
     },
 
     start() {
+      settings.theme.get().then(theme => {
+        this.$vuetify.theme.dark = theme === Constants.Themes.Dark;
+      });
+
       RemoteProvider.instance().start(window).then(connected => {
         if (connected) {
           this.onConnect(connected);
@@ -214,8 +220,4 @@ export default {
 }
 </style>
 <style>
-/* Fixes toolbars in main content */
-.container .v-toolbar__content {
-  padding: 0
-}
 </style>

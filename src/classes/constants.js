@@ -33,6 +33,9 @@ const Constants = {
   },
 
   Event: {
+    App: {
+      Reload: 'app.reload'
+    },
     Snackbar: 'snackbar',
     Sync: {
       Listen: 'sync.listen',

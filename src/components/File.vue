@@ -1,11 +1,12 @@
 <template>
   <div>
-    <v-toolbar class="elevation-0 mb-4" dense>
-      <v-toolbar-title>{{ metadata.name }}</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn v-if="!autoSave" @click="perform('save')" icon><v-icon>mdi-content-save</v-icon></v-btn>
-      <v-btn @click="close" icon><v-icon>mdi-close</v-icon></v-btn>
-    </v-toolbar>
+    <div class="d-flex flex-row mb-4">
+      <div class="text-h5">{{ metadata.name || '*New file' }}</div>
+      <div class="d-flex ml-auto">
+        <v-btn v-if="!autoSave" @click="perform('save')" icon><v-icon>mdi-content-save</v-icon></v-btn>
+        <v-btn @click="close" icon><v-icon>mdi-close</v-icon></v-btn>
+      </div>
+    </div>
 
     <file-editor :type="type" v-model="buffer" @save="perform('save')"></file-editor>
 
