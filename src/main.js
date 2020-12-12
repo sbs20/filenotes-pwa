@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Vuetify from 'vuetify';
 
 import App from './App.vue';
 import About from './components/About';
@@ -12,16 +11,15 @@ import Search from './components/Search';
 import Start from './components/Start';
 import VueAudioVisual from 'vue-audio-visual';
 
-import 'vuetify/dist/vuetify.min.css';
 import '@mdi/font/css/materialdesignicons.css';
 import 'fontsource-cascadia-code';
 
 import './registerServiceWorker';
+import vuetify from './plugins/vuetify';
 
 Vue.config.productionTip = false;
 Vue.use(VueRouter);
 Vue.use(VueAudioVisual);
-Vue.use(Vuetify);
 
 const router = new VueRouter({
   routes: [
@@ -37,7 +35,7 @@ const router = new VueRouter({
 });
 
 new Vue({
-  vuetify: new Vuetify({}),
+  vuetify,
   router: router,
-  render: h => h(App),
+  render: h => h(App)
 }).$mount('#app');

@@ -2,12 +2,13 @@
   <v-app>
     <navigation-drawer v-on:sync-force="syncForce"></navigation-drawer>
 
+    <div id="progress">
+      <v-progress-linear v-if="progress.show" v-model="progress.value"></v-progress-linear>
+      <v-progress-linear v-if="progress.status" :color="progress.status" :value="100"></v-progress-linear>
+    </div>
+
     <v-main>
       <install></install>
-      <div id="progress">
-        <v-progress-linear v-if="progress.show" v-model="progress.value"></v-progress-linear>
-        <v-progress-linear v-if="progress.status" :color="progress.status" :value="100"></v-progress-linear>
-      </div>
       <v-container fluid>
         <transition name="fade" mode="out-in">
           <router-view></router-view>
@@ -203,25 +204,18 @@ export default {
 };
 </script>
 
-<style lang="scss">
-@import './assets/css/app.scss'
-</style>
-
 <style scoped>
 #progress {
   position: fixed;
   left: 0;
   right: 0;
-  top: 4rem;
   width: 100%;
   z-index: 5;
 }
 </style>
 <style>
-.progress {
-  border-radius: 0;
-}
-.progress.is-small {
-  height: 0.2rem;
+/* Fixes toolbars in main content */
+.container .v-toolbar__content {
+  padding: 0
 }
 </style>

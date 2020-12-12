@@ -107,5 +107,8 @@ module.exports = {
       skipWaiting: true,
       clientsClaim: true,
     }
-  }
+  },
+  transpileDependencies: [
+    'vuetify'
+  ]
 };

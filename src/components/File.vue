@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-toolbar class="elevation-0" dense>
+    <v-toolbar class="elevation-0 mb-4" dense>
       <v-toolbar-title>{{ metadata.name }}</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn v-if="!autoSave" @click="perform('save')" icon><v-icon>mdi-content-save</v-icon></v-btn>

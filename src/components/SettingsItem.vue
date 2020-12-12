@@ -1,10 +1,6 @@
 <template>
-  <v-row>
-    <v-col cols="9">
-      <div class="pt-2"><slot name="description"></slot></div>
-    </v-col>
-    <v-col cols="3">
-      <slot name="action"></slot>
-    </v-col>
-  </v-row>
+  <div class="d-flex flex-row mt-4">
+    <div class="pt-2"><slot name="description"></slot></div>
+    <div class="d-flex ml-auto"><slot name="action"></slot></div>
+  </div>
 </template>

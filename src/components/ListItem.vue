@@ -1,10 +1,12 @@
 <template>
-  <div class="list-item" @click="$emit('open', value)">
-    <div class="float-left">
+  <div class="list-item d-flex flex-row" @click="$emit('open', value)">
+    <div>
       <flash v-model="value.key"></flash>
+    </div>
+    <div>
       <file-icon :value="value"></file-icon>
     </div>
-    <div class="float-left pl-2">
+    <div class="pl-2">
       <div class="text-h6">{{ value.name }}&nbsp;</div>
       <div class="text-caption">
         <span v-if="value.tag === 'file'">
@@ -12,7 +14,7 @@
         </span>&nbsp;
       </div>
     </div>
-    <div class="float-right" v-on:click.stop>
+    <div class="d-flex ml-auto" v-on:click.stop>
       <list-item-action v-if="actions"
         @rename="$emit('rename', value)"
         @remove="$emit('remove', value)"
@@ -61,7 +63,7 @@ export default {
 <style scoped>
 .list-item {
   min-height: 3.5rem;
-  padding: 0 0.5rem 0 0.5rem;
+  /* padding: 0 0.5rem 0 0.5rem; */
   cursor: pointer;
 }
 </style>

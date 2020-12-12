@@ -35,7 +35,6 @@ export default {
 .flash {
   width: 0.25rem;
   min-height: 3rem;
-  float: left;
   margin-right: 0.75em;
 }
 </style>

@@ -15,7 +15,11 @@ import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-markdown';
-import 'prismjs/themes/prism-tomorrow.css';
+
+import 'prismjs/themes/prism.css';
+//import 'prismjs/themes/prism-funky.css';
+//import 'prismjs/themes/prism-twilight.css';
+//import 'prismjs/themes/prism-tomorrow.css';
 
 export default {
   name: 'TextEditor',
@@ -75,20 +79,22 @@ export default {
 <style scoped>
 /* required class */
 .editor {
-  color: #ccc;
+  /* color: #ccc; */
   font-family: Cascadia Code, Courier, monospace;
   font-size: 1rem;
   line-height: 1.75rem;
-  padding: 0.5rem;
   min-height: 12rem;
   font-weight: 100;
 }
 </style>
 
 <style>
+/* Required to override Vueify */
 pre.prism-editor__editor .title {
   font-family: Cascadia Code, Courier, monospace !important;
   font-size: 1rem !important;
+  line-height: 1.75rem;
+  letter-spacing: -0.02rem;
 }
 
 /* .prism-editor__textarea {

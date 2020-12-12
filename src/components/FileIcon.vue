@@ -1,5 +1,5 @@
 <template>
-  <v-icon class="pt-1">mdi-{{icon}}</v-icon>
+  <v-icon class="pt-2">mdi-{{icon}}</v-icon>
 </template>
 
 <script>
