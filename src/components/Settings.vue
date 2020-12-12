@@ -8,7 +8,7 @@
             Theme.
           </template>
           <template v-slot:action>
-            <div class="field">
+            <div style="max-width: 6rem;">
               <v-select label="Theme" :items="themes" v-model="theme"></v-select>
             </div>
           </template>
@@ -18,9 +18,7 @@
             Autoname. Automatically names notes when you save.
           </template>
           <template v-slot:action>
-            <div class="field">
-              <v-switch v-model="autoName"></v-switch>
-            </div>
+            <v-switch v-model="autoName"></v-switch>
           </template>
         </settings-item>
         <settings-item>
@@ -28,9 +26,7 @@
             Autosave. Automatically saves notes when you close.
           </template>
           <template v-slot:action>
-            <div class="field">
-              <v-switch v-model="autoSave"></v-switch>
-            </div>
+            <v-switch v-model="autoSave"></v-switch>
           </template>
         </settings-item>
         <settings-item>
@@ -38,9 +34,7 @@
             Autosync. Automatically syncs notes.
           </template>
           <template v-slot:action>
-            <div class="field">
-              <v-switch v-model="autoSync"></v-switch>
-            </div>
+            <v-switch v-model="autoSync"></v-switch>
           </template>
         </settings-item>
       </template>
