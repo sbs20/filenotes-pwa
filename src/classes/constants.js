@@ -3,6 +3,12 @@ const Constants = {
   HostUrl: process.env.VUE_APP_HOST_URL,
   Version: process.env.VUE_APP_VERSION,
   
+  Keys: {
+    s: 83,
+    enter: 13,
+    escape: 27
+  },
+  
   Settings: {
     Name: 'name',
     Email: 'email',

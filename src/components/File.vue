@@ -118,7 +118,7 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (event.keyCode === 27) {
+      if (event.keyCode === Constants.Keys.escape) {
         event.preventDefault();
         event.stopPropagation();
         this.close();

@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import Constants from '../classes/constants';
 export default {
   name: 'ConfirmYesNoCancel',
   data() {
@@ -29,7 +30,7 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (event.keyCode === 13) {
+      if (event.keyCode === Constants.Keys.enter) {
         this.ok();
       }
     },

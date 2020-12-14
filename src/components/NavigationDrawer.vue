@@ -10,7 +10,7 @@
     </v-app-bar>
 
     <v-navigation-drawer class="elevation-0" v-model="drawer" app temporary>
-      <v-app-bar color="accent-4 elevation-1">
+      <v-app-bar color="accent-4 elevation-0">
         <v-btn icon href="/">
           <v-img contain max-width="36" max-height="36" src="../../public/img/filenotes-88.png" alt="Filenotes" />
         </v-btn>

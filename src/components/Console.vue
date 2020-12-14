@@ -7,6 +7,7 @@
 </template>
 
 <script>
+import Constants from '../classes/constants';
 import Logger from '../classes/logger';
 
 export default {
@@ -40,7 +41,7 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (event.keyCode === 27) {
+      if (event.keyCode === Constants.Keys.escape) {
         this.close();
       }
     },

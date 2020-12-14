@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import Constants from '../classes/constants';
 import LocalProvider from '../classes/local-provider';
 import Logger from '../classes/logger';
 import MetadataComparator from '../classes/metadata-comparator';
@@ -62,7 +63,7 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (event.keyCode === 27) {
+      if (event.keyCode === Constants.Keys.escape) {
         this.close();
       }
     },

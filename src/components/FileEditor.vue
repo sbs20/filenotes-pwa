@@ -62,7 +62,7 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (event.keyCode === 83 /* s */ && event.ctrlKey) {
+      if (event.keyCode === Constants.Keys.s && event.ctrlKey) {
         this.$emit('save');
         event.preventDefault();
       }
