@@ -3,7 +3,7 @@
     <list-new @directory="mkdir" @text="mktext"></list-new>
 
     <div class="d-flex flex-row mb-4">
-      <div class="text-h5">{{ header }}</div>
+      <div class="text-h5" style="word-break: break-word;">{{ header }}</div>
       <div class="d-flex ml-auto">
         <sort-options v-model="sortBy"></sort-options>
       </div>
