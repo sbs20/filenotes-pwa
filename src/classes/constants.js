@@ -13,7 +13,8 @@ const Constants = {
     AutoName: 'auto-name',
     AutoSync: 'auto-sync',
     AutoSave: 'auto-save',
-    SortBy: 'sort-by'
+    SortBy: 'sort-by',
+    TextEditor: 'text-editor'
   },
 
   Themes: {
@@ -30,6 +31,11 @@ const Constants = {
     SizeDesc: 'size-desc',
     ModifiedAsc: 'modified-asc',
     ModifiedDesc: 'modified-desc'
+  },
+
+  TextEditor: {
+    Plain: 'plain',
+    Prism: 'prism'
   },
 
   Event: {

@@ -1,13 +1,12 @@
 <template>
-  <div>
-    <prism-editor v-if="text !== null" ref="editor" class="editor" v-model="text"
-      :highlight="highlighter" :line-numbers="false" @input="update"></prism-editor>
+  <div class="hightlight-container">
+    <v-textarea v-if="text !== null" autofocus auto-grow ref="textarea" class="editor editor-text" v-model="text"
+      @input="update"></v-textarea>
+    <pre class="editor-text display" v-html="pretty"></pre>
   </div>
 </template>
 
 <script>
-import { PrismEditor } from 'vue-prism-editor';
-
 import 'vue-prism-editor/dist/prismeditor.min.css';
 
 // import highlighting library
@@ -22,11 +21,7 @@ import 'prismjs/themes/prism.css';
 //import 'prismjs/themes/prism-tomorrow.css';
 
 export default {
-  name: 'TextEditor',
-
-  components: {
-    PrismEditor
-  },
+  name: 'HighlightTextEditor',
 
   props: {
     /** @type {Buffer} */
@@ -39,9 +34,15 @@ export default {
 
   mounted() {
     /** @type {HTMLInputElement} */
-    const textarea = this.$refs.editor.$refs.textarea;
-    textarea.setSelectionRange(0, 0);
-    textarea.focus();
+    // const textarea = this.$refs.textarea;
+    // textarea.setSelectionRange(0, 0);
+    // textarea.focus();
+  },
+
+  computed: {
+    pretty() {
+      return this.highlighter(this.text);
+    }
   },
 
   data() {
@@ -64,9 +65,9 @@ export default {
       }
     },
 
-    highlighter(code) {
+    highlighter(text) {
       const language = languages.md;
-      return highlight(code, language);
+      return highlight(text, language);
     },
 
     update() {
@@ -77,20 +78,50 @@ export default {
 </script>
 
 <style scoped>
-/* required class */
+/* .highlight-container {
+  position: relative;
+  text-align: left;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  width: 100%;
+} */
+
 .editor {
-  /* color: #ccc; */
+  /* position: absolute; */
+  position: relative;
+  background-color: transparent;
+}
+
+.editor-text {
   font-family: Cascadia Code, Courier, monospace;
   font-size: 1rem;
   line-height: 1.75rem;
-  min-height: 12rem;
   font-weight: 100;
+}
+
+pre.display {
+  /* margin-top: 16px; */
+  position: relative;
+  /* box-sizing: inherit; */
+  white-space: pre-wrap;
+  /* width: 100%; */
+  display: inline;
 }
 </style>
 
 <style>
+div.v-textarea.editor textarea {
+  position: absolute;
+  color: red !important;
+  background-color: transparent !important;
+  white-space: pre-wrap;
+  width: 100%;
+  /* z-index: 5 !important; */
+}
+
 /* Required to override Vueify */
-pre.prism-editor__editor .title {
+pre.display .title {
   font-family: Cascadia Code, Courier, monospace !important;
   font-size: 1rem !important;
   line-height: 1.75rem;

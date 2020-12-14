@@ -15,6 +15,16 @@
         </settings-item>
         <settings-item>
           <template v-slot:description>
+            Text editor.
+          </template>
+          <template v-slot:action>
+            <div style="max-width: 6rem;">
+              <v-select label="Text editor" :items="textEditors" v-model="textEditor"></v-select>
+            </div>
+          </template>
+        </settings-item>
+        <settings-item>
+          <template v-slot:description>
             Autoname. Automatically names notes when you save.
           </template>
           <template v-slot:action>
@@ -158,6 +168,17 @@ export default {
       autoName: true,
       autoSave: true,
       autoSync: true,
+      textEditor: Constants.TextEditor.Plain, 
+      textEditors: [
+        {
+          text: 'Plain',
+          value: Constants.TextEditor.Plain
+        },
+        {
+          text: 'Highlighted',
+          value: Constants.TextEditor.Prism
+        }
+      ],
       theme: Constants.Themes.Light,
       themes: [
         {
@@ -183,25 +204,15 @@ export default {
       }
     },
 
+    /* eslint-disable brace-style */
     load() {
-      settings.autoName.get().then(value => {
-        this.autoName = value;
-      });
-      settings.autoSave.get().then(value => {
-        this.autoSave = value;
-      });
-      settings.autoSync.get().then(value => {
-        this.autoSync = value;
-      });
-      settings.name.get().then(name => {
-        this.accountName = name;
-      });
-      settings.email.get().then(email => {
-        this.accountEmail = email;
-      });
-      settings.theme.get().then(theme => {
-        this.theme = theme;
-      });
+      settings.autoName.get().then(value => { this.autoName = value; });
+      settings.autoSave.get().then(value => { this.autoSave = value; });
+      settings.autoSync.get().then(value => { this.autoSync = value; });
+      settings.name.get().then(name => { this.accountName = name; });
+      settings.email.get().then(email => { this.accountEmail = email; });
+      settings.textEditor.get().then(editor => { this.textEditor = editor; });
+      settings.theme.get().then(theme => { this.theme = theme; });
     },
 
     notify(msg) {
@@ -287,12 +298,16 @@ export default {
       });
     },
 
+    textEditor() {
+      settings.textEditor.set(this.textEditor).then(() => {
+        this.notify(`TextEditor: ${this.textEditor}`);
+      });
+    },
+
     theme() {
       settings.theme.set(this.theme).then(() => {
-        //this.notify(`Autosync: ${this.autoSync ? 'on' : 'off'}`);
         this.$root.$emit(Constants.Event.App.Reload);
       });
-
     }
   }
 };
