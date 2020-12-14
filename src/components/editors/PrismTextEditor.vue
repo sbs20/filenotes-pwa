@@ -80,10 +80,10 @@ export default {
 /* required class */
 .prism-text-editor {
   font-family: Cascadia Code, Courier, monospace;
+  /* font-family: Courier, monospace; */
   font-size: 1rem;
   line-height: 1.75rem;
   min-height: 12rem;
-  font-weight: 100;
 }
 </style>
 
@@ -93,7 +93,14 @@ pre.prism-editor__editor .title {
   font-family: Cascadia Code, Courier, monospace !important;
   font-size: 1rem !important;
   line-height: 1.75rem;
-  letter-spacing: -0.02rem !important;
+  letter-spacing: normal !important;
+}
+
+/* Fix Firefox spacing */
+@-moz-document url-prefix() {
+  pre.prism-editor__editor .title, pre.prism-editor__editor .bold {
+    letter-spacing: -0.0175rem !important;
+  }
 }
 
 /* .prism-editor__textarea {
