@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-app-bar color="accent-4 elevation-1" app>
+    <v-app-bar color="accent-4 elevation-0" app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>Filenotes</v-toolbar-title>
       <v-spacer></v-spacer>

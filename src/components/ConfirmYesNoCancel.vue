@@ -1,7 +1,7 @@
 <template>
   <v-dialog v-model="show" aria-role="dialog" max-width="300" v-on:keydown.stop="_onKeys" aria-modal>
     <v-card>
-      <v-card-title class="headline">
+      <v-card-title>
         {{ message }}
       </v-card-title>
       <v-card-actions>
