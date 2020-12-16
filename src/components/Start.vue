@@ -7,14 +7,14 @@
 </template>
 
 <script>
-import RemoteProvider from '../classes/remote-provider';
+import Context from '../classes/context';
 
 export default {
   name: 'Start',
 
   methods: {
     authenticate() {
-      RemoteProvider.instance().authenticate(window);
+      Context.instance().remote.authenticate(window);
     }
   }
 };

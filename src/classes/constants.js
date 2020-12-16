@@ -15,12 +15,18 @@ const Constants = {
     OAuth: 'oauth',
     Pkce: 'pkce',
     Theme: 'theme',
+    StorageService: 'storage-service',
     Cursor: 'cursor',
     AutoName: 'auto-name',
     AutoSync: 'auto-sync',
     AutoSave: 'auto-save',
     SortBy: 'sort-by',
     TextEditor: 'text-editor'
+  },
+
+  StorageServices: {
+    None: 'none',
+    Dropbox: 'dropbox'
   },
 
   Themes: {

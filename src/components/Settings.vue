@@ -8,7 +8,7 @@
             Theme.
           </template>
           <template v-slot:action>
-            <div style="max-width: 6rem;">
+            <div style="max-width: 9rem;">
               <v-select label="Theme" :items="themes" v-model="theme"></v-select>
             </div>
           </template>
@@ -18,7 +18,7 @@
             Text editor.
           </template>
           <template v-slot:action>
-            <div style="max-width: 6rem;">
+            <div style="max-width: 9rem;">
               <v-select label="Text editor" :items="textEditors" v-model="textEditor"></v-select>
             </div>
           </template>
@@ -39,6 +39,22 @@
             <v-switch v-model="autoSave"></v-switch>
           </template>
         </settings-item>
+      </template>
+    </settings-section>
+
+    <settings-section>
+      <template v-slot:title>Sync</template>
+      <template v-slot:items>
+        <settings-item>
+          <template v-slot:description>
+            Cloud storage service.
+          </template>
+          <template v-slot:action>
+            <div style="max-width: 9rem;">
+              <v-select label="Cloud Storage" :items="storageServices" v-model="storageService"></v-select>
+            </div>
+          </template>
+        </settings-item>
         <settings-item>
           <template v-slot:description>
             Autosync. Automatically syncs notes.
@@ -47,12 +63,6 @@
             <v-switch v-model="autoSync"></v-switch>
           </template>
         </settings-item>
-      </template>
-    </settings-section>
-
-    <settings-section>
-      <template v-slot:title>Sync</template>
-      <template v-slot:items>
         <settings-item>
           <template v-slot:description>
             Reset cursor. Filenotes will no longer know what it has synced and
@@ -139,15 +149,15 @@
 import Logger from '../classes/logger';
 import Settings from '../classes/settings';
 import Storage from '../classes/data/storage';
-import RemoteProvider from '../classes/remote-provider';
 import SettingsSection from './SettingsSection';
 import SettingsItem from './SettingsItem';
 import Constants from '../classes/constants';
+import Context from '../classes/context';
 
 const log = Logger.get('Settings');
 const settings = Settings.instance();
 const storage = Storage.instance();
-const remote = RemoteProvider.instance();
+const context = Context.instance();
 
 export default {
   name: 'Settings',
@@ -168,6 +178,17 @@ export default {
       autoName: true,
       autoSave: true,
       autoSync: true,
+      storageService: Constants.StorageServices.Dropbox,
+      storageServices: [
+        {
+          text: 'None (local only)',
+          value: Constants.StorageServices.None
+        },
+        {
+          text: 'Dropbox',
+          value: Constants.StorageServices.Dropbox
+        }
+      ],
       textEditor: Constants.TextEditor.Plain, 
       textEditors: [
         {
@@ -206,6 +227,7 @@ export default {
 
     /* eslint-disable brace-style */
     load() {
+      settings.storageService.get().then(value => { this.storageService = value; });
       settings.autoName.get().then(value => { this.autoName = value; });
       settings.autoSave.get().then(value => { this.autoSave = value; });
       settings.autoSync.get().then(value => { this.autoSync = value; });
@@ -251,7 +273,7 @@ export default {
     },
 
     logout() {
-      remote.clear().then(() => {
+      context.remote.clear().then(() => {
         this.notify('Logged out');
       });
     },
@@ -263,23 +285,29 @@ export default {
     },
 
     forceAuthentication() {
-      remote.authenticate(window);
+      context.remote.authenticate(window);
     },
 
     causeRemoteError() {
-      remote.read('/non-existent-file');
-    },
-
-    connect1() {
-      remote.startFromToken().then(this.afterConnect);
-    },
-
-    connect2() {
-      remote.startFromQueryString(window.location.search).then(this.afterConnect);
-    },
+      context.remote.read('/non-existent-file');
+    }
   },
 
   watch: {
+    storageService() {
+      settings.storageService.set(this.storageService).then(() => {
+        if (this.storageService === Constants.StorageServices.None) {
+          this.autoSync = false;
+          if (context.remote) {
+            context.remote.clear().then(() => {
+              this.$root.$emit(Constants.Event.App.Reload);
+            });
+          }
+        }
+        this.notify(`Storage service: ${this.storageService}`);
+      });
+    },
+
     autoName() {
       settings.autoName.set(this.autoName).then(() => {
         this.notify(`Autoname: ${this.autoName ? 'on' : 'off'}`);
@@ -295,6 +323,7 @@ export default {
     autoSync() {
       settings.autoSync.set(this.autoSync).then(() => {
         this.notify(`Autosync: ${this.autoSync ? 'on' : 'off'}`);
+        this.$root.$emit(Constants.Event.App.Reload);
       });
     },
 
@@ -312,8 +341,3 @@ export default {
   }
 };
 </script>
-<style scoped>
-.float-right {
-  float: right;
-}
-</style>

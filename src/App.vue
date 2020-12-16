@@ -25,9 +25,8 @@
 
 <script>
 import Constants from './classes/constants';
+import Context from './classes/context';
 import Logger from './classes/logger';
-import SyncEngine from './classes/sync-engine';
-import RemoteProvider from './classes/remote-provider';
 import Settings from './classes/settings';
 
 import Install from './components/Install';
@@ -35,7 +34,7 @@ import NavigationDrawer from './components/NavigationDrawer';
 
 const log = Logger.get('App');
 const settings = Settings.instance();
-const sync = SyncEngine.instance();
+const context = Context.instance();
 
 export default {
   name: 'App',
@@ -100,7 +99,7 @@ export default {
           if (enabled) {
             this.syncStart();
           } else {
-            sync.isRequired().then(required => {
+            context.sync.isRequired().then(required => {
               const msg = required ? 'Sync required' : 'Up to date';
               log.info(msg);
               this.openSnackbar(msg);
@@ -144,10 +143,15 @@ export default {
     },
 
     syncListen() {
+      if (!context.remote) {
+        log.debug('Remote provider not configured');
+        return;
+      }
+
       log.debug('Listening for updates');
-      RemoteProvider.instance().poll().then(changes => {
+      context.remote.poll().then(changes => {
         if (changes) {
-          if (sync.active) {
+          if (context.sync.active) {
             log.debug('Already syncing. Ignore change');
             return;
           }
@@ -181,6 +185,7 @@ export default {
       this.progress.value = 0;
       this.progress.status = '';
       this.progress.show = true;
+      const sync = context.sync;
       sync.on('progress', this.updateProgress);
       sync.execute().then(() => {
         sync.off('progress');
@@ -198,11 +203,20 @@ export default {
         this.$vuetify.theme.dark = theme === Constants.Themes.Dark;
       });
 
-      RemoteProvider.instance().start(window).then(connected => {
-        if (connected) {
-          this.onConnect(connected);
+      context.init().then(() => {
+        if (context.remote) {
+          context.remote.start(window).then(connected => {
+            if (connected) {
+              this.onConnect(connected);
+            } else {
+              this.$router.replace('/start');
+            }
+          });
         } else {
-          this.$router.replace('/start');
+          /** @type {string} */
+          if (this.$route.matched.length === 0) {
+            this.$router.replace('/list');
+          }
         }
       });
     },

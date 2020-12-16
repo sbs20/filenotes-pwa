@@ -279,7 +279,7 @@ export default class DropboxProvider {
    * @param {BufferLike} buffer - The byte array
    * @returns {string} - Hex encoded hash
    */
-  static hash(buffer) {
+  hash(buffer) {
     const BLOCK_SIZE = 4 * 1024 * 1024;
     if (!Buffer.isBuffer(buffer)) {
       buffer = Buffer.from(buffer);

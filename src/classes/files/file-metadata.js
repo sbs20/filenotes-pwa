@@ -1,6 +1,8 @@
+import Context from '../context';
 import BaseMetadata from './base-metadata';
 import FilePath from './file-path';
-import RemoteProvider from '../remote-provider';
+
+const context = Context.instance();
 
 export default class FileMetadata extends BaseMetadata {
 
@@ -44,7 +46,7 @@ export default class FileMetadata extends BaseMetadata {
   data(data) {
     return this.assign({
       size: data.byteLength,
-      hash: RemoteProvider.hash(data),
+      hash: context.hash(data),
       modified: new Date().toISOString()
     });
   }

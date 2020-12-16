@@ -43,6 +43,7 @@ export default class Settings {
     this.autoName = new StoredProperty(Constants.Settings.AutoName, true);
     this.autoSave = new StoredProperty(Constants.Settings.AutoSave, true);
     this.autoSync = new StoredProperty(Constants.Settings.AutoSync, true);
+    this.storageService = new StoredProperty(Constants.Settings.StorageService, Constants.StorageServices.Dropbox);
     this.oauth = new StoredProperty(Constants.Settings.OAuth);
     this.pkce = new StoredProperty(Constants.Settings.Pkce);
     this.name = new StoredProperty(Constants.Settings.Name, '');
