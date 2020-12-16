@@ -4,6 +4,7 @@
       <plain-text-editor v-if="textEditor === 'plain'" v-model="buffer" @input="update"></plain-text-editor>
       <prism-text-editor v-if="textEditor === 'prism'" v-model="buffer" @input="update"></prism-text-editor>
       <highlight-text-editor v-if="textEditor === 'highlight'" v-model="buffer" @input="update"></highlight-text-editor>
+      <custom-text-editor v-if="textEditor === 'custom'" v-model="buffer" @input="update"></custom-text-editor>
     </template>
     <image-editor v-if="type === 'image'" v-model="buffer"></image-editor>
     <audio-editor v-if="type === 'audio'" v-model="buffer"></audio-editor>
@@ -16,6 +17,7 @@ import Settings from '../classes/settings';
 
 import AudioEditor from './editors/AudioEditor';
 import ImageEditor from './editors/ImageEditor';
+import CustomTextEditor from './editors/CustomTextEditor';
 import HighlightTextEditor from './editors/HighlightTextEditor';
 import PlainTextEditor from './editors/PlainTextEditor';
 import PrismTextEditor from './editors/PrismTextEditor';
@@ -32,6 +34,7 @@ export default {
 
   components: {
     AudioEditor,
+    CustomTextEditor,
     ImageEditor,
     PlainTextEditor,
     PrismTextEditor,
@@ -70,7 +73,7 @@ export default {
 
     load() {
       Settings.instance().textEditor.get().then(editor => {
-        // this.textEditor = 'highlight';
+        // this.textEditor = 'custom';
         // console.log(editor);
         this.textEditor = editor;
       });
