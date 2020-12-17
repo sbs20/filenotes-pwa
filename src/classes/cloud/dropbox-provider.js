@@ -1,5 +1,5 @@
 import Constants from '../constants';
-import DropboxProvider from './dropbox-provider';
+import DropboxClient from './dropbox-client';
 import Logger from '../logger';
 import QueryString from '../utils/query-string';
 import Settings from '../settings';
@@ -7,7 +7,7 @@ import Settings from '../settings';
 const settings = Settings.instance();
 const log = Logger.get('DropboxManager');
 
-export default class DropboxManager extends DropboxProvider {
+export default class DropboxProvider extends DropboxClient {
   constructor() {
     super({
       clientId: Constants.ApplicationId,

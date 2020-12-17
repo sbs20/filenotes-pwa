@@ -1,6 +1,6 @@
 import Constants from './constants';
-import DropboxManager from '../classes/dropbox/dropbox-manager';
-import Settings from '../classes/settings';
+import DropboxProvider from './cloud/dropbox-provider';
+import Settings from './settings';
 import SyncEngine from './sync-engine';
 
 let instance = null;
@@ -18,7 +18,7 @@ export default class Context {
     const service = await Settings.instance().storageService.get();
     switch (service) {
       case Constants.StorageServices.Dropbox:
-        this._remote = new DropboxManager();
+        this._remote = new DropboxProvider();
         break;
 
       default:
@@ -41,7 +41,7 @@ export default class Context {
   }
 
   /**
-   * @returns {DropboxManager}
+   * @returns {DropboxProvider}
    */
   get remote() {
     return this._remote;

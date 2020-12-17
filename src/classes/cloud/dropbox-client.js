@@ -19,7 +19,7 @@ const MAP = {
   'content_hash': 'hash'
 };
 
-export default class DropboxProvider {
+export default class DropboxClient {
   /**
    * Constructor
    * @param {ConfigureOptions} options - Options
