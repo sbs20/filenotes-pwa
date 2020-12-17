@@ -1,5 +1,9 @@
 <template>
   <v-app>
+    <transition name="fade">
+      <div v-if="progress.show && foregroundSync" class="mask"></div>
+    </transition>
+
     <navigation-drawer v-on:sync-force="syncForce"></navigation-drawer>
 
     <div id="progress">
@@ -10,7 +14,7 @@
     <v-main>
       <install></install>
       <v-container fluid>
-        <transition name="fade" mode="out-in">
+        <transition name="fade" mode="out-in" :duration="150">
           <router-view></router-view>
         </transition>
       </v-container>
@@ -46,6 +50,7 @@ export default {
 
   data() {
     return {
+      foregroundSync: true,
       progress: {
         status: '',
         show: false,
@@ -203,6 +208,10 @@ export default {
         this.$vuetify.theme.dark = theme === Constants.Themes.Dark;
       });
 
+      settings.foregroundSync.get().then(enabled => {
+        this.foregroundSync = enabled;
+      });
+
       context.init().then(() => {
         if (context.remote) {
           context.remote.start(window).then(connected => {
@@ -232,6 +241,21 @@ export default {
   width: 100%;
   z-index: 5;
 }
-</style>
-<style>
+
+.mask {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.4);
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
 </style>

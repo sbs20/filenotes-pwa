@@ -20,6 +20,8 @@ const Constants = {
     AutoName: 'auto-name',
     AutoSync: 'auto-sync',
     AutoSave: 'auto-save',
+    AutoFocus: 'auto-focus',
+    ForegroundSync: 'foreground-sync',
     SortBy: 'sort-by',
     TextEditor: 'text-editor'
   },

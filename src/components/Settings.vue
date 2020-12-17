@@ -13,6 +13,7 @@
             </div>
           </template>
         </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Text editor.
@@ -23,6 +24,7 @@
             </div>
           </template>
         </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Autoname. Automatically names notes when you save.
@@ -31,12 +33,22 @@
             <v-switch v-model="autoName"></v-switch>
           </template>
         </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Autosave. Automatically saves notes when you close.
           </template>
           <template v-slot:action>
             <v-switch v-model="autoSave"></v-switch>
+          </template>
+        </settings-item>
+
+        <settings-item>
+          <template v-slot:description>
+            Autofocus. Automatically Focuses the cursor in editable documents.
+          </template>
+          <template v-slot:action>
+            <v-switch v-model="autoFocus"></v-switch>
           </template>
         </settings-item>
       </template>
@@ -55,6 +67,7 @@
             </div>
           </template>
         </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Autosync. Automatically syncs notes.
@@ -63,6 +76,18 @@
             <v-switch v-model="autoSync"></v-switch>
           </template>
         </settings-item>
+
+        <settings-item>
+          <template v-slot:description>
+            Foreground sync. Stops further editing while a sync is in progress.
+            This reduces the likelihood of save conflicts if you quickly re-edit
+            a note which is uploading.
+          </template>
+          <template v-slot:action>
+            <v-switch v-model="foregroundSync"></v-switch>
+          </template>
+        </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Reset cursor. Filenotes will no longer know what it has synced and
@@ -73,6 +98,7 @@
             <v-btn color="primary" @click="clearCursor">Reset</v-btn>
           </template>
         </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Delete local changes. This will remove records of local changes.
@@ -96,6 +122,7 @@
           <template v-slot:action>
           </template>
         </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Reset connection. This will clear your authentication token and
@@ -105,6 +132,7 @@
             <v-btn color="primary" @click="logout">Logout</v-btn>
           </template>
         </settings-item>
+
         <settings-item>
           <template v-slot:description>
             Force authentication.  
@@ -178,6 +206,8 @@ export default {
       autoName: true,
       autoSave: true,
       autoSync: true,
+      autoFocus: true,
+      foregroundSync: true,
       storageService: Constants.StorageServices.Dropbox,
       storageServices: [
         {
@@ -231,10 +261,12 @@ export default {
       settings.autoName.get().then(value => { this.autoName = value; });
       settings.autoSave.get().then(value => { this.autoSave = value; });
       settings.autoSync.get().then(value => { this.autoSync = value; });
+      settings.autoFocus.get().then(value => { this.autoFocus = value; });
       settings.name.get().then(name => { this.accountName = name; });
       settings.email.get().then(email => { this.accountEmail = email; });
       settings.textEditor.get().then(editor => { this.textEditor = editor; });
       settings.theme.get().then(theme => { this.theme = theme; });
+      settings.foregroundSync.get().then(value => { this.foregroundSync = value; });
     },
 
     notify(msg) {
@@ -290,6 +322,10 @@ export default {
 
     causeRemoteError() {
       context.remote.read('/non-existent-file');
+    },
+
+    appReload() {
+      this.$root.$emit(Constants.Event.App.Reload);
     }
   },
 
@@ -300,7 +336,7 @@ export default {
           this.autoSync = false;
           if (context.remote) {
             context.remote.clear().then(() => {
-              this.$root.$emit(Constants.Event.App.Reload);
+              this.appReload();
             });
           }
         }
@@ -323,7 +359,20 @@ export default {
     autoSync() {
       settings.autoSync.set(this.autoSync).then(() => {
         this.notify(`Autosync: ${this.autoSync ? 'on' : 'off'}`);
-        this.$root.$emit(Constants.Event.App.Reload);
+        this.appReload();
+      });
+    },
+
+    autoFocus() {
+      settings.autoFocus.set(this.autoFocus).then(() => {
+        this.notify(`Autofocus: ${this.autoFocus ? 'on' : 'off'}`);
+      });
+    },
+
+    foregroundSync() {
+      settings.foregroundSync.set(this.foregroundSync).then(() => {
+        this.notify(`Foreground sync: ${this.foregroundSync ? 'on' : 'off'}`);
+        this.appReload();
       });
     },
 
@@ -335,7 +384,7 @@ export default {
 
     theme() {
       settings.theme.set(this.theme).then(() => {
-        this.$root.$emit(Constants.Event.App.Reload);
+        this.appReload();
       });
     }
   }
