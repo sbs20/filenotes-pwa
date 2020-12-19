@@ -5,6 +5,7 @@ export default {
   name: 'CTextarea',
 
   props: {
+    autofocus: Boolean,
     value: String,
     scrollfix: Boolean,
     top: {
@@ -13,9 +14,15 @@ export default {
     },
   },
 
-  mounted () {
+  mounted() {
     setTimeout(() => {
-      this.y = this.$refs.textarea.getBoundingClientRect().top,
+      /** @type {HTMLInputElement} */
+      const textarea = this.$refs.textarea;
+      textarea.setSelectionRange(0, 0);
+      if (this.autofocus) {
+        textarea.focus();
+      }
+      this.y = textarea.getBoundingClientRect().top,
       this._updateHeight();
     }, 0);
   },
@@ -87,7 +94,6 @@ export default {
 
       switch (event.code) {
         default:
-          console.log(event);
           break;
       }
 

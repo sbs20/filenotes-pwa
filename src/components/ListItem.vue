@@ -1,21 +1,24 @@
 <template>
-  <div class="list-item d-flex flex-row" @click="$emit('open', value)">
+  <div class="list-item d-flex flex-row" @click="$emit('open', value)" @contextmenu="onContext">
     <div>
       <flash v-model="value.key"></flash>
     </div>
     <div>
-      <file-icon :value="value"></file-icon>
+      <file-icon class="pt-2" :value="value"></file-icon>
     </div>
     <div class="pl-2">
       <div class="text-h6">{{ value.name }}&nbsp;</div>
       <div class="text-caption">
         <span v-if="value.tag === 'file'">
           <file-size v-model="value.size"></file-size> (<date-time v-model="value.modified"></date-time>)
-        </span>&nbsp;
+        </span>
+        <span v-else>
+          Folder
+        </span>
       </div>
     </div>
-    <div class="d-flex ml-auto" v-on:click.stop>
-      <list-item-action v-if="actions"
+    <div class="ml-auto pt-2" v-on:click.stop>
+      <list-item-action v-if="actions" ref="actions"
         @rename="$emit('rename', value)"
         @remove="$emit('remove', value)"
         @move="$emit('move', value)"></list-item-action>
@@ -57,6 +60,13 @@ export default {
       return this.showActions && this.value.name !== Constants.ParentDirectory;
     }
   },
+
+  methods: {
+    onContext(event) {
+      event.preventDefault();
+      this.$refs.actions.open(event);
+    }
+  }
 };
 </script>
 

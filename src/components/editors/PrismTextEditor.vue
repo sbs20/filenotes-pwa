@@ -29,7 +29,7 @@ export default {
   },
 
   props: {
-    /** @type {Buffer} */
+    autofocus: Boolean,
     value: Buffer,
   },
 
@@ -41,7 +41,9 @@ export default {
     /** @type {HTMLInputElement} */
     const textarea = this.$refs.editor.$refs.textarea;
     textarea.setSelectionRange(0, 0);
-    textarea.focus();
+    if (this.autofocus) {
+      textarea.focus();
+    }
   },
 
   data() {

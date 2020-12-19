@@ -1,15 +1,15 @@
 <template>
-  <c-textarea v-model="text" :top="90" spellcheck="false" scrollfix class="plain-editor" @input="update"></c-textarea>
+  <div v-if="text !== null">
+    <v-textarea :autofocus="autofocus" auto-grow ref="textarea" class="plain-editor" v-model="text" @input="update"></v-textarea>
+  </div>
 </template>
 
 <script>
-import CTextarea from '../core/CTextarea.vue';
-
 export default {
-  components: { CTextarea },
-  name: 'PlainTextEditor',
+  name: 'VTextEditor',
 
   props: {
+    autofocus: Boolean,
     /** @type {Buffer} */
     value: Buffer,
   },
@@ -49,10 +49,9 @@ export default {
 .plain-editor {
   font-family: Cascadia Code, Courier, monospace;
   font-size: 1rem;
-  font-weight: 100;
   line-height: 1.75rem;
-  outline: 0;
   width: 100%;
+  font-weight: 100;
 }
 
 </style>

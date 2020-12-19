@@ -1,6 +1,6 @@
 <template>
   <div class="hightlight-container">
-    <v-textarea v-if="text !== null" autofocus auto-grow ref="textarea" class="editor editor-text" v-model="text"
+    <v-textarea v-if="text !== null" :autofocus="autofocus" auto-grow ref="textarea" class="editor editor-text" v-model="text"
       @input="update"></v-textarea>
     <pre class="editor-text display" v-html="pretty"></pre>
   </div>
@@ -24,6 +24,7 @@ export default {
   name: 'HighlightTextEditor',
 
   props: {
+    autofocus: Boolean,
     /** @type {Buffer} */
     value: Buffer,
   },

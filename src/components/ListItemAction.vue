@@ -1,5 +1,5 @@
 <template>
-  <v-menu class="pt-2" offset-y aria-role="list">
+  <v-menu ref="menu" class="pt-2" offset-y aria-role="list">
     <template v-slot:activator="{ on }">
       <v-icon v-on="on">mdi-dots-vertical</v-icon>
     </template>
@@ -13,6 +13,12 @@
 
 <script>
 export default {
-  name: 'ListItemAction'
+  name: 'ListItemAction',
+
+  methods: {
+    open(event) {
+      this.$refs.menu.isActive = true;
+    }
+  }
 };
 </script>

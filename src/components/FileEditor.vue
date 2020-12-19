@@ -1,13 +1,13 @@
 <template>
   <div>
     <template v-if="type === 'text'">
-      <plain-text-editor v-if="textEditor === 'plain'" v-model="buffer" @input="update"></plain-text-editor>
-      <prism-text-editor v-if="textEditor === 'prism'" v-model="buffer" @input="update"></prism-text-editor>
-      <highlight-text-editor v-if="textEditor === 'highlight'" v-model="buffer" @input="update"></highlight-text-editor>
-      <custom-text-editor v-if="textEditor === 'custom'" v-model="buffer" @input="update"></custom-text-editor>
+      <prism-text-editor v-if="textEditor === 'prism'" :autofocus="autoFocus" v-model="buffer" @input="update"></prism-text-editor>
+      <highlight-text-editor v-if="textEditor === 'highlight'" :autofocus="autoFocus" v-model="buffer" @input="update"></highlight-text-editor>
+      <plain-text-editor v-if="textEditor === 'plain'" :autofocus="autoFocus" v-model="buffer" @input="update"></plain-text-editor>
     </template>
     <image-editor v-if="type === 'image'" v-model="buffer"></image-editor>
     <audio-editor v-if="type === 'audio'" v-model="buffer"></audio-editor>
+    <div v-if="type === 'unknown'">Unknown file type</div>
   </div>
 </template>
 
@@ -17,7 +17,6 @@ import Settings from '../classes/settings';
 
 import AudioEditor from './editors/AudioEditor';
 import ImageEditor from './editors/ImageEditor';
-import CustomTextEditor from './editors/CustomTextEditor';
 import HighlightTextEditor from './editors/HighlightTextEditor';
 import PlainTextEditor from './editors/PlainTextEditor';
 import PrismTextEditor from './editors/PrismTextEditor';
@@ -25,16 +24,12 @@ import PrismTextEditor from './editors/PrismTextEditor';
 export default {
   name: 'FileEditor',
   props: {
-    /** @type {string} */
     type: String,
-
-    /** @type {Buffer} */
     value: Buffer,
   },
 
   components: {
     AudioEditor,
-    CustomTextEditor,
     ImageEditor,
     PlainTextEditor,
     PrismTextEditor,
@@ -43,8 +38,9 @@ export default {
 
   data() {
     return {
+      autoFocus: false,
       buffer: null,
-      textEditor: Constants.TextEditor.Plain
+      textEditor: null
     };
   },
 
@@ -72,10 +68,13 @@ export default {
     },
 
     load() {
-      Settings.instance().textEditor.get().then(editor => {
-        // this.textEditor = 'custom';
-        // console.log(editor);
-        this.textEditor = editor;
+      Settings.instance().autoFocus.get().then(autoFocus => {
+        this.autoFocus = autoFocus;
+        Settings.instance().textEditor.get().then(editor => {
+          // this.textEditor = 'custom';
+          // console.log(editor);
+          this.textEditor = editor;
+        });
       });
 
       if (this.value !== undefined) {
