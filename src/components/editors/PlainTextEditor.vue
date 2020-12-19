@@ -1,5 +1,9 @@
 <template>
-  <c-textarea v-model="text" :autofocus="autofocus" :top="90" spellcheck="false" scrollfix class="plain-editor" @input="update"></c-textarea>
+  <v-input>
+    <c-textarea v-model="text" :autofocus="autofocus"
+      spellcheck="false" scrollfix
+      class="plain-editor" @input="update"></c-textarea>
+  </v-input>
 </template>
 
 <script>
@@ -52,6 +56,7 @@ export default {
   font-weight: 100;
   line-height: 1.75rem;
   outline: 0;
+  resize: none;
   width: 100%;
 }
 

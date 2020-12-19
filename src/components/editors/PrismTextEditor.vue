@@ -82,7 +82,6 @@ export default {
 /* required class */
 .prism-text-editor {
   font-family: Cascadia Code, Courier, monospace;
-  /* font-family: Courier, monospace; */
   font-size: 1rem;
   line-height: 1.75rem;
   min-height: 12rem;

@@ -8,10 +8,6 @@ export default {
     autofocus: Boolean,
     value: String,
     scrollfix: Boolean,
-    top: {
-      type: Number,
-      default: 0
-    },
   },
 
   mounted() {
