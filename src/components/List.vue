@@ -5,6 +5,7 @@
     <div class="d-flex flex-row mb-4">
       <div class="text-h5" style="word-break: break-word;">{{ header }}</div>
       <div class="d-flex ml-auto">
+        <v-btn v-if="!autoSync" icon @click="sync"><v-icon>mdi-sync</v-icon></v-btn>
         <sort-options v-model="sortBy"></sort-options>
       </div>
     </div>

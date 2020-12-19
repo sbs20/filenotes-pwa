@@ -9,7 +9,7 @@
           </template>
           <template v-slot:action>
             <div style="max-width: 9rem;">
-              <v-select label="Theme" :items="themes" v-model="theme"></v-select>
+              <v-select @change="update('theme', $event)" label="Theme" :items="themes" v-model="theme"></v-select>
             </div>
           </template>
         </settings-item>
@@ -20,7 +20,7 @@
           </template>
           <template v-slot:action>
             <div style="max-width: 9rem;">
-              <v-select label="Text editor" :items="textEditors" v-model="textEditor"></v-select>
+              <v-select @change="update('textEditor', $event)" label="Text editor" :items="textEditors" v-model="textEditor"></v-select>
             </div>
           </template>
         </settings-item>
@@ -30,7 +30,7 @@
             Autoname. Automatically names notes when you save.
           </template>
           <template v-slot:action>
-            <v-switch v-model="autoName"></v-switch>
+            <v-switch @change="update('autoName', $event)" v-model="autoName"></v-switch>
           </template>
         </settings-item>
 
@@ -39,7 +39,7 @@
             Autosave. Automatically saves notes when you close.
           </template>
           <template v-slot:action>
-            <v-switch v-model="autoSave"></v-switch>
+            <v-switch @change="update('autoSave', $event)" v-model="autoSave"></v-switch>
           </template>
         </settings-item>
 
@@ -48,7 +48,7 @@
             Autofocus. Automatically Focuses the cursor in editable documents.
           </template>
           <template v-slot:action>
-            <v-switch v-model="autoFocus"></v-switch>
+            <v-switch @change="update('autoFocus', $event)" v-model="autoFocus"></v-switch>
           </template>
         </settings-item>
       </template>
@@ -63,7 +63,7 @@
           </template>
           <template v-slot:action>
             <div style="max-width: 9rem;">
-              <v-select label="Cloud Storage" :items="storageServices" v-model="storageService"></v-select>
+              <v-select @change="update('storageService', $event)" label="Cloud Storage" :items="storageServices" v-model="storageService"></v-select>
             </div>
           </template>
         </settings-item>
@@ -73,7 +73,7 @@
             Autosync. Automatically syncs notes.
           </template>
           <template v-slot:action>
-            <v-switch v-model="autoSync"></v-switch>
+            <v-switch @change="update('autoSync', $event)" v-model="autoSync"></v-switch>
           </template>
         </settings-item>
 
@@ -84,7 +84,7 @@
             a note which is uploading.
           </template>
           <template v-slot:action>
-            <v-switch v-model="foregroundSync"></v-switch>
+            <v-switch @change="update('foregroundSync', $event)" v-model="foregroundSync"></v-switch>
           </template>
         </settings-item>
 
@@ -324,68 +324,74 @@ export default {
       context.remote.read('/non-existent-file');
     },
 
+    update(field, value) {
+      switch (field) {
+        case 'autoFocus':
+          settings.autoFocus.set(value).then(() => {
+            this.notify(`Autofocus: ${value ? 'on' : 'off'}`);
+          });
+          break;
+
+        case 'autoName':
+          settings.autoName.set(value).then(() => {
+            this.notify(`Autoname: ${value ? 'on' : 'off'}`);
+          });
+          break;
+
+        case 'autoSave':
+          settings.autoSave.set(value).then(() => {
+            this.notify(`Autosave: ${value ? 'on' : 'off'}`);
+          });
+          break;
+
+        case 'autoSync':
+          settings.autoSync.set(value).then(() => {
+            this.notify(`Autosync: ${value ? 'on' : 'off'}`);
+            this.appReload();
+          });
+          break;
+
+        case 'foregroundSync':
+          settings.foregroundSync.set(this.foregroundSync).then(() => {
+            this.notify(`Foreground sync: ${this.foregroundSync ? 'on' : 'off'}`);
+            this.appReload();
+          });
+          break;
+
+        case 'storageService':
+          settings.storageService.set(this.storageService).then(() => {
+            if (this.storageService === Constants.StorageServices.None) {
+              this.autoSync = false;
+              if (context.remote) {
+                context.remote.clear().then(() => {
+                  this.appReload();
+                });
+              }
+            }
+            this.notify(`Storage service: ${this.storageService}`);
+          });
+          break;
+
+        case 'textEditor':
+          settings.textEditor.set(this.textEditor).then(() => {
+            this.notify(`TextEditor: ${this.textEditor}`);
+          });
+          break;
+
+        case 'theme':
+          settings.theme.set(this.theme).then(() => {
+            this.appReload();
+          });
+          break;
+
+        default:
+          console.log(value, event);
+
+      }
+    },
+
     appReload() {
       this.$root.$emit(Constants.Event.App.Reload);
-    }
-  },
-
-  watch: {
-    storageService() {
-      settings.storageService.set(this.storageService).then(() => {
-        if (this.storageService === Constants.StorageServices.None) {
-          this.autoSync = false;
-          if (context.remote) {
-            context.remote.clear().then(() => {
-              this.appReload();
-            });
-          }
-        }
-        this.notify(`Storage service: ${this.storageService}`);
-      });
-    },
-
-    autoName() {
-      settings.autoName.set(this.autoName).then(() => {
-        this.notify(`Autoname: ${this.autoName ? 'on' : 'off'}`);
-      });
-    },
-
-    autoSave() {
-      settings.autoSave.set(this.autoSave).then(() => {
-        this.notify(`Autosave: ${this.autoSave ? 'on' : 'off'}`);
-      });
-    },
-
-    autoSync() {
-      settings.autoSync.set(this.autoSync).then(() => {
-        this.notify(`Autosync: ${this.autoSync ? 'on' : 'off'}`);
-        this.appReload();
-      });
-    },
-
-    autoFocus() {
-      settings.autoFocus.set(this.autoFocus).then(() => {
-        this.notify(`Autofocus: ${this.autoFocus ? 'on' : 'off'}`);
-      });
-    },
-
-    foregroundSync() {
-      settings.foregroundSync.set(this.foregroundSync).then(() => {
-        this.notify(`Foreground sync: ${this.foregroundSync ? 'on' : 'off'}`);
-        this.appReload();
-      });
-    },
-
-    textEditor() {
-      settings.textEditor.set(this.textEditor).then(() => {
-        this.notify(`TextEditor: ${this.textEditor}`);
-      });
-    },
-
-    theme() {
-      settings.theme.set(this.theme).then(() => {
-        this.appReload();
-      });
     }
   }
 };

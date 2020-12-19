@@ -16,6 +16,7 @@ export default {
   name: 'ListItemAction',
 
   methods: {
+    /* eslint-disable no-unused-vars */
     open(event) {
       this.$refs.menu.isActive = true;
     }

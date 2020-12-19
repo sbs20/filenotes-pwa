@@ -29,7 +29,7 @@
 
         <v-list-item @click="$emit('sync-force')">
           <v-list-item-icon><v-icon>mdi-sync</v-icon></v-list-item-icon>
-          <v-list-item-title>Force Sync</v-list-item-title>
+          <v-list-item-title>Sync</v-list-item-title>
         </v-list-item>
 
         <v-divider></v-divider>
