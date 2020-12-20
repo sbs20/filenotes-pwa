@@ -22,7 +22,8 @@ export default class DropboxProvider extends DropboxClient {
     const oauth = await settings.oauth.get();
     const name = await settings.name.get();
     const email = await settings.email.get();
-    return oauth && name && email;
+    const avatar = await settings.avatar.get();
+    return oauth && name && email && avatar;
   }
 
   /**
@@ -33,6 +34,7 @@ export default class DropboxProvider extends DropboxClient {
     await settings.oauth.delete();
     await settings.name.delete();
     await settings.email.delete();
+    await settings.avatar.delete();
   }
 
   /**
