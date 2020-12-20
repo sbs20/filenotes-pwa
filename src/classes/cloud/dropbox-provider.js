@@ -48,6 +48,7 @@ export default class DropboxProvider extends DropboxClient {
         log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
         await settings.name.set(this.accountName);
         await settings.email.set(this.accountEmail);
+        await settings.avatar.set(this.accountAvatar);
         return true;
       }
     }

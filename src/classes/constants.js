@@ -12,6 +12,7 @@ const Constants = {
   Settings: {
     Name: 'name',
     Email: 'email',
+    Avatar: 'avatar',
     OAuth: 'oauth',
     Pkce: 'pkce',
     Theme: 'theme',

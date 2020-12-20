@@ -17,6 +17,20 @@
         <v-toolbar-title>Filenotes</v-toolbar-title>
       </v-app-bar>
       <v-list nav>
+
+        <div v-if="email">
+          <v-list-item>
+            <v-list-item-avatar><v-img class="rounded-lg" contain :src="avatar"></v-img></v-list-item-avatar>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title>{{ name }}</v-list-item-title>
+              <v-list-item-subtitle>{{ email }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+          <v-divider></v-divider>
+        </div>
+        
         <v-list-item @click="$router.push('/list')">
           <v-list-item-icon><v-icon>mdi-file-document-multiple</v-icon></v-list-item-icon>
           <v-list-item-title>Files</v-list-item-title>
@@ -49,12 +63,27 @@
 </template>
 
 <script>
+import Settings from '../classes/settings';
 export default {
   name: 'NavigationDrawer',
 
-  data: () => ({
-    drawer: false,
-  }),
+  data() {
+    Settings.instance().name.get().then(value => {
+      this.name = value;
+    });
+    Settings.instance().email.get().then(value => {
+      this.email = value;
+    });
+    Settings.instance().avatar.get().then(value => {
+      this.avatar = value;
+    });
+    return {
+      drawer: false,
+      avatar: null,
+      email: null,
+      name: null
+    };
+  }
 };
 </script>
 

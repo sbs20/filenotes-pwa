@@ -99,7 +99,8 @@ export default class DropboxClient {
       this.connected = true;
       const account = response.result;
       this.accountEmail = account.email;
-      this.accountName = account.name.display_name;  
+      this.accountName = account.name.display_name;
+      this.accountAvatar = account.profile_photo_url;
     } catch (error) {
       this.connected = false;
     }

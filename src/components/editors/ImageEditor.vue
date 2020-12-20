@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-img v-if="src" :src="src" />
+    <v-img v-if="src" contain :src="src" />
   </div>
 </template>
 
