@@ -11,7 +11,7 @@
     </div>
 
     <div>
-      <list-item tabindex="1"
+      <list-item
         v-for="entry in entries" v-bind:key="entry.key" :value="entry"
         @open="open" @rename="rename" @remove="remove" @move="move"></list-item>
     </div>

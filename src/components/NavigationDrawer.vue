@@ -30,15 +30,10 @@
           </v-list-item>
           <v-divider></v-divider>
         </div>
-        
+
         <v-list-item @click="$router.push('/list')">
           <v-list-item-icon><v-icon>mdi-file-document-multiple</v-icon></v-list-item-icon>
           <v-list-item-title>Files</v-list-item-title>
-        </v-list-item>
-
-        <v-list-item @click="$router.push('/console')">
-          <v-list-item-icon><v-icon>mdi-console</v-icon></v-list-item-icon>
-          <v-list-item-title>Console</v-list-item-title>
         </v-list-item>
 
         <v-list-item @click="$emit('sync-force')">
@@ -51,6 +46,11 @@
         <v-list-item @click="$router.push('/settings')">
           <v-list-item-icon><v-icon>mdi-cog</v-icon></v-list-item-icon>
           <v-list-item-title>Settings</v-list-item-title>
+        </v-list-item>
+
+        <v-list-item @click="$router.push('/console')">
+          <v-list-item-icon><v-icon>mdi-console</v-icon></v-list-item-icon>
+          <v-list-item-title>Console</v-list-item-title>
         </v-list-item>
 
         <v-list-item @click="$router.push('/about')">

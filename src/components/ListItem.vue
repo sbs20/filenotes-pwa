@@ -1,5 +1,5 @@
 <template>
-  <div class="list-item d-flex flex-row" @click="$emit('open', value)" @contextmenu="onContext">
+  <div class="list-item d-flex flex-row" tabindex="1" @click="$emit('open', value)" @contextmenu="onContext">
     <div>
       <flash v-model="value.key"></flash>
     </div>
@@ -73,7 +73,12 @@ export default {
 <style scoped>
 .list-item {
   min-height: 3.5rem;
-  /* padding: 0 0.5rem 0 0.5rem; */
   cursor: pointer;
 }
+
+/* Tab index */
+.list-item:focus {
+  outline: 1px rgba(128, 128, 128, 0.2) solid;
+}
+
 </style>
