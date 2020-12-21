@@ -95,6 +95,11 @@ pre.prism-editor__editor .title {
   font-size: 1rem !important;
   line-height: 1.75rem;
   letter-spacing: normal !important;
+  color: #00a2ed;
+}
+
+textarea::-moz-selection {
+  background-color: #808080;
 }
 
 /* Fix Firefox spacing */

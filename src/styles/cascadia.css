@@ -1,0 +1,12 @@
+/* cascadia-code-latin-ext-400-normal
+ * Override the default implementation in order to block the font-display
+ */
+@font-face {
+  font-family: 'Cascadia Code';
+  font-style: normal;
+  font-display: block;
+  font-weight: 400;
+  src:
+    url('/fontsource-cascadia-code/files/cascadia-code-latin-ext-400-normal.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
+    url('/fontsource-cascadia-code/files/cascadia-code-latin-ext-400-normal.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}

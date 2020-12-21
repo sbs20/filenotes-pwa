@@ -2,7 +2,7 @@
   <div>
     <v-app-bar color="accent-4 elevation-0" app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Filenotes</v-toolbar-title>
+      <v-toolbar-title class="unselectable">Filenotes</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn icon @click="$router.push('/search')">
         <v-icon>mdi-magnify</v-icon>
@@ -14,7 +14,7 @@
         <v-btn icon href="/">
           <v-img contain max-width="36" max-height="36" src="../../public/img/filenotes-88.png" alt="Filenotes" />
         </v-btn>
-        <v-toolbar-title>Filenotes</v-toolbar-title>
+        <v-toolbar-title class="unselectable">Filenotes</v-toolbar-title>
       </v-app-bar>
       <v-list nav>
 
@@ -53,6 +53,11 @@
           <v-list-item-title>Console</v-list-item-title>
         </v-list-item>
 
+        <v-list-item @click="reload">
+          <v-list-item-icon><v-icon>mdi-reload</v-icon></v-list-item-icon>
+          <v-list-item-title>Reload</v-list-item-title>
+        </v-list-item>
+
         <v-list-item @click="$router.push('/about')">
           <v-list-item-icon><v-icon>mdi-information</v-icon></v-list-item-icon>
           <v-list-item-title>About</v-list-item-title>
@@ -83,10 +88,21 @@ export default {
       email: null,
       name: null
     };
+  },
+
+  methods: {
+    reload() {
+      window.location.href = `?z=${Date.now()}`;
+    }
   }
 };
 </script>
 
 <style>
-
+.unselectable {
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 </style>

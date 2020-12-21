@@ -1,30 +1,32 @@
 <template>
-  <v-app>
-    <transition name="fade">
-      <div v-if="progress.show && foregroundSync" class="mask"></div>
-    </transition>
+  <transition name="fade">
+    <v-app v-show="show">
+      <transition name="fade">
+        <div v-if="progress.show && foregroundSync" class="mask"></div>
+      </transition>
 
-    <navigation-drawer v-on:sync-force="syncForce"></navigation-drawer>
+      <navigation-drawer v-on:sync-force="syncForce"></navigation-drawer>
 
-    <div id="progress">
-      <v-progress-linear v-if="progress.show" v-model="progress.value"></v-progress-linear>
-      <v-progress-linear v-if="progress.status" :color="progress.status" :value="100"></v-progress-linear>
-    </div>
+      <div id="progress">
+        <v-progress-linear v-if="progress.show" v-model="progress.value"></v-progress-linear>
+        <v-progress-linear v-if="progress.status" :color="progress.status" :value="100"></v-progress-linear>
+      </div>
 
-    <v-main>
-      <install></install>
-      <v-container fluid>
-        <transition name="fade" mode="out-in" :duration="150">
-          <router-view></router-view>
-        </transition>
-      </v-container>
-    </v-main>
+      <v-main>
+        <install></install>
+        <v-container fluid>
+          <transition name="fade" mode="out-in" :duration="150">
+            <router-view></router-view>
+          </transition>
+        </v-container>
+      </v-main>
 
-    <v-snackbar v-model="snackbar.show" :timeout="snackbar.timeout">
-      {{ snackbar.text }}
-      <v-btn :color="snackbar.color" text @click="snackbar.show = false">Ok</v-btn>
-    </v-snackbar>
-  </v-app>
+      <v-snackbar v-model="snackbar.show" :timeout="snackbar.timeout">
+        {{ snackbar.text }}
+        <v-btn :color="snackbar.color" text @click="snackbar.show = false">Ok</v-btn>
+      </v-snackbar>
+    </v-app>
+  </transition>
 </template>
 
 <script>
@@ -56,6 +58,7 @@ export default {
         show: false,
         value: 0
       },
+      show: false,
       snackbar: {
         color: 'green',
         show: false,
@@ -63,10 +66,6 @@ export default {
         timeout: 2000
       }
     };
-  },
-
-  mounted() {
-    document.body.classList.add('app-background');
   },
 
   created() {
@@ -205,7 +204,13 @@ export default {
 
     start() {
       settings.theme.get().then(theme => {
+        if (theme === Constants.Themes.System) {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? Constants.Themes.Dark
+            : Constants.Themes.Light;
+        }
         this.$vuetify.theme.dark = theme === Constants.Themes.Dark;
+        this.show = true;
       });
 
       settings.foregroundSync.get().then(enabled => {
@@ -234,6 +239,10 @@ export default {
 </script>
 
 <style scoped>
+/* body {
+  overscroll-behavior-y: none;
+} */
+
 #progress {
   position: fixed;
   left: 0;

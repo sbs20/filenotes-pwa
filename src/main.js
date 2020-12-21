@@ -12,7 +12,7 @@ import Start from './components/Start';
 import VueAudioVisual from 'vue-audio-visual';
 
 import '@mdi/font/css/materialdesignicons.css';
-import 'fontsource-cascadia-code';
+import './styles/cascadia.css';
 
 import './registerServiceWorker';
 import vuetify from './plugins/vuetify';

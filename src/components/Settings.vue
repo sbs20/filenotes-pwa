@@ -5,7 +5,7 @@
       <template v-slot:items>
         <settings-item>
           <template v-slot:description>
-            Theme.
+            Theme. If you use system theme and change it, you will need to reload the app.
           </template>
           <template v-slot:action>
             <div style="max-width: 9rem;">
@@ -230,8 +230,12 @@ export default {
           value: Constants.TextEditor.Prism
         }
       ],
-      theme: Constants.Themes.Light,
+      theme: Constants.Themes.System,
       themes: [
+        {
+          text: 'System',
+          value: Constants.Themes.System
+        },
         {
           text: 'Light',
           value: Constants.Themes.Light

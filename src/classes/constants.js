@@ -33,8 +33,9 @@ const Constants = {
   },
 
   Themes: {
+    Dark: 'dark',
     Light: 'light',
-    Dark: 'dark'
+    System: 'system'
   },
 
   SortBy: {

@@ -53,7 +53,7 @@ export default class Settings {
     this.avatar = new StoredProperty(Constants.Settings.Avatar, '');
     this.cursor = new StoredProperty(Constants.Settings.Cursor, '');
     this.sortBy = new StoredProperty(Constants.Settings.SortBy);
-    this.theme = new StoredProperty(Constants.Settings.Theme, Constants.Themes.Light);
+    this.theme = new StoredProperty(Constants.Settings.Theme, Constants.Themes.System);
     this.textEditor = new StoredProperty(Constants.Settings.TextEditor, Constants.TextEditor.Plain);
   }
 
