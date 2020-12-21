@@ -8,7 +8,6 @@ import File from './components/File';
 import List from './components/List';
 import Settings from './components/Settings';
 import Search from './components/Search';
-import Start from './components/Start';
 import VueAudioVisual from 'vue-audio-visual';
 
 import '@mdi/font/css/materialdesignicons.css';
@@ -29,7 +28,6 @@ const router = new VueRouter({
     { path: '/list*', component: List },
     { path: '/search/:query', component: Search },
     { path: '/search', component: Search },
-    { path: '/start', component: Start },
     { path: '/settings', component: Settings },
   ]
 });

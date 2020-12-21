@@ -35,6 +35,7 @@ export default class DropboxProvider extends DropboxClient {
     await settings.name.delete();
     await settings.email.delete();
     await settings.avatar.delete();
+    this.connected = false;
   }
 
   /**
@@ -77,6 +78,7 @@ export default class DropboxProvider extends DropboxClient {
           await settings.oauth.set(oauthToken);
           await settings.name.set(this.accountName);
           await settings.email.set(this.accountEmail);
+          await settings.avatar.set(this.accountAvatar);
           await settings.pkce.delete();
           return true;
         }  
@@ -120,9 +122,11 @@ export default class DropboxProvider extends DropboxClient {
       }
       return false;
     } else {
+      this.connected = true;
       this.cursor = await settings.cursor.get();
       this.accountName = await settings.name.get();
       this.accountEmail = await settings.email.get();
+      this.accountAvatar = await settings.avatar.get();
       const oauthToken = await settings.oauth.get();
       if (oauthToken && oauthToken.refresh_token) {
         this.refreshToken = oauthToken.refresh_token;

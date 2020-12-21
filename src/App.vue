@@ -223,7 +223,7 @@ export default {
             if (connected) {
               this.onConnect(connected);
             } else {
-              this.$router.replace('/start');
+              this.$router.replace('/about');
             }
           });
         } else {

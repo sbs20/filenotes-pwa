@@ -311,6 +311,7 @@ export default {
     logout() {
       context.remote.clear().then(() => {
         this.notify('Logged out');
+        this.appReload();
       });
     },
 
