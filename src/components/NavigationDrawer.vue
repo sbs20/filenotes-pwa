@@ -14,7 +14,7 @@
         <v-btn icon href="/">
           <v-img contain max-width="36" max-height="36" src="../../public/img/filenotes-88.png" alt="Filenotes" />
         </v-btn>
-        <v-toolbar-title class="unselectable">Filenotes</v-toolbar-title>
+        <v-toolbar-title class="unselectable">Filenotes (v{{version}})</v-toolbar-title>
       </v-app-bar>
       <v-list nav>
 
@@ -68,6 +68,7 @@
 </template>
 
 <script>
+import Constants from '../classes/constants';
 import Settings from '../classes/settings';
 export default {
   name: 'NavigationDrawer',
@@ -86,7 +87,8 @@ export default {
       drawer: false,
       avatar: null,
       email: null,
-      name: null
+      name: null,
+      version: Constants.Version
     };
   },
 
