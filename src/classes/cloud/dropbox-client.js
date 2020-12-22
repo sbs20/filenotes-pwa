@@ -35,13 +35,24 @@ export default class DropboxClient {
     this.polling = false;
     this.adapter = new FieldAdapter(MAP);
     this.connected = false;
+    this.abortController = new AbortController();
 
     /** @type {RemoteAccount} */
     this.account = {};
 
     this.client = new Dropbox({
       clientId: this.options.clientId,
-      fetch: (url, options) => fetch(url, options) });
+      fetch: (url, options) => {
+        this.abortController = new AbortController();
+        options.signal = this.abortController.signal;
+        return fetch(url, options);
+      }
+    });
+  }
+
+  abort() {
+    this.abortController.abort();
+    this.polling = false;
   }
 
   /**
@@ -199,13 +210,22 @@ export default class DropboxClient {
       throw new Error('Already polling');
     }
 
-    this.polling = true;
-    const response = await this.client.filesListFolderLongpoll({ cursor: this.cursor, timeout: LONG_POLL_TIMEOUT });
-    this.polling = false;
-    if (response.result.changes !== undefined) {
+    try {
+      this.polling = true;
+      const response = await this.client.filesListFolderLongpoll({
+        cursor: this.cursor,
+        timeout: LONG_POLL_TIMEOUT
+      });
+
+      if (response.result.changes === undefined) {
+        throw new Error(`Polling error: ${response.result}`);
+      }
+
       return response.result.changes;
+
+    } finally {
+      this.polling = false;
     }
-    throw new Error(`Polling error: ${response.result}`);
   }
 
   /**

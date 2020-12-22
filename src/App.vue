@@ -33,6 +33,7 @@
 import Constants from './classes/constants';
 import Context from './classes/context';
 import Logger from './classes/logger';
+import Poller from './classes/cloud/poller';
 import Settings from './classes/settings';
 
 import Install from './components/Install';
@@ -193,35 +194,27 @@ export default {
     },
 
     syncListen() {
-      if (!context.remote) {
-        log.debug('Remote provider not configured');
-        return;
-      }
+      settings.autoSync.get().then(enabled => {
+        if (enabled) {
+          const poller = new Poller(window, context.remote, 500);
+          poller.run().then(changes => {
+            if (changes) {
+              if (context.sync.active) {
+                log.debug('Poll finished: Ignore already syncing');
+                return;
+              }
 
-      log.debug('Listening for updates');
-      context.remote.poll().then(changes => {
-        if (changes) {
-          if (context.sync.active) {
-            log.debug('Already syncing. Ignore change');
-            return;
-          }
-
-          settings.autoSync.get().then(enabled => {
-            if (enabled) {
-              this.syncStart();
+              settings.autoSync.get().then(enabled => {
+                if (enabled) {
+                  log.debug('Poll finished: syncing');
+                  this.syncStart();
+                }
+              });
             }
-          });
 
-        } else {
-          log.debug('Poll finished with no changes');
-          settings.autoSync.get().then(enabled => {
-            if (enabled) {
-              this.$root.$emit(Constants.Event.Sync.Listen);
-            }
+            window.setTimeout(this.syncListen, poller.readyIn());
           });
         }
-      }).catch(reason => {
-        log.debug(`syncListen: ${reason}`);
       });
     },
 
