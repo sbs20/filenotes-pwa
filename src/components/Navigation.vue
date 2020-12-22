@@ -11,7 +11,7 @@
 
     <v-navigation-drawer class="elevation-0" v-model="drawer" app temporary>
       <v-app-bar color="accent-4 elevation-0">
-        <v-btn icon href="/">
+        <v-btn icon @click="reload">
           <v-img contain max-width="36" max-height="36" src="../../public/img/filenotes-88.png" alt="Filenotes" />
         </v-btn>
         <v-toolbar-title class="unselectable">Filenotes (v{{version}})</v-toolbar-title>
@@ -53,11 +53,6 @@
           <v-list-item-title>Console</v-list-item-title>
         </v-list-item>
 
-        <v-list-item @click="reload">
-          <v-list-item-icon><v-icon>mdi-reload</v-icon></v-list-item-icon>
-          <v-list-item-title>Reload</v-list-item-title>
-        </v-list-item>
-
         <v-list-item @click="$router.push('/about')">
           <v-list-item-icon><v-icon>mdi-information</v-icon></v-list-item-icon>
           <v-list-item-title>About</v-list-item-title>
@@ -71,7 +66,7 @@
 import Constants from '../classes/constants';
 import Settings from '../classes/settings';
 export default {
-  name: 'NavigationDrawer',
+  name: 'Navigation',
 
   data() {
     Settings.instance().name.get().then(value => {

@@ -5,7 +5,7 @@
         <div v-if="progress.show && foregroundSync" class="mask"></div>
       </transition>
 
-      <navigation-drawer v-on:sync-force="syncForce"></navigation-drawer>
+      <navigation :key="navigationKey" v-on:sync-force="syncForce"></navigation>
 
       <div id="progress">
         <v-progress-linear v-if="progress.show" v-model="progress.value"></v-progress-linear>
@@ -36,7 +36,7 @@ import Logger from './classes/logger';
 import Settings from './classes/settings';
 
 import Install from './components/Install';
-import NavigationDrawer from './components/NavigationDrawer';
+import Navigation from './components/Navigation';
 
 const log = Logger.get('App');
 const settings = Settings.instance();
@@ -47,12 +47,13 @@ export default {
 
   components: {
     Install,
-    NavigationDrawer
+    Navigation
   },
 
   data() {
     return {
       foregroundSync: true,
+      navigationKey: 0,
       progress: {
         status: '',
         show: false,
@@ -92,9 +93,18 @@ export default {
   },
 
   methods: {
-    onConnect(connected) {
+    afterConnect(connected) {
       if (connected) {
-        /** @type {string} */
+        // Get rid of any query strings now we've connected
+        if (window.location.search) {
+          window.location.href = '/';
+          return;
+        }
+
+        // Update navigation pane
+        this.refreshNavigation();
+
+        // Default route if connected
         if (this.$route.matched.length === 0) {
           this.$router.replace('/list');
         }
@@ -120,6 +130,10 @@ export default {
       }
     },
 
+    refreshNavigation() {
+      this.navigationKey = Date.now();
+    },
+
     openSnackbar(event) {
       if (typeof(event) === 'string') {
         event = { text: event };
@@ -132,6 +146,40 @@ export default {
       this.progress.value = event.value;
     },
 
+    start() {
+      this.refreshNavigation();
+      
+      settings.theme.get().then(theme => {
+        if (theme === Constants.Themes.System) {
+          theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? Constants.Themes.Dark
+            : Constants.Themes.Light;
+        }
+        this.$vuetify.theme.dark = theme === Constants.Themes.Dark;
+        this.show = true;
+      });
+
+      settings.foregroundSync.get().then(enabled => {
+        this.foregroundSync = enabled;
+      });
+
+      context.init().then(() => {
+        if (context.remote) {
+          context.remote.start(window).then(connected => {
+            if (connected) {
+              this.afterConnect(connected);
+            } else {
+              this.$router.replace('/about');
+            }
+          });
+        } else {
+          if (this.$route.matched.length === 0) {
+            this.$router.replace('/list');
+          }
+        }
+      });
+    },
+    
     syncFinish(success) {
       this.progress.show = false;
       this.progress.value = 0;
@@ -199,39 +247,6 @@ export default {
         const msg = `Sync error: ${reason}`;
         log.error(msg);
         this.syncFinish(false);
-      });
-    },
-
-    start() {
-      settings.theme.get().then(theme => {
-        if (theme === Constants.Themes.System) {
-          theme = window.matchMedia('(prefers-color-scheme: dark)').matches
-            ? Constants.Themes.Dark
-            : Constants.Themes.Light;
-        }
-        this.$vuetify.theme.dark = theme === Constants.Themes.Dark;
-        this.show = true;
-      });
-
-      settings.foregroundSync.get().then(enabled => {
-        this.foregroundSync = enabled;
-      });
-
-      context.init().then(() => {
-        if (context.remote) {
-          context.remote.start(window).then(connected => {
-            if (connected) {
-              this.onConnect(connected);
-            } else {
-              this.$router.replace('/about');
-            }
-          });
-        } else {
-          /** @type {string} */
-          if (this.$route.matched.length === 0) {
-            this.$router.replace('/list');
-          }
-        }
       });
     },
   }
