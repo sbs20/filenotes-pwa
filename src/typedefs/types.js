@@ -11,6 +11,25 @@
  */
 
 /**
+ * @typedef {Object} OAuthToken
+ * @property {string} uid
+ * @property {string} access_token
+ * @property {number} expires_in
+ * @property {string} token_type
+ * @property {string} scope
+ * @property {string} refresh_token
+ * @property {string} account_id
+ */
+
+/**
+ * @typedef {Object} RemoteAccount
+ * @property {string} name - Account name
+ * @property {string} email - Email address
+ * @property {string} avatar - Avatar url
+ * @property {OAuthToken} oauth - OAuth token
+ */
+
+/**
  * @typedef {Object} Metadata
  * @property {('file'|'folder'|'deleted')} tag
  * @property {string} key - The lowercase path
@@ -41,17 +60,6 @@
  * @property {string} challenge
  * @property {string} verifier
  * @property {string} [code]
- */
-
-/**
- * @typedef {Object} OAuthToken
- * @property {string} uid
- * @property {string} access_token
- * @property {number} expires_in
- * @property {string} token_type
- * @property {string} scope
- * @property {string} refresh_token
- * @property {string} account_id
  */
 
 /**

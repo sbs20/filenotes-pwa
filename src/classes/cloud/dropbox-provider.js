@@ -15,47 +15,58 @@ export default class DropboxProvider extends DropboxClient {
   }
 
   /**
-   * Indicates if we've connected in the past on the basis of settings
-   * @returns {Promise.<boolean>}
-   */
-  async hasConnected() {
-    const oauth = await settings.oauth.get();
-    const name = await settings.name.get();
-    const email = await settings.email.get();
-    const avatar = await settings.avatar.get();
-    return oauth && name && email && avatar;
-  }
-
-  /**
    * Clears all authentication data from settings
    */
-  async clear() {
-    await settings.pkce.delete();
-    await settings.oauth.delete();
-    await settings.name.delete();
-    await settings.email.delete();
-    await settings.avatar.delete();
+  async accountClear() {
+    await Promise.all([
+      settings.name.delete(),
+      settings.email.delete(),
+      settings.avatar.delete(),
+      settings.pkce.delete(),
+      settings.oauth.delete(),
+    ]);
     this.connected = false;
   }
 
   /**
+   * @returns {Promise.<RemoteAccount>}
+   */
+  async accountLoad() {
+    return {
+      name: await settings.name.get(),
+      email: await settings.email.get(),
+      avatar: await settings.avatar.get(),
+      oauth: await settings.oauth.get()
+    };
+  }
+
+  /**
+   * 
+   * @param {RemoteAccount} account 
+   * @returns {Promise.<void>}
+   */
+  async accountSave(account) {
+    await Promise.all([
+      settings.name.set(account.name),
+      settings.email.set(account.email),
+      settings.avatar.set(account.avatar),
+      settings.oauth.set(account.oauth)
+    ]);
+  }
+
+  /**
    * Attempts to connect
+   * @param {OAuthToken} [oauth]
    * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async startFromToken() {
-    const oauthToken = await settings.oauth.get();
-    if (oauthToken && oauthToken.refresh_token) {
-      this.refreshToken = oauthToken.refresh_token;
-      if (await this.connect()) {
-        log.debug('Connected using stored access token');
-        log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
-        await settings.name.set(this.accountName);
-        await settings.email.set(this.accountEmail);
-        await settings.avatar.set(this.accountAvatar);
-        return true;
-      }
+  async startFromToken(oauth) {
+    oauth = oauth || await settings.oauth.get();
+    if (await super.startFromToken(oauth)) {
+      log.debug('Connected using stored access token');
+      log.info(`Logged in as ${this.account.name} (${this.account.email})`);
+      await this.accountSave(this.account);      
+      return true;
     }
-
     return false;
   }
 
@@ -71,17 +82,8 @@ export default class DropboxProvider extends DropboxClient {
       const pkceParams = await settings.pkce.get();
       if (pkceParams) {
         pkceParams.code = code;
-        const oauthToken = await this.pkceFinish(pkceParams);
-        if (oauthToken && await this.connect()) {
-          log.debug('Connected using url access token');
-          log.info(`Logged in as ${this.accountName} (${this.accountEmail})`);
-          await settings.oauth.set(oauthToken);
-          await settings.name.set(this.accountName);
-          await settings.email.set(this.accountEmail);
-          await settings.avatar.set(this.accountAvatar);
-          await settings.pkce.delete();
-          return true;
-        }  
+        const oauth = await this.pkceFinish(pkceParams);
+        return await this.startFromToken(oauth);
       }
     }
 
@@ -100,7 +102,7 @@ export default class DropboxProvider extends DropboxClient {
     }
 
     // Initiate sign in
-    await this.clear();
+    await this.accountClear();
     const params = this.pkceStart();
     await settings.pkce.set(params);
     window.location.href = params.url;
@@ -113,7 +115,18 @@ export default class DropboxProvider extends DropboxClient {
    * @returns {Promise.<boolean>} Promise<boolean>
    */
   async start(window) {
-    if (!await this.hasConnected()) {
+    const account = await this.accountLoad();
+
+    if (account.oauth && account.name) {
+      this.connected = true;
+      this.cursor = await settings.cursor.get();
+      this.account = account;
+      if (account.oauth && account.oauth.refresh_token) {
+        this.refreshToken = account.oauth.refresh_token;
+      }
+      log.info(`Logged in as ${this.account.name} (${this.account.email}) (cached)`);
+      return true;
+    } else {
       if (await this.startFromToken()) {
         return true;
       }
@@ -121,18 +134,6 @@ export default class DropboxProvider extends DropboxClient {
         return true;
       }
       return false;
-    } else {
-      this.connected = true;
-      this.cursor = await settings.cursor.get();
-      this.accountName = await settings.name.get();
-      this.accountEmail = await settings.email.get();
-      this.accountAvatar = await settings.avatar.get();
-      const oauthToken = await settings.oauth.get();
-      if (oauthToken && oauthToken.refresh_token) {
-        this.refreshToken = oauthToken.refresh_token;
-      }
-      log.info(`Logged in as ${this.accountName} (${this.accountEmail}) (cached)`);
-      return true;
     }
   }
 }

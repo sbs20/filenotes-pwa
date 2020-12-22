@@ -51,7 +51,7 @@ export default class Settings {
     this.name = new StoredProperty(Constants.Settings.Name, '');
     this.email = new StoredProperty(Constants.Settings.Email, '');
     this.avatar = new StoredProperty(Constants.Settings.Avatar, '');
-    this.cursor = new StoredProperty(Constants.Settings.Cursor, '');
+    this.cursor = new StoredProperty(Constants.Settings.Cursor);
     this.sortBy = new StoredProperty(Constants.Settings.SortBy);
     this.theme = new StoredProperty(Constants.Settings.Theme, Constants.Themes.System);
     this.textEditor = new StoredProperty(Constants.Settings.TextEditor, Constants.TextEditor.Plain);

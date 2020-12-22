@@ -12,6 +12,7 @@ import VueAudioVisual from 'vue-audio-visual';
 
 import '@mdi/font/css/materialdesignicons.css';
 import './styles/cascadia.css';
+import './styles/overrides.css';
 
 import './registerServiceWorker';
 import vuetify from './plugins/vuetify';

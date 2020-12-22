@@ -55,7 +55,7 @@
     </settings-section>
 
     <settings-section>
-      <template v-slot:title>Sync</template>
+      <template v-slot:title>Cloud service and Sync</template>
       <template v-slot:items>
         <settings-item>
           <template v-slot:description>
@@ -68,84 +68,73 @@
           </template>
         </settings-item>
 
-        <settings-item>
-          <template v-slot:description>
-            Autosync. Automatically syncs notes.
-          </template>
-          <template v-slot:action>
-            <v-switch @change="update('autoSync', $event)" v-model="autoSync"></v-switch>
-          </template>
-        </settings-item>
+        <template v-if="storageService !== 'none'">
+          <template v-if="accountName">
+            <settings-item>
+              <template v-slot:description>
+                {{ accountName }} ({{ accountEmail }})
+              </template>
+              <template v-slot:action>
+              </template>
+            </settings-item>
 
-        <settings-item>
-          <template v-slot:description>
-            Foreground sync. Stops further editing while a sync is in progress.
-            This reduces the likelihood of save conflicts if you quickly re-edit
-            a note which is uploading.
+            <settings-item>
+              <template v-slot:description>
+                Reset connection. This will clear your authentication token and
+                local account settings and require you to log in again.
+              </template>
+              <template v-slot:action>
+                <v-btn color="primary" @click="logout">Logout</v-btn>
+              </template>
+            </settings-item>
           </template>
-          <template v-slot:action>
-            <v-switch @change="update('foregroundSync', $event)" v-model="foregroundSync"></v-switch>
-          </template>
-        </settings-item>
 
-        <settings-item>
-          <template v-slot:description>
-            Reset cursor. Filenotes will no longer know what it has synced and
-            will check every file again. Provided you have local files it will
-            still check file hashes and versions.
-          </template>
-          <template v-slot:action>
-            <v-btn color="primary" @click="clearCursor">Reset</v-btn>
-          </template>
-        </settings-item>
+          <settings-item v-else>
+            <template v-slot:description>
+              Authenticate
+            </template>
+            <template v-slot:action>
+              <v-btn color="success" @click="authenticate">Login</v-btn>
+            </template>
+          </settings-item>
 
-        <settings-item>
-          <template v-slot:description>
-            Delete local changes. This will remove records of local changes.
-            This means that they will not be uploaded. If remote files have
-            changed then they may overwrite your local files.
-          </template>
-          <template v-slot:action>
-            <v-btn color="warning" @click="clearLocalDeltas">Clear</v-btn>
-          </template>
-        </settings-item>
+          <settings-item>
+            <template v-slot:description>
+              Autosync. Automatically syncs notes.
+            </template>
+            <template v-slot:action>
+              <v-switch @change="update('autoSync', $event)" v-model="autoSync"></v-switch>
+            </template>
+          </settings-item>
+
+          <settings-item>
+            <template v-slot:description>
+              Foreground sync. Stops further editing while a sync is in progress.
+              This reduces the likelihood of save conflicts if you quickly re-edit
+              a note which is uploading.
+            </template>
+            <template v-slot:action>
+              <v-switch @change="update('foregroundSync', $event)" v-model="foregroundSync"></v-switch>
+            </template>
+          </settings-item>
+
+          <settings-item>
+            <template v-slot:description>
+              Delete local changes. This will remove records of local changes.
+              This means that they will not be uploaded. If remote files have
+              changed then they may overwrite your local files.
+            </template>
+            <template v-slot:action>
+              <v-btn color="warning" @click="clearLocalDeltas">Clear</v-btn>
+            </template>
+          </settings-item>
+
+        </template>
       </template>
     </settings-section>
 
     <settings-section>
-      <template v-slot:title>Connection</template>
-      <template v-slot:items>
-        <settings-item>
-          <template v-slot:description>
-            {{ accountName }} ({{ accountEmail }})
-          </template>
-          <template v-slot:action>
-          </template>
-        </settings-item>
-
-        <settings-item>
-          <template v-slot:description>
-            Reset connection. This will clear your authentication token and
-            local account settings and require you to log in again.
-          </template>
-          <template v-slot:action>
-            <v-btn color="primary" @click="logout">Logout</v-btn>
-          </template>
-        </settings-item>
-
-        <settings-item>
-          <template v-slot:description>
-            Force authentication.  
-          </template>
-          <template v-slot:action>
-            <v-btn color="success" @click="forceAuthentication">Login</v-btn>
-          </template>
-        </settings-item>
-      </template>
-    </settings-section>
-
-    <settings-section>
-      <template v-slot:title>Local files</template>
+      <template v-slot:title>Danger zone</template>
       <template v-slot:items>
         <settings-item>
           <template v-slot:description>Clear local filesystem</template>
@@ -153,12 +142,7 @@
             <v-btn color="primary" @click="clearLocalFs">Clear</v-btn>
           </template>
         </settings-item>
-      </template>
-    </settings-section>
-
-    <settings-section>
-      <template v-slot:title>Local storage</template>
-      <template v-slot:items>
+ 
         <settings-item>
           <template v-slot:description>
             Nuke database. Completely remove all local files, pending updates
@@ -282,12 +266,6 @@ export default {
       this.$router.go(-1);
     },
 
-    clearCursor() {
-      settings.cursor.delete().then(() => {
-        this.notify('Cursor cleared');
-      });
-    },
-
     clearLocalDeltas() {
       storage.fs.delta.clear().then(() => {
         this.notify('Local deltas cleared');
@@ -309,7 +287,7 @@ export default {
     },
 
     logout() {
-      context.remote.clear().then(() => {
+      context.remote.accountClear().then(() => {
         this.notify('Logged out');
         this.appReload();
       });
@@ -321,7 +299,7 @@ export default {
       });
     },
 
-    forceAuthentication() {
+    authenticate() {
       context.remote.authenticate(window);
     },
 
@@ -368,9 +346,7 @@ export default {
             if (this.storageService === Constants.StorageServices.None) {
               this.autoSync = false;
               if (context.remote) {
-                context.remote.clear().then(() => {
-                  this.appReload();
-                });
+                this.logout();
               }
             }
             this.notify(`Storage service: ${this.storageService}`);

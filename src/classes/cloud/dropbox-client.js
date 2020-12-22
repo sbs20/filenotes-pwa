@@ -36,6 +36,9 @@ export default class DropboxClient {
     this.adapter = new FieldAdapter(MAP);
     this.connected = false;
 
+    /** @type {RemoteAccount} */
+    this.account = {};
+
     this.client = new Dropbox({
       clientId: this.options.clientId,
       fetch: (url, options) => fetch(url, options) });
@@ -71,7 +74,7 @@ export default class DropboxClient {
     this.client.auth.codeChallenge = params.challenge;
     this.client.auth.codeVerifier = params.verifier;
     if (params.code !== undefined) {
-      delete this.options.oauthToken;
+      delete this.account.oauth;
 
       try {
         const response = await this.client.auth.getAccessTokenFromCode(
@@ -79,8 +82,7 @@ export default class DropboxClient {
         /** @type {OAuthToken} */
         const token = response.result;
         this.refreshToken = token.refresh_token;
-        this.options.oauthToken = token;
-        return this.options.oauthToken;  
+        return token;
       } catch {
         return undefined;
       }
@@ -97,14 +99,33 @@ export default class DropboxClient {
     try {
       const response = await this.client.usersGetCurrentAccount();
       this.connected = true;
+
       const account = response.result;
-      this.accountEmail = account.email;
-      this.accountName = account.name.display_name;
-      this.accountAvatar = account.profile_photo_url;
+      this.account.name = account.name.display_name;
+      this.account.email = account.email;
+      this.account.avatar = account.profile_photo_url;
+
     } catch (error) {
+      this.account = {};
       this.connected = false;
     }
     return this.connected;
+  }
+
+  /**
+   * Attempts to connect
+   * @param {OAuthToken} oauth
+   * @returns {Promise.<boolean>} Promise<boolean>
+   */
+  async startFromToken(oauth) {
+    if (oauth && oauth.refresh_token) {
+      this.refreshToken = oauth.refresh_token;
+      this.account.oauth = oauth;
+      if (await this.connect()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

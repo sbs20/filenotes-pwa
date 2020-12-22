@@ -1,0 +1,4 @@
+/* Necessary to stop clipping of font tails */
+.v-select__selection--comma {
+  overflow: visible;
+}

@@ -1,3 +1,4 @@
+import Constants from './constants';
 import EventEmitter from './event-emitter';
 import FileContent from './files/file-content';
 import Logger from './logger';
@@ -28,11 +29,11 @@ const active = Symbol();
 export default class SyncEngine extends EventEmitter {
   /**
    * Constructor
-   * @param {DropboxManager} remote 
+   * @param {DropboxProvider} remote 
    */
   constructor(remote) {
     super();
-    /** @type {DropboxManager} */
+    /** @type {DropboxProvider} */
     this.remote = remote;
     this[active] = false;
   }
@@ -195,7 +196,7 @@ export default class SyncEngine extends EventEmitter {
       // Uploads, creates and deletes have rate limiting - await each
       for (const delta of localDeltas) {
         await this._applyRemote(delta);
-        this.emit('progress', {
+        this.emit(Constants.Event.Sync.Progress, {
           value: completed(++index)
         });
       }
@@ -203,7 +204,7 @@ export default class SyncEngine extends EventEmitter {
       const remoteDeltas = await this.remote.list();
       // There doesn't appear to be rate limiting for downloads
       await Promise.all(remoteDeltas.map(delta => this._applyLocal(delta).then(() => {
-        this.emit('progress', {
+        this.emit(Constants.Event.Sync.Progress, {
           value: completed(++index)
         });
       })));

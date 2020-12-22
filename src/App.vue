@@ -102,7 +102,7 @@ export default {
         }
 
         // Update navigation pane
-        this.refreshNavigation();
+        this.refreshNavigationComponent();
 
         // Default route if connected
         if (this.$route.matched.length === 0) {
@@ -130,7 +130,7 @@ export default {
       }
     },
 
-    refreshNavigation() {
+    refreshNavigationComponent() {
       this.navigationKey = Date.now();
     },
 
@@ -147,8 +147,8 @@ export default {
     },
 
     start() {
-      this.refreshNavigation();
-      
+      this.refreshNavigationComponent();
+
       settings.theme.get().then(theme => {
         if (theme === Constants.Themes.System) {
           theme = window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -168,14 +168,12 @@ export default {
           context.remote.start(window).then(connected => {
             if (connected) {
               this.afterConnect(connected);
-            } else {
+            } else if (this.$route.path !== '/about') {
               this.$router.replace('/about');
             }
           });
-        } else {
-          if (this.$route.matched.length === 0) {
-            this.$router.replace('/list');
-          }
+        } else if (this.$route.matched.length === 0) {
+          this.$router.replace('/list');
         }
       });
     },
@@ -238,12 +236,12 @@ export default {
       this.progress.status = '';
       this.progress.show = true;
       const sync = context.sync;
-      sync.on('progress', this.updateProgress);
+      sync.on(Constants.Event.Sync.Progress, this.updateProgress);
       sync.execute().then(() => {
-        sync.off('progress');
+        sync.off(Constants.Event.Sync.Progress);
         this.syncFinish(true);
       }).catch(reason => {
-        sync.off('progress');
+        sync.off(Constants.Event.Sync.Progress);
         const msg = `Sync error: ${reason}`;
         log.error(msg);
         this.syncFinish(false);

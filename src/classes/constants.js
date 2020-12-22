@@ -62,7 +62,8 @@ const Constants = {
     Sync: {
       Listen: 'sync.listen',
       Start: 'sync.start',
-      Finish: 'sync.finish'
+      Finish: 'sync.finish',
+      Progress: 'sync.progress'
     }
   },
 

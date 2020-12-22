@@ -1,7 +1,8 @@
 <template>
   <div>
-    <div v-if="!connected" class="d-flex flex-row mt-4 justify-center">
+    <div v-if="showAuthenticate" class="d-flex flex-row mt-4 justify-center">
       <v-btn color="primary" @click="authenticate">Authenticate with Dropbox</v-btn>
+      <v-btn color="secondary" @click="useDisconnected">Use disconnected</v-btn>
     </div>
     <div class="d-flex flex-row mt-4 justify-center">
       <img src="../../public/img/filenotes-88.png">
@@ -69,17 +70,23 @@
 <script>
 import Constants from '../classes/constants';
 import Context from '../classes/context';
+import Settings from '../classes/settings';
+
+const context = Context.instance();
+const settings = Settings.instance();
 
 export default {
   name: 'About',
 
   created() {
     document.addEventListener('keydown', this._onKeys);
+    window.scrollTo(0, 0);
+    this.init();
   },
 
   data() {
     return {
-      connected: Context.instance().remote.connected,
+      showAuthenticate: false,
       version: Constants.Version
     };
   },
@@ -96,11 +103,28 @@ export default {
     },
 
     authenticate() {
-      Context.instance().remote.authenticate(window);
+      if (context.remote) {
+        context.remote.authenticate(window);
+      }
     },
 
     close() {
       this.$router.go(-1);
+    },
+
+    init() {
+      settings.storageService.get().then(service => {
+        settings.oauth.get().then(oauth => {
+          this.showAuthenticate = service === Constants.StorageServices.Dropbox && oauth === undefined;
+        });
+      });
+    },
+
+    useDisconnected() {
+      settings.storageService.set(Constants.StorageServices.None).then(() => {
+        this.showAuthenticate = false;
+      });
+      settings.autoSync.set(false);
     }
   }
 };

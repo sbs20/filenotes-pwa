@@ -35,8 +35,8 @@
           <v-list-item-icon><v-icon>mdi-file-document-multiple</v-icon></v-list-item-icon>
           <v-list-item-title>Files</v-list-item-title>
         </v-list-item>
-
-        <v-list-item @click="$emit('sync-force')">
+    
+        <v-list-item @click="$emit('sync-force')" v-if="showSync">
           <v-list-item-icon><v-icon>mdi-sync</v-icon></v-list-item-icon>
           <v-list-item-title>Sync</v-list-item-title>
         </v-list-item>
@@ -65,24 +65,31 @@
 <script>
 import Constants from '../classes/constants';
 import Settings from '../classes/settings';
+
+const settings = Settings.instance();
+
 export default {
   name: 'Navigation',
 
   data() {
-    Settings.instance().name.get().then(value => {
+    settings.name.get().then(value => {
       this.name = value;
     });
-    Settings.instance().email.get().then(value => {
+    settings.email.get().then(value => {
       this.email = value;
     });
-    Settings.instance().avatar.get().then(value => {
+    settings.avatar.get().then(value => {
       this.avatar = value;
+    });
+    settings.storageService.get().then(service => {
+      this.showSync = service !== Constants.StorageServices.None;
     });
     return {
       drawer: false,
       avatar: null,
       email: null,
       name: null,
+      showSync: true,
       version: Constants.Version
     };
   },
