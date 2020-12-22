@@ -42,6 +42,7 @@ import Navigation from './components/Navigation';
 const log = Logger.get('App');
 const settings = Settings.instance();
 const context = Context.instance();
+const poller = new Poller(window, context, 500);
 
 export default {
   name: 'App',
@@ -195,12 +196,11 @@ export default {
 
     syncListen() {
       settings.autoSync.get().then(enabled => {
-        if (enabled) {
-          const poller = new Poller(window, context.remote, 500);
+        if (enabled && !poller.running) {
           poller.run().then(changes => {
             if (changes) {
               if (context.sync.active) {
-                log.debug('Poll finished: Ignore already syncing');
+                log.debug('sync active - ignoring poll');
                 return;
               }
 
@@ -208,6 +208,7 @@ export default {
                 if (enabled) {
                   log.debug('Poll finished: syncing');
                   this.syncStart();
+                  return;
                 }
               });
             }
