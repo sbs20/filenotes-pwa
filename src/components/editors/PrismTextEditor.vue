@@ -95,7 +95,8 @@ pre.prism-editor__editor .title {
   font-size: 1rem !important;
   line-height: 1.75rem;
   letter-spacing: normal !important;
-  color: #00a2ed;
+  /* color: #00a2ed; */
+  color: #ffaf00
 }
 
 textarea::-moz-selection {

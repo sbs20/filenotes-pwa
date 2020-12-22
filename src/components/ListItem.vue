@@ -1,6 +1,6 @@
 <template>
   <div class="list-item d-flex flex-row" tabindex="1" @click="$emit('open', value)" @contextmenu="onContext">
-    <div>
+    <div class="pt-1">
       <flash v-model="value.key"></flash>
     </div>
     <div>
@@ -79,6 +79,7 @@ export default {
 /* Tab index */
 .list-item:focus {
   outline: 1px rgba(128, 128, 128, 0.2) solid;
+  background-color: rgba(128, 128, 128, 0.1);
 }
 
 </style>
