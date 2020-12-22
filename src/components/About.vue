@@ -21,6 +21,25 @@
       install it (although you won't get offline access).
     </div>
 
+    <div class="text-h4 mt-4">At a glance</div>
+    <div class="body-1 mt-4">
+      <ul>
+        <li>Open file format - no lock in</li>
+        <ul>
+          <li>Text files (.txt .md)</li>
+          <li>Audio files (.aac .mp3)</li>
+          <li>Image files (.jpg .gif .png)</li>
+        </ul>
+        <li>Sort by name, size, modified</li>
+        <li>Search name and content</li>
+        <li>Autoname</li>
+        <li>Autosave</li>
+        <li>Autosync</li>
+        <li>Works offline</li>
+        <li>Optional background sync</li>
+      </ul>
+    </div>
+
     <div class="text-h4 mt-4">Sync your data</div>
     <div class="body-1 mt-4">
       Sync files with Dropbox in its own scoped directory
@@ -40,7 +59,8 @@
     <div class="text-h4 mt-4">License</div>
     <div class="body-1 mt-4">
       This software is free to use and licensed under MIT. The source code is
-      available at <a href="">GitHub</a>.
+      available on <a target="_blank" href="https://github.com/sbs20/filenotes-pwa">GitHub</a>.
+      Copyright &copy; 2020-present, Sam Strachan.
     </div>
 
   </div>
