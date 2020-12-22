@@ -8,7 +8,10 @@
       <img src="../../public/img/filenotes-88.png">
     </div>
     <div class="d-flex flex-row mt-4 justify-center">
-      <div class="text-h2">Filenotes v{{ version }}</div>
+      <div class="text-h2">Filenotes</div>
+    </div>
+    <div class="d-flex flex-row mt-4 justify-center">
+      <div class="text-caption">(v{{ version }})</div>
     </div>
 
     <div class="text-h4 mt-4">What is filenotes?</div>

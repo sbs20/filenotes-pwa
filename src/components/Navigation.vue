@@ -14,10 +14,10 @@
         <v-btn icon @click="reload">
           <v-img contain max-width="36" max-height="36" src="../../public/img/filenotes-88.png" alt="Filenotes" />
         </v-btn>
-        <v-toolbar-title class="unselectable">Filenotes (v{{version}})</v-toolbar-title>
+        <v-toolbar-title class="unselectable">Filenotes</v-toolbar-title>
       </v-app-bar>
-      <v-list nav>
 
+      <v-list nav>
         <div v-if="email">
           <v-list-item>
             <v-list-item-avatar><v-img class="rounded-lg" contain :src="avatar"></v-img></v-list-item-avatar>
@@ -57,7 +57,23 @@
           <v-list-item-icon><v-icon>mdi-information</v-icon></v-list-item-icon>
           <v-list-item-title>About</v-list-item-title>
         </v-list-item>
+
+        <v-divider></v-divider>
+
+        <v-list-item>
+          <v-list-item-icon><v-icon>mdi-tools</v-icon></v-list-item-icon>
+          <v-list-item-title class="unselectable">Version {{version}}</v-list-item-title>
+        </v-list-item>
       </v-list>
+
+      <template v-slot:append>
+        <div class="d-flex flex-row pa-4 text-caption">
+          <div class="ml-auto">
+            &copy; 2020 Sam Strachan
+          </div>
+        </div>
+      </template>
+
     </v-navigation-drawer>
   </div>  
 </template>
