@@ -1,6 +1,6 @@
 import Constants from './constants';
 import EventEmitter from './event-emitter';
-import FileContent from './files/file-content';
+import FileBuilder from './files/file-builder';
 import Logger from './logger';
 import Storage from './data/storage';
 
@@ -49,7 +49,7 @@ export default class SyncEngine extends EventEmitter {
       case 'file': {
         if (local === undefined || metadata.hash !== local.hash) {
           const buffer = await this.remote.read(metadata.key);
-          const content = FileContent.create(metadata.key, buffer);
+          const content = FileBuilder.content(metadata.key, buffer);
           await storage.fs.content.writeAll([content]);   
           await storage.fs.metadata.writeAll([metadata]);
           log.info(`downloaded: ${metadata.key}`);

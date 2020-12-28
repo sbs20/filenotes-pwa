@@ -1,8 +1,5 @@
-import DeletedMetadata from './files/deleted-metadata';
-import FileContent from './files/file-content';
-import FileMetadata from './files/file-metadata';
+import FileBuilder from './files/file-builder';
 import FilePath from './files/file-path';
-import FolderMetadata from './files/folder-metadata';
 import Logger from './logger';
 import Storage from './data/storage';
 
@@ -35,7 +32,7 @@ export default class LocalProvider {
    */
   async get(path) {
     if (path === '') {
-      return FolderMetadata.create('');
+      return FileBuilder.folder('');
     }
     return await storage.fs.metadata.read(path.toLowerCase());
   }
@@ -46,7 +43,7 @@ export default class LocalProvider {
    * @returns {Promise.<void>}
    */
   async mkdir(path) {
-    const metadata = FolderMetadata.create(path);
+    const metadata = FileBuilder.folder(path);
     await storage.fs.metadata.writeAll([metadata]);
     await storage.fs.delta.writeAll([metadata]);    
   }
@@ -129,7 +126,7 @@ export default class LocalProvider {
     }
 
     if (data) {
-      const content = FileContent.create(metadata.path, data);
+      const content = FileBuilder.content(metadata.path, data);
 
       // See what's stored locally already
       const current = await storage.fs.metadata.read(metadata.key);
@@ -160,7 +157,7 @@ export default class LocalProvider {
 
     await storage.fs.metadata.deleteAll(keys);
     await storage.fs.content.deleteAll(keys);
-    await storage.fs.delta.writeAll([DeletedMetadata.create(path)]);
+    await storage.fs.delta.writeAll([FileBuilder.deleted(path)]);
     keys.forEach(key => log.info(`rm ${key}`));
   }
 
@@ -187,11 +184,11 @@ export default class LocalProvider {
 
       this.mkdir(destinationPath);
       await storage.fs.metadata.deleteAll([sourcePath]);
-      await storage.fs.delta.writeAll([DeletedMetadata.create(sourcePath)]);
+      await storage.fs.delta.writeAll([FileBuilder.deleted(sourcePath)]);
 
     } else {
       const content = await storage.fs.content.read(sourcePath.toLowerCase());
-      const destination = FileMetadata.create().assign(source).path(destinationPath).value;
+      const destination = FileBuilder.path(source, destinationPath);
       await this.write(destination, content.data);
       await this.delete(sourcePath);  
     }

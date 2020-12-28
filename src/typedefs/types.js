@@ -30,7 +30,7 @@
  */
 
 /**
- * @typedef {Object} Metadata
+ * @typedef {Object} MetadataX
  * @property {('file'|'folder'|'deleted')} tag
  * @property {string} key - The lowercase path
  * @property {string} name - The filename
@@ -44,7 +44,7 @@
  */
 
 /**
- * @typedef {Object} Content
+ * @typedef {Object} ContentX
  * @property {string} key - The lowercase path
  * @property {string} [preview] - Preview data
  * @property {ArrayBuffer} data - The data

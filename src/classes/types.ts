@@ -1,4 +1,5 @@
 type FileType = 'audio'|'text'|'image'|'unknown';
+type Tag = 'file'|'folder'|'deleted';
 
 // interface OAuthToken {
 //   uid: string;
@@ -9,3 +10,22 @@ type FileType = 'audio'|'text'|'image'|'unknown';
 //   refresh_token: string;
 //   account_id: string;
 // }
+
+interface Metadata {
+  tag: Tag;
+  key: string;
+  name: string;
+  id?: string;
+  revision?: string;
+  hash?: string;
+  modified?: string;
+  path: string;
+  size?: number;
+  downloadable?: boolean;
+}
+
+interface Content {
+  key: string;
+  preview?: string;
+  data: ArrayBuffer;
+}
