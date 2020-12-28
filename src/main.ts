@@ -2,12 +2,12 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 
 import App from './App.vue';
-import About from './components/About';
-import Console from './components/Console';
-import File from './components/File';
-import List from './components/List';
-import Settings from './components/Settings';
-import Search from './components/Search';
+import About from './components/About.vue';
+import Console from './components/Console.vue';
+import File from './components/File.vue';
+import List from './components/List.vue';
+import Settings from './components/Settings.vue';
+import Search from './components/Search.vue';
 import VueAudioVisual from 'vue-audio-visual';
 
 import '@mdi/font/css/materialdesignicons.css';

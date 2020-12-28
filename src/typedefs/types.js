@@ -51,10 +51,6 @@
  */
 
 /**
- * @typedef {'audio'|'text'|'image'|'unknown'} FileType
- */
-
-/**
  * @typedef {Object} PkceParameters
  * @property {string} [url]
  * @property {string} challenge

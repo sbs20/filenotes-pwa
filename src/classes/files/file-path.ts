@@ -1,9 +1,11 @@
 export default class FilePath {
+  path: string;
+
   /**
    * Constructor
    * @param {string} path 
    */
-  constructor(path) {
+  constructor(path: string) {
     this.path = path;
   }
 
@@ -11,7 +13,7 @@ export default class FilePath {
    * Returns the container directory
    * @returns {string}
    */
-  get directory() {
+  get directory(): string {
     const path = this.path;
     if (path.indexOf('/') === -1) {
       return '';
@@ -20,11 +22,7 @@ export default class FilePath {
     return directory;
   }
 
-  /**
-   * Returns the file extension
-   * @returns {string}
-   */
-  get extension() {
+  get extension(): string {
     const name = this.name;
     if (name.indexOf('.') === -1) {
       return '';
@@ -36,18 +34,16 @@ export default class FilePath {
 
   /**
    * Returns the filename
-   * @returns {string}
    */
-  get name() {
+  get name(): string {
     const name = this.path.split('/').slice(-1)[0];
     return name;
   }
 
   /**
    * Returns the filename stem (without the extension)
-   * @returns {string}
    */
-  get stem() {
+  get stem(): string {
     const name = this.name;
     if (name.indexOf('.') === -1) {
       return name;
@@ -58,18 +54,13 @@ export default class FilePath {
 
   /**
    * Returns the path key
-   * @returns {string}
    */
-  get key() {
+  get key(): string {
     const key = this.path.toLowerCase();
     return key;
   }
 
-  /**
-   * Returns the type
-   * @returns {FileType}
-   */
-  get type() {
+  get type(): FileType {
     switch (this.extension.toLowerCase()) {
       case 'csv':
       case 'md':
@@ -91,38 +82,22 @@ export default class FilePath {
     }
   }
 
-  /**
-   * @param {string} directory
-   * @returns {FilePath}
-   */
-  move(directory) {
+  move(directory: string): FilePath {
     if (!directory.endsWith('/')) {
       directory += '/';
     }
     return new FilePath(`${directory}${this.name}`);
   }
 
-  /**
-   * @param {string} name
-   * @returns {FilePath}
-   */
-  rename(name) {
+  rename(name: string): FilePath {
     return new FilePath(`${this.directory}/${name}`);
   }
 
-  /**
-   * Creates a filepath
-   * @param {string} path 
-   */
-  static create(path) {
+  static create(path: string): FilePath {
     return new FilePath(path);
   }
 
-  /**
-   * @param {FileType} type
-   * @returns {string} The default extension without a preceding dot
-   */
-  static defaultExtension(type) {
+  static defaultExtension(type: FileType): string {
     switch (type) {
       case 'text':
         return 'txt';
