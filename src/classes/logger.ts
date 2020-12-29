@@ -35,7 +35,7 @@ export default class Logger {
   /**
    * Writes a log line
    */
-  write(level: string, message: string, data: object): void {
+  write(level: string, message: string, data?: object): void {
     const output = this.format(level, message, data);
     console.log(output);
     singleton.messages.push(output);
@@ -50,28 +50,28 @@ export default class Logger {
   /**
    * Debug
    */
-  debug(message: string, data: object): void {
+  debug(message: string, data?: object): void {
     this.write(Logger.levels.DEBUG, message, data);
   }
 
   /**
    * Error
    */
-  error(message: string, data: object): void {
+  error(message: string, data?: object): void {
     this.write(Logger.levels.ERROR, message, data);
   }
 
   /**
    * Info
    */
-  info(message: string, data: object): void {
+  info(message: string, data?: object): void {
     this.write(Logger.levels.INFO, message, data);
   }
 
   /**
    * Warning
    */
-  warn(message: string, data: object): void {
+  warn(message: string, data?: object): void {
     this.write(Logger.levels.WARNING, message, data);
   }
 

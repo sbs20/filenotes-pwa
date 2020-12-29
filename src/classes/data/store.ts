@@ -1,3 +1,4 @@
+// eslint-disable-next-line
 import { IDBPCursorWithValue } from 'idb';
 import Database from './database';
 
@@ -37,7 +38,7 @@ export default class Store<T> {
   /**
    * Returns a list of objects
    */
-  async list(predicate?: (key: string, value: any) => boolean): Promise<T> {
+  async list(predicate?: (key: string, value: any) => boolean): Promise<T[]> {
     if (predicate === undefined) {
       return await Database.use(idb => idb.getAll(this.store));
     }

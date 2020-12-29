@@ -5,16 +5,13 @@ import Storage from './data/storage';
 
 const storage = Storage.instance();
 const log = Logger.get('LocalProvider');
-let provider = null;
+let provider: LocalProvider | null = null;
 
 export default class LocalProvider {
   /**
    * Gets an available filename in a given directory
-   * @param {Metadata} directory
-   * @param {string} name
-   * @returns {Promise.<string>}
    */
-  async new(directory, name) {
+  async new(directory: Metadata, name: string): Promise<string> {
     const existing = await this.list(directory, false);
     let candidate = name;
     let index = 0;
@@ -28,9 +25,8 @@ export default class LocalProvider {
 
   /**
    * Returns a metadata object
-   * @returns {Promise.<Metadata>} - Promise<Metadata>
    */
-  async get(path) {
+  async get(path: string): Promise<Metadata> {
     if (path === '') {
       return FileBuilder.folder('');
     }
@@ -39,10 +35,8 @@ export default class LocalProvider {
 
   /**
    * Creates a local directory
-   * @param {string} path
-   * @returns {Promise.<void>}
    */
-  async mkdir(path) {
+  async mkdir(path: string): Promise<void> {
     const metadata = FileBuilder.folder(path);
     await storage.fs.metadata.writeAll([metadata]);
     await storage.fs.delta.writeAll([metadata]);    
@@ -50,35 +44,29 @@ export default class LocalProvider {
 
   /**
    * Returns a list of file metadata objects
-   * @param {Metadata} [directory]
-   * @param {boolean} [recursive]
-   * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
-  async list(directory, recursive) {
-    const predicate = directory === undefined ? undefined : (fileKey) => {
-      const dirKey = directory.key + '/';
-      return fileKey.startsWith(dirKey) && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
-    };
+  async list(directory?: Metadata, recursive?: boolean): Promise<Metadata[]> {
+    if (directory) {
+      return await storage.fs.metadata.list((fileKey) => {
+        const dirKey = directory.key + '/';
+        return fileKey.startsWith(dirKey) && (recursive || fileKey.indexOf('/', dirKey.length) === -1);
+      });
+    }
 
-    let list = await storage.fs.metadata.list(predicate);
-    return list;
+    return await storage.fs.metadata.list();
   }
 
   /**
    * Returns a list of file metadata objects
-   * @param {string|RegExp} [query]
-   * @param {Metadata} [directory]
-   * @param {boolean} [recursive]
-   * @returns {Promise.<Array.<Metadata>>} - Promise<Metadata[]>
    */
-  async search(query, directory, recursive) {
+  async search(query: string | RegExp, directory?: Metadata, recursive?: boolean): Promise<Metadata[]> {
     if (typeof(query) === 'string') {
       query = new RegExp(query, 'i');
     }
 
-    const index = {};
-    const searchable = {};
-    const results = [];
+    const index: Dictionary<Metadata> = {};
+    const searchable: Dictionary<boolean> = {};
+    const results: Metadata[] = [];
     (await this.list(directory, recursive)).forEach(m => {
       index[m.key] = m;
       if (m.name.match(query)) {
@@ -103,21 +91,16 @@ export default class LocalProvider {
 
   /**
    * Returns the file data as an ArrayBuffer
-   * @param {string} path
-   * @returns {Promise.<ArrayBuffer>} - Promise<ArrayBuffer>
    */
-  async read(path) {
+  async read(path: string): Promise<ArrayBuffer> {
     const content = await storage.fs.content.read(path.toLowerCase());
     return content === undefined ? new Uint8Array().buffer : content.data;
   }
 
   /**
    * Writes file data to disk
-   * @param {Metadata} metadata 
-   * @param {ArrayBuffer} data 
-   * @returns {Promise.<boolean>} Whether the file was saved
    */
-  async write(metadata, data) {
+  async write(metadata: Metadata, data: ArrayBuffer): Promise<boolean> {
     if (metadata === undefined) {
       throw new Error('Metadata is undefined');
     }
@@ -145,9 +128,8 @@ export default class LocalProvider {
 
   /**
    * Delete a file
-   * @param {string} path 
    */
-  async delete(path) {
+  async delete(path: string): Promise<void> {
     const metadata = await storage.fs.metadata.read(path.toLowerCase());
     const keys = [path.toLowerCase()];
     if (metadata.tag === 'folder') {
@@ -163,10 +145,8 @@ export default class LocalProvider {
 
   /**
    * Moves a file
-   * @param {string} sourcePath 
-   * @param {string} destinationPath 
    */
-  async move(sourcePath, destinationPath) {
+  async move(sourcePath: string, destinationPath: string): Promise<void> {
     log.debug(`mv ${sourcePath} ${destinationPath}`);
     const source = await storage.fs.metadata.read(sourcePath.toLowerCase());
     const destination = await storage.fs.metadata.read(destinationPath.toLowerCase());
@@ -197,7 +177,7 @@ export default class LocalProvider {
   /**
    * @returns {LocalProvider}
    */
-  static instance() {
+  static instance(): LocalProvider {
     if (provider === null) {
       provider = new LocalProvider();
     }

@@ -8,7 +8,7 @@ function _apply(mapping: Dictionary<string>, input: any) {
   }, {});
 }
 
-export default class FieldAdapter {
+export default class FieldAdapter<T> {
   from: Dictionary<string>;
   to: Dictionary<string>;
 
@@ -23,14 +23,14 @@ export default class FieldAdapter {
   /**
    * Applies mapping
    */
-  apply(input: object): object {
+  apply(input: object): T {
     return _apply(this.to, input);
   }
   
   /**
    * Unapplies mapping
    */
-  unapply(input: object): object {
+  unapply(input: T): object {
     return _apply(this.from, input);
   }
 }
