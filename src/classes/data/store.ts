@@ -1,4 +1,3 @@
-// eslint-disable-next-line
 import { IDBPCursorWithValue } from 'idb';
 import Database from './database';
 

@@ -1,7 +1,6 @@
 import Convert from '../utils/convert';
 import FieldAdapter from '../utils/field-adapter';
 import extend from '../utils/extend';
-// eslint-disable-next-line
 import { Dropbox, DropboxAuth, files } from 'dropbox';
 import { sha256Sync } from '../utils/sha256';
 
@@ -49,7 +48,7 @@ export default class DropboxClient {
 
     this.client = new Dropbox({
       clientId: this.options.clientId,
-      fetch: (url: string, options: any) => {
+      fetch: (url: string, options: any):Promise<Response> => {
         this.abortController = new AbortController();
         options.signal = this.abortController.signal;
         return fetch(url, options);
@@ -57,7 +56,7 @@ export default class DropboxClient {
     });
   }
 
-  abort() {
+  abort():void {
     this.abortController.abort();
     this.polling = false;
   }
@@ -95,7 +94,7 @@ export default class DropboxClient {
     auth.codeChallenge = params.challenge;
     auth.codeVerifier = params.verifier;
     if (params.code !== undefined) {
-      delete this.account.oauthToken;
+      delete this.account.oauth;
 
       try {
         const response = await this.auth.getAccessTokenFromCode(this.options.authUrl, params.code);
@@ -139,7 +138,7 @@ export default class DropboxClient {
   async startFromToken(oauth: OAuthToken): Promise<boolean> {
     if (oauth && oauth.refresh_token) {
       this.refreshToken = oauth.refresh_token;
-      this.account.oauthToken = oauth;
+      this.account.oauth = oauth;
       if (await this.connect()) {
         return true;
       }
@@ -173,7 +172,7 @@ export default class DropboxClient {
     const files: Metadata[] = [];
     let hasMore = true;
 
-    const handleResult = (result: files.ListFolderResult) => {
+    const handleResult = (result: files.ListFolderResult):void => {
       result.entries
         .map(metadata => this.adapter.apply(metadata))
         .forEach(file => files.push(file));
@@ -202,7 +201,7 @@ export default class DropboxClient {
   /**
    * Returns a list of file metadata objects without updating the cursor
    */
-  async peek() {
+  async peek(): Promise<Metadata[]> {
     const cursor = this.cursor;
     const list = await this.list();
     this.cursor = cursor;
@@ -212,7 +211,7 @@ export default class DropboxClient {
   /**
    * Returns when there's an update
    */
-  async poll() {
+  async poll(): Promise<boolean> {
     if (this.polling) {
       throw new Error('Already polling');
     }

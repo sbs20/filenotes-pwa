@@ -1,5 +1,5 @@
 export default {
-  parse(str: string): object {
+  parse(str: string): any {
     const ret = Object.create(null);
 
     if (typeof str !== 'string') {

@@ -1,4 +1,3 @@
-// eslint-disable-next-line
 import { openDB, deleteDB, IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'filenotes.app';

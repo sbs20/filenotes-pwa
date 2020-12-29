@@ -24,7 +24,6 @@ interface PkceParameters {
 }
 
 interface DropboxClientOptions {
-  oauthToken: string;
   clientId: string;
   authUrl: string;
 }
@@ -33,7 +32,7 @@ interface RemoteAccount {
   name: string;
   email: string;
   avatar: string;
-  oauthToken?: OAuthToken;
+  oauth?: OAuthToken;
 }
 
 interface Metadata {

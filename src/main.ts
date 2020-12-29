@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue, { CreateElement, VNode } from 'vue';
 import VueRouter from 'vue-router';
 
 import App from './App.vue';
@@ -36,5 +36,5 @@ const router = new VueRouter({
 new Vue({
   vuetify,
   router: router,
-  render: h => h(App)
+  render: (h: CreateElement): VNode => h(App)
 }).$mount('#app');

@@ -17,7 +17,7 @@ export default class DropboxProvider extends DropboxClient {
   /**
    * Clears all authentication data from settings
    */
-  async accountClear() {
+  async accountClear(): Promise<void> {
     await Promise.all([
       settings.name.delete(),
       settings.email.delete(),
@@ -28,10 +28,7 @@ export default class DropboxProvider extends DropboxClient {
     this.connected = false;
   }
 
-  /**
-   * @returns {Promise.<RemoteAccount>}
-   */
-  async accountLoad() {
+  async accountLoad(): Promise<RemoteAccount> {
     return {
       name: await settings.name.get(),
       email: await settings.email.get(),
@@ -45,7 +42,7 @@ export default class DropboxProvider extends DropboxClient {
    * @param {RemoteAccount} account 
    * @returns {Promise.<void>}
    */
-  async accountSave(account) {
+  async accountSave(account: RemoteAccount): Promise<void> {
     await Promise.all([
       settings.name.set(account.name),
       settings.email.set(account.email),
@@ -56,12 +53,10 @@ export default class DropboxProvider extends DropboxClient {
 
   /**
    * Attempts to connect
-   * @param {OAuthToken} [oauth]
-   * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async startFromToken(oauth) {
+  async startFromToken(oauth?: OAuthToken | undefined): Promise<boolean> {
     oauth = oauth || await settings.oauth.get();
-    if (await super.startFromToken(oauth)) {
+    if (await super.startFromToken(oauth as OAuthToken)) {
       log.debug('Connected using stored access token');
       log.info(`Logged in as ${this.account.name} (${this.account.email})`);
       await this.accountSave(this.account);      
@@ -72,10 +67,8 @@ export default class DropboxProvider extends DropboxClient {
 
   /**
    * Attempts to connect
-   * @param {string} queryString
-   * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async startFromQueryString(queryString) {
+  async startFromQueryString(queryString: string): Promise<boolean> {
     const code = QueryString.parse(queryString).code;
     if (code) {
       /** @type {PkceParameters} */
@@ -92,10 +85,8 @@ export default class DropboxProvider extends DropboxClient {
 
   /**
    * Forces authentication
-   * @param {Window} window
-   * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async authenticate(window) {
+  async authenticate(window: Window): Promise<boolean> {
     if (window === undefined) {
       log.error('window parameter must be specified');
       throw new Error('window parameter must be specified');
@@ -105,16 +96,14 @@ export default class DropboxProvider extends DropboxClient {
     await this.accountClear();
     const params = this.pkceStart();
     await settings.pkce.set(params);
-    window.location.href = params.url;
+    window.location.href = params.url as string;
     return false;
   }
 
   /**
    * Start
-   * @param {Window} window
-   * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async start(window) {
+  async start(window: Window): Promise<boolean> {
     const account = await this.accountLoad();
 
     if (account.oauth && account.name) {

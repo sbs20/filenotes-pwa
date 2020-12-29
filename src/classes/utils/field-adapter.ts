@@ -1,5 +1,5 @@
 
-function _apply(mapping: Dictionary<string>, input: any) {
+function _apply(mapping: Dictionary<string>, input: any): any {
   return Object.keys(input).reduce<any>((output, key) => {
     if (key in mapping) {
       output[mapping[key]] = input[key];

@@ -1,7 +1,7 @@
 const Constants = {
-  ApplicationId: process.env.VUE_APP_DROPBOX_CLIENT_ID,
-  HostUrl: process.env.VUE_APP_HOST_URL,
-  Version: process.env.VUE_APP_VERSION,
+  ApplicationId: process.env.VUE_APP_DROPBOX_CLIENT_ID as string,
+  HostUrl: process.env.VUE_APP_HOST_URL as string,
+  Version: process.env.VUE_APP_VERSION as string,
   
   Keys: {
     s: 83,
