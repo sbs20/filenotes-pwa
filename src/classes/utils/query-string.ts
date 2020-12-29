@@ -1,5 +1,5 @@
 export default {
-  parse(str) {
+  parse(str: string): object {
     const ret = Object.create(null);
 
     if (typeof str !== 'string') {
@@ -17,9 +17,9 @@ export default {
       // Firefox (pre 40) decodes `%3D` to `=`
       // https://github.com/sindresorhus/query-string/pull/37
       let key = parts.shift();
-      let val = parts.length > 0 ? parts.join('=') : undefined;
+      let val: string | undefined | null = parts.length > 0 ? parts.join('=') : undefined;
 
-      key = decodeURIComponent(key);
+      key = decodeURIComponent(key as string);
 
       // missing `=` should be `null`:
       // http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters

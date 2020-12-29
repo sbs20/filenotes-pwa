@@ -1,69 +1,58 @@
 //https://developers.google.com/web/fundamentals/instant-and-offline/web-storage/indexeddb-best-practices
-export default {
+export default class Convert {
   /**
    * Converts a Blob to an ArrayBuffer
-   * @param {Blob} blob The blob to convert
-   * @returns {Promise.<ArrayBuffer>} A Promise<ArrayBuffer>
    */
-  blobToArrayBuffer(blob) {
+  static blobToArrayBuffer(blob: Blob): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.addEventListener('loadend', () => {
-        resolve(reader.result);
+        resolve(reader.result as ArrayBuffer);
       });
       reader.addEventListener('error', reject);
       reader.readAsArrayBuffer(blob);
     });
-  },
+  }
 
   /**
    * Converts an ArrayBuffer to a Blob
-   * @param {ArrayBuffer} buffer The ArrayBuffer to convert
-   * @param {string} [type] Type. Default is 'application/octet-stream'
-   * @returns {Blob} A Blob
    */
-  arrayBufferToBlob(buffer, type) {
+  static arrayBufferToBlob(buffer: ArrayBuffer, type?: string): Blob {
     const t = type || 'application/octet-stream';
     return new Blob([buffer], {type: t});
-  },
+  }
 
   /**
    * Converts a string to an ArrayBuffer
-   * @param {string} string The string to convert
-   * @returns {ArrayBuffer} An ArrayBuffer
    */
-  stringToArrayBuffer(string) {
+  static stringToArrayBuffer(string: string): ArrayBuffer {
     const encoder = new TextEncoder();
     return encoder.encode(string).buffer;
-  },
+  }
   
   /**
    * Converts an ArrayBuffer to a string
-   * @param {ArrayBuffer} buffer The ArrayBuffer to convert
-   * @returns {string} A string
    */
-  arrayBufferToString(buffer) {
+  static arrayBufferToString(buffer: ArrayBuffer): string {
     const decoder = new TextDecoder('utf-8');
     return decoder.decode(buffer);
-  },
+  }
 
   /**
    * Converts an ArrayBuffer to a hex string
-   * @param {ArrayBuffer} buffer The ArrayBuffer to convert
-   * @returns {string} A hex encoded string
    */
-  arrayBufferToHex(buffer) {
+  static arrayBufferToHex(buffer: ArrayBuffer): string {
     const array = Array.from(new Uint8Array(buffer));
     const hex = array.map(b => b.toString(16).padStart(2, '0')).join('');
     return hex;
-  },
+  }
 
   /**
    * Takes an array of ArrayBuffers and concenates them into a single buffer
    * @param {Array.<ArrayBuffer>} buffers 
    * @returns {ArrayBuffer} Concatenated ArrayBuffer
    */
-  arrayBuffersConcat(buffers) {
+  static arrayBuffersConcat(buffers: ArrayBuffer[]): ArrayBuffer {
     let size = buffers.map(buffer => buffer.byteLength).reduce((a, b) => a + b, 0);
     let result = new Uint8Array(size);
     let offset = 0;
@@ -73,4 +62,4 @@ export default {
     }
     return result.buffer;
   }
-};
+}

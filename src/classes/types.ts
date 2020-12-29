@@ -1,5 +1,10 @@
 type FileType = 'audio'|'text'|'image'|'unknown';
 type Tag = 'file'|'folder'|'deleted';
+type BufferLike = Uint8Array | ArrayBuffer | Buffer;
+
+interface Dictionary<T> {
+  [key: string]: T
+}
 
 // interface OAuthToken {
 //   uid: string;

@@ -1,5 +1,6 @@
-function _apply(mapping, input) {
-  return Object.keys(input).reduce((output, key) => {
+
+function _apply(mapping: Dictionary<string>, input: any) {
+  return Object.keys(input).reduce<any>((output, key) => {
     if (key in mapping) {
       output[mapping[key]] = input[key];
     }
@@ -8,9 +9,12 @@ function _apply(mapping, input) {
 }
 
 export default class FieldAdapter {
-  constructor(mapping) {
+  from: Dictionary<string>;
+  to: Dictionary<string>;
+
+  constructor(mapping: Dictionary<string>) {
     this.to = mapping;
-    this.from = Object.keys(this.to).reduce((acc, key) => {
+    this.from = Object.keys(this.to).reduce<any>((acc, key) => {
       acc[this.to[key]] = key;
       return acc;
     }, {});
@@ -18,19 +22,15 @@ export default class FieldAdapter {
 
   /**
    * Applies mapping
-   * @param {Object} input 
-   * @returns {Object} output
    */
-  apply(input) {
+  apply(input: object): object {
     return _apply(this.to, input);
   }
   
   /**
    * Unapplies mapping
-   * @param {Object} input 
-   * @returns {Object} output
    */
-  unapply(input) {
+  unapply(input: object): object {
     return _apply(this.from, input);
   }
 }
