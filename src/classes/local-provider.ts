@@ -60,7 +60,7 @@ export default class LocalProvider {
    * Returns a list of file metadata objects
    */
   async search(query: string | RegExp, directory?: Metadata, recursive?: boolean): Promise<Metadata[]> {
-    if (typeof(query) === 'string') {
+    if (typeof query === 'string') {
       query = new RegExp(query, 'i');
     }
 

@@ -20,7 +20,7 @@ export default class KeyValueStore {
   /**
    * Sets a value
    */
-  async set(key: string, val: any): Promise<void> {
+  async set(key: string, val: unknown): Promise<void> {
     await Database.use(idb => idb.put(this.store, val, key));
   }
 

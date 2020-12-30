@@ -172,7 +172,7 @@ export default class SyncEngine extends EventEmitter {
     try {
       const localDeltas = await deltas();
       const peek = await this.remote.peek();
-      const total = (localDeltas.length * 2) + peek.length;
+      const total = localDeltas.length * 2 + peek.length;
       const completed = (count: number):number => {
         return 100 * count * (1 / total);
       };
