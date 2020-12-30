@@ -44,10 +44,10 @@ export default class DropboxProvider extends DropboxClient {
    */
   async accountSave(account: RemoteAccount): Promise<void> {
     await Promise.all([
-      settings.name.set(account.name),
-      settings.email.set(account.email),
-      settings.avatar.set(account.avatar),
-      settings.oauth.set(account.oauth)
+      settings.name.set(account.name!),
+      settings.email.set(account.email!),
+      settings.avatar.set(account.avatar!),
+      settings.oauth.set(account.oauth!)
     ]);
   }
 

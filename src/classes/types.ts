@@ -29,9 +29,9 @@ interface DropboxClientOptions {
 }
 
 interface RemoteAccount {
-  name: string;
-  email: string;
-  avatar: string;
+  name?: string;
+  email?: string;
+  avatar?: string;
   oauth?: OAuthToken;
 }
 

@@ -13,7 +13,7 @@ export default class KeyValueStore {
   /**
    * Gets a value
    */
-  async get(key: string): Promise<any> {
+  async get(key: string): Promise<unknown> {
     return await Database.use(idb => idb.get(this.store, key));
   }
 

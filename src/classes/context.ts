@@ -3,18 +3,18 @@ import DropboxProvider from './cloud/dropbox-provider';
 import Settings from './settings';
 import SyncEngine from './sync-engine';
 
-let instance = null;
+let instance: Context | null = null;
 
 export default class Context {
+  private _remote: DropboxProvider | null;
+  private _sync: SyncEngine | null;
+
   constructor() {
     this._remote = null;
     this._sync = null;
   }
 
-  /**
-   * @returns {Promise.<void>}
-   */
-  async init() {
+  async init(): Promise<void> {
     const service = await Settings.instance().storageService.get();
     switch (service) {
       case Constants.StorageServices.Dropbox:
@@ -22,7 +22,7 @@ export default class Context {
         break;
 
       default:
-        this._remote = undefined;
+        this._remote = null;
         break;
     }
     this._sync = new SyncEngine(this._remote);
@@ -30,34 +30,23 @@ export default class Context {
 
   /**
    * Calculates the content hash
-   * @param {BufferLike} buffer - The byte array
-   * @returns {string} - Hex encoded hash
    */
-  hash(buffer) {
+  hash(buffer: BufferLike): string {
     if (this._remote) {
       return this._remote.hash(buffer);
     }
     return '';
   }
 
-  /**
-   * @returns {DropboxProvider}
-   */
-  get remote() {
+  get remote(): DropboxProvider | null {
     return this._remote;
   }
 
-  /**
-   * @returns {SyncEngine}
-   */
-  get sync() {
+  get sync(): SyncEngine | null {
     return this._sync;
   }
 
-  /**
-   * @returns {Context}
-   */
-  static instance() {
+  static instance(): Context {
     if (instance === null) {
       instance = new Context();
     }

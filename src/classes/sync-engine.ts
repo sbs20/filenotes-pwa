@@ -1,18 +1,16 @@
+import EventEmitter from 'events';
 import Constants from './constants';
-import EventEmitter from './event-emitter';
 import FileBuilder from './files/file-builder';
 import Logger from './logger';
 import Storage from './data/storage';
+import DropboxProvider from './cloud/dropbox-provider';
 
 const storage = Storage.instance();
 const log = Logger.get('SyncEngine');
 
-/**
- * @returns {Promise.<Array.<Metadata>>}
- */
-async function deltas() {
+async function deltas(): Promise<Metadata[]> {
   const deltas = await storage.fs.delta.list();
-  const sorted = [];
+  const sorted: Metadata[] = [];
   deltas.filter(m => m.tag === 'deleted')
     .sort((m1, m2) => m2.key.length - m1.key.length)
     .forEach(m => sorted.push(m));
@@ -24,31 +22,25 @@ async function deltas() {
   return sorted;
 }
 
-const active = Symbol();
-
 export default class SyncEngine extends EventEmitter {
-  /**
-   * Constructor
-   * @param {DropboxProvider} remote 
-   */
-  constructor(remote) {
+  remote: DropboxProvider | null;
+  private _active: boolean;
+
+  constructor(remote: DropboxProvider | null) {
     super();
-    /** @type {DropboxProvider} */
     this.remote = remote;
-    this[active] = false;
+    this._active = false;
   }
 
   /**
    * Applies a metadata to the local filesystem
-   * @param {Metadata} metadata
-   * @returns {Promise.<boolean>}
    */
-  async _applyLocal(metadata) {
+  private async _applyLocal(metadata: Metadata): Promise<boolean> {
     const local = await storage.fs.metadata.read(metadata.key);
     switch (metadata.tag) {
       case 'file': {
         if (local === undefined || metadata.hash !== local.hash) {
-          const buffer = await this.remote.read(metadata.key);
+          const buffer = await this.remote!.read(metadata.key);
           const content = FileBuilder.content(metadata.key, buffer);
           await storage.fs.content.writeAll([content]);   
           await storage.fs.metadata.writeAll([metadata]);
@@ -89,15 +81,12 @@ export default class SyncEngine extends EventEmitter {
 
   /**
    * Applies a metadata
-   * @param {Metadata} metadata
-   * @returns {Promise.<boolean>}
    */
-  async _applyRemote(metadata) {
+  private async _applyRemote(metadata: Metadata): Promise<boolean> {
     switch (metadata.tag) {
       case 'file': {
-        /** @type {Content} */
         const content = await storage.fs.content.read(metadata.key);
-        const response = await this.remote.write(metadata, content.data);
+        const response = await this.remote!.write(metadata, content.data);
         if (response.key === metadata.key) {
           // Write the response in order to get the revision update
           await storage.fs.metadata.writeAll([response]);
@@ -116,12 +105,12 @@ export default class SyncEngine extends EventEmitter {
       }
 
       case 'folder':
-        await this.remote.mkdir(metadata.path);
+        await this.remote!.mkdir(metadata.path);
         log.info(`created remote directory: ${metadata.key}`);
         break;
 
       case 'deleted':
-        await this.remote.delete(metadata.path);
+        await this.remote!.delete(metadata.path);
         log.info(`deleted remote file: ${metadata.key}`);  
         break;
 
@@ -134,43 +123,39 @@ export default class SyncEngine extends EventEmitter {
     return true;
   }
 
-  /**
-   * @returns {boolean}
-   */
-  get active() {
-    return this[active];
+  get active(): boolean {
+    return this._active;
   }
 
-  /**
-   * @returns {Promise.<boolean>}
-   */
-  async isRequired() {
+  async required(): Promise<boolean> {
     if (this.active) {
       log.debug('Currently syncing.');
       return false;
     }
 
+    if (!this.remote) {
+      log.debug('Remote provider not set');
+      return false;
+    }
+
     try {
-      this[active] = true;
+      this._active = true;
       const localDeltas = await deltas();
       const peek = await this.remote.peek();
       const total = localDeltas.length + peek.length;
-      this[active] = false;
       return total > 0;
     } catch (error) {
       log.error('Unable to reach server', error);
-      this[active] = false;
       throw error;
+    } finally {
+      this._active = false;
     }
   }
 
-  /**
-   * @returns {Promise.<void>}
-   */
-  async execute() {
+  async execute(): Promise<void> {
     if (!this.remote) {
-      log.error('Remote provider not set');
-      this[active] = false;
+      log.debug('Remote provider not set');
+      this._active = false;
       throw new Error('Remote provider not set');
     }
 
@@ -179,16 +164,16 @@ export default class SyncEngine extends EventEmitter {
       return;
     }
 
-    this[active] = true;
+    this._active = true;
     log.info('Started');
-    const cursor = await storage.settings.get('cursor');
+    const cursor = await storage.settings.get('cursor') as string;
     this.remote.cursor = cursor;
 
     try {
       const localDeltas = await deltas();
       const peek = await this.remote.peek();
       const total = (localDeltas.length * 2) + peek.length;
-      const completed = count => {
+      const completed = (count: number):number => {
         return 100 * count * (1 / total);
       };
       let index = 0;
@@ -211,11 +196,11 @@ export default class SyncEngine extends EventEmitter {
 
       await storage.settings.set('cursor', this.remote.cursor);
       log.info('Finished');
-      this[active] = false;
     } catch (error) {
       log.error('Sync error occurred', error);
-      this[active] = false;
       throw error;
+    } finally {
+      this._active = false;
     }
   }
 }

@@ -22,7 +22,7 @@ const MAP = {
 export default class DropboxClient {
   client: Dropbox | any;
   options: DropboxClientOptions;
-  cursor: string | null;
+  cursor?: string;
   polling: boolean;
   adapter: FieldAdapter<Metadata>;
   connected: boolean;
@@ -35,7 +35,6 @@ export default class DropboxClient {
    */
   constructor(options: DropboxClientOptions) {
     this.options = options;
-    this.cursor = null;
     this.polling = false;
     this.adapter = new FieldAdapter<Metadata>(MAP);
     this.connected = false;
