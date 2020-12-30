@@ -7,7 +7,7 @@ import Settings from '../settings';
 const settings = Settings.instance();
 const log = Logger.get('DropboxManager');
 
-export default class DropboxProvider extends DropboxClient {
+export default class DropboxProvider extends DropboxClient implements RemoteProvider {
   constructor() {
     super({
       clientId: Constants.ApplicationId,
@@ -28,7 +28,7 @@ export default class DropboxProvider extends DropboxClient {
     this.connected = false;
   }
 
-  async accountLoad(): Promise<RemoteAccount> {
+  private async accountLoad(): Promise<RemoteAccount> {
     return {
       name: await settings.name.get(),
       email: await settings.email.get(),
@@ -42,7 +42,7 @@ export default class DropboxProvider extends DropboxClient {
    * @param {RemoteAccount} account 
    * @returns {Promise.<void>}
    */
-  async accountSave(account: RemoteAccount): Promise<void> {
+  private async accountSave(account: RemoteAccount): Promise<void> {
     await Promise.all([
       settings.name.set(account.name!),
       settings.email.set(account.email!),
@@ -54,7 +54,7 @@ export default class DropboxProvider extends DropboxClient {
   /**
    * Attempts to connect
    */
-  async startFromToken(oauth?: OAuthToken | undefined): Promise<boolean> {
+  protected async startFromToken(oauth?: OAuthToken | undefined): Promise<boolean> {
     oauth = oauth || await settings.oauth.get();
     if (await super.startFromToken(oauth as OAuthToken)) {
       log.debug('Connected using stored access token');
@@ -68,8 +68,8 @@ export default class DropboxProvider extends DropboxClient {
   /**
    * Attempts to connect
    */
-  async startFromQueryString(queryString: string): Promise<boolean> {
-    const code = QueryString.parse(queryString).code;
+  private async startFromQueryString(queryString: string): Promise<boolean> {
+    const code = QueryString.parse(queryString).code as string;
     if (code) {
       /** @type {PkceParameters} */
       const pkceParams = await settings.pkce.get();

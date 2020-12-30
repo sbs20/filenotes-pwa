@@ -53,3 +53,19 @@ interface Content {
   preview?: string;
   data: ArrayBuffer;
 }
+
+interface RemoteProvider {
+  cursor?: string;
+  accountClear(): Promise<void>;
+  authenticate(window: Window): Promise<boolean>;
+  start(window: Window): Promise<boolean>;
+  abort():void;
+  delete(path: string): Promise<Metadata | undefined>;
+  list(): Promise<Metadata[]>;
+  peek(): Promise<Metadata[]>;
+  poll(): Promise<boolean>;
+  mkdir(path: string): Promise<void>;
+  read(path: string): Promise<ArrayBuffer>;
+  write(metadata: Metadata, buffer: ArrayBuffer): Promise<Metadata>;
+  hash(buffer: BufferLike): string;
+}

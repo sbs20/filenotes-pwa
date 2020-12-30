@@ -3,7 +3,6 @@ import Constants from './constants';
 import FileBuilder from './files/file-builder';
 import Logger from './logger';
 import Storage from './data/storage';
-import DropboxProvider from './cloud/dropbox-provider';
 
 const storage = Storage.instance();
 const log = Logger.get('SyncEngine');
@@ -23,10 +22,10 @@ async function deltas(): Promise<Metadata[]> {
 }
 
 export default class SyncEngine extends EventEmitter {
-  remote: DropboxProvider | null;
+  remote: RemoteProvider | null;
   private _active: boolean;
 
-  constructor(remote: DropboxProvider | null) {
+  constructor(remote: RemoteProvider | null) {
     super();
     this.remote = remote;
     this._active = false;

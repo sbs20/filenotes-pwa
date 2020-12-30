@@ -20,14 +20,14 @@ const MAP = {
 };
 
 export default class DropboxClient {
-  client: Dropbox | any;
-  options: DropboxClientOptions;
+  private client: Dropbox | any;
+  private options: DropboxClientOptions;
+  private polling: boolean;
+  private adapter: FieldAdapter<Metadata>;
+  private abortController: AbortController;
+  protected connected: boolean;
+  protected account: RemoteAccount;
   cursor?: string;
-  polling: boolean;
-  adapter: FieldAdapter<Metadata>;
-  connected: boolean;
-  abortController: AbortController;
-  account: RemoteAccount;
 
   /**
    * Constructor
@@ -60,19 +60,19 @@ export default class DropboxClient {
     this.polling = false;
   }
 
-  get auth(): DropboxAuth | any {
+  private get auth(): DropboxAuth | any {
     const client = this.client as any;
     return client.auth;
   }
 
-  set refreshToken(value: string) {
+  protected set refreshToken(value: string) {
     this.auth.setRefreshToken(value);
   }
 
   /**
    * Returns the authentication parameters
    */
-  pkceStart(): PkceParameters {
+  protected pkceStart(): PkceParameters {
     const auth = this.auth as any;
     const url = this.auth.getAuthenticationUrl(
       this.options.authUrl, undefined, 'code', 'offline', undefined, 'none', true);
@@ -88,7 +88,7 @@ export default class DropboxClient {
    * @param {PkceParameters} params The PKCE parameters
    * @returns {Promise.<OAuthToken>} The access token
    */
-  async pkceFinish(params: PkceParameters): Promise<OAuthToken | undefined> {
+  protected async pkceFinish(params: PkceParameters): Promise<OAuthToken | undefined> {
     const auth = this.auth as any;
     auth.codeChallenge = params.challenge;
     auth.codeVerifier = params.verifier;
@@ -110,7 +110,7 @@ export default class DropboxClient {
   /**
    * Attempts to connect and returns whether or not it was successful
    */
-  async connect(): Promise<boolean> {
+  protected async connect(): Promise<boolean> {
     try {
       const response = await this.client.usersGetCurrentAccount();
       this.connected = true;
@@ -134,7 +134,7 @@ export default class DropboxClient {
   /**
    * Attempts to connect
    */
-  async startFromToken(oauth: OAuthToken): Promise<boolean> {
+  protected async startFromToken(oauth: OAuthToken): Promise<boolean> {
     if (oauth && oauth.refresh_token) {
       this.refreshToken = oauth.refresh_token;
       this.account.oauth = oauth;
@@ -280,7 +280,7 @@ export default class DropboxClient {
   /**
    * Writes a file to dropbox
    */
-  async _write(commitInfo: files.CommitInfo | any): Promise<Metadata> {
+  private async _write(commitInfo: files.CommitInfo | any): Promise<Metadata> {
     const CHUNKING_THRESHOLD = 2 * 1024 * 1024;
 
     const buffer = commitInfo.contents as ArrayBuffer;

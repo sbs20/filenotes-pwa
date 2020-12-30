@@ -1,18 +1,18 @@
 export default {
-  parse(str: string): any {
-    const ret = Object.create(null);
+  parse(search: string): Dictionary<String | null | (string | null)[]> {
+    const obj = Object.create(null);
 
-    if (typeof str !== 'string') {
-      return ret;
+    if (typeof search !== 'string') {
+      return obj;
     }
 
-    str = str.trim().replace(/^(\?|#|&)/, '');
+    search = search.trim().replace(/^(\?|#|&)/, '');
 
-    if (!str) {
-      return ret;
+    if (!search) {
+      return obj;
     }
 
-    str.split('&').forEach((param) => {
+    search.split('&').forEach((param) => {
       const parts = param.replace(/\+/g, ' ').split('=');
       // Firefox (pre 40) decodes `%3D` to `=`
       // https://github.com/sindresorhus/query-string/pull/37
@@ -25,15 +25,15 @@ export default {
       // http://w3.org/TR/2012/WD-url-20120524/#collect-url-parameters
       val = val === undefined ? null : decodeURIComponent(val);
 
-      if (ret[key] === undefined) {
-        ret[key] = val;
-      } else if (Array.isArray(ret[key])) {
-        ret[key].push(val);
+      if (obj[key] === undefined) {
+        obj[key] = val;
+      } else if (Array.isArray(obj[key])) {
+        obj[key].push(val);
       } else {
-        ret[key] = [ret[key], val];
+        obj[key] = [obj[key], val];
       }
     });
 
-    return ret;
+    return obj;
   }
 };
