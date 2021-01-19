@@ -1,8 +1,4 @@
-/**
- * @typedef {import('idb').IDBPDatabase} IDBPDatabase
- */
-
-import { openDB, deleteDB } from 'idb';
+import { openDB, deleteDB, IDBPDatabase } from 'idb';
 
 export const DB_NAME = 'filenotes.app';
 export const DB_VERSION = 1;
@@ -13,14 +9,13 @@ export const STORE_FS_DELTA = 'fs.delta';
 
 export default class Database {
   constructor() {
-    this.db = null;
   }
 
   /**
    * Opens the database
    */
-  async open() {
-    this.db = await openDB(DB_NAME, DB_VERSION, {
+  static async open(): Promise<IDBPDatabase> {
+    return await openDB(DB_NAME, DB_VERSION, {
       upgrade(db) {
         db.createObjectStore(STORE_SETTINGS);
         db.createObjectStore(STORE_FS_METADATA, { keyPath: 'key' });
@@ -39,30 +34,20 @@ export default class Database {
   /**
    * Deletes the database
    */
-  async delete() {
+  static async delete(): Promise<void> {
     await deleteDB(DB_NAME, {});
   }
 
   /**
-   * Closes the underlying database
+   * Opens and closes a database using the callback in the middle
    */
-  close() {
-    this.db.close();
-    this.db = null;
-  }
-
-  /**
-    * Opens and closes a database using the callback in the middle
-    * @param {function(IDBPDatabase)} callback 
-    */
-  static async use(callback) {
-    const database = new Database();
-    await database.open();
+  static async use(callback: (db: IDBPDatabase) => any): Promise<any> {
+    const idb: IDBPDatabase = await Database.open();
     let response = null;
     try {
-      response = await callback(database.db);
+      response = await callback(idb);
     } catch { /*Nothing*/ }
-    database.close();
+    idb.close();
     return response;  
   }
 }

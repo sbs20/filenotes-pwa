@@ -1,13 +1,15 @@
+import Context from '../context';
 import Logger from '../logger';
 const log = Logger.get('Poller');
 
 export default class Poller {
-  /**
-   * @param {Window} window 
-   * @param {import('../context').default} context
-   * @param {number} timeout Timeout in seconds
-   */
-  constructor(window, context, timeout) {
+  window: Window;
+  context: Context;
+  timeout: number;
+  next: number;
+  running: boolean;
+
+  constructor(window: Window, context: Context, timeout: number) {
     this.window = window;
     this.context = context;
     this.timeout = timeout;
@@ -15,23 +17,17 @@ export default class Poller {
     this.running = false;
   }
 
-  _delay() {
+  _delay(): number {
     return 60 * 1000 * (1 + Math.random());
   }
 
-  readyIn() {
+  readyIn(): number {
     return Math.max(0, this.next - Date.now());
   }
 
-  get provider() {
-    return this.context.remote;
-  }
-
-  /**
-   * @returns {Promise.<boolean>}
-   */
-  async run() {
-    if (!this.provider) {
+  async run(): Promise<boolean> {
+    const provider = this.context.remote;
+    if (!provider) {
       this.next = Date.now() + this._delay();
       return false;
     }
@@ -45,13 +41,13 @@ export default class Poller {
 
     const timer = this.window.setTimeout(() => {
       log.debug('abort');
-      this.provider.abort();
+      provider.abort();
       aborted = true;
     }, this.timeout * 1000);
 
     log.debug('listening');
     try {
-      const changes = await this.provider.poll();
+      const changes = await provider.poll();
       log.debug(`changes: ${changes}`);
       this.next = Date.now();
       return changes;

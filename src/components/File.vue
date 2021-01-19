@@ -18,7 +18,7 @@
 
 <script>
 import Constants from '../classes/constants';
-import FileMetadata from '../classes/files/file-metadata';
+import FileBuilder from '../classes/files/file-builder';
 import FilePath from '../classes/files/file-path';
 import LocalProvider from '../classes/local-provider';
 import Logger from '../classes/logger';
@@ -153,7 +153,7 @@ export default {
     },
     
     isSaved() {
-      const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
+      const metadata = FileBuilder.data(this.metadata, this.buffer);
       return this.savedHash === metadata.hash;
     },
 
@@ -260,14 +260,11 @@ export default {
 
           let name = this.filename || defaultName;
           fs.new(this.directory, name).then(name => {
-            const metadata = FileMetadata.create()
-              .path(`${this.directory.path}/${name}`)
-              .data(this.buffer)
-              .value;
+            const metadata = FileBuilder.file(`${this.directory.path}/${name}`, this.buffer);
             resolve(metadata);
           });
         } else {
-          const metadata = FileMetadata.create().assign(this.metadata).data(this.buffer).value;
+          const metadata = FileBuilder.data(this.metadata, this.buffer);
           resolve(metadata);
         }
       });

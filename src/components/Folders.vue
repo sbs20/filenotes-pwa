@@ -12,7 +12,7 @@
 
 <script>
 import FilePath from '../classes/files/file-path';
-import FolderMetadata from '../classes/files/folder-metadata';
+import FileBuilder from '../classes/files/file-builder';
 import LocalProvider from '../classes/local-provider';
 
 export default {
@@ -33,7 +33,7 @@ export default {
   },
 
   created() {
-    this.open(FolderMetadata.create(this.value));
+    this.open(FileBuilder.folder(this.value));
   },
 
   methods: {
@@ -59,7 +59,7 @@ export default {
 
         LocalProvider.instance().list(current).then(entries => {
           if (current.key !== '') {
-            const parent = FolderMetadata.create(FilePath.create(current.path).directory);
+            const parent = FileBuilder.folder(FilePath.create(current.path).directory);
             parent.name = '../ (parent)';
             entries.splice(0, 0, parent);
           }

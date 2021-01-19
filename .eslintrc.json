@@ -1,0 +1,82 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:vue/essential",
+    "@vue/typescript"
+  ],
+  "parserOptions": {
+    "parser": "babel-eslint"
+  },
+  "overrides": [
+    {
+      "files": "./src/**/*.ts",
+      "excludedFiles": "./src/**/*.d.ts",
+      "parserOptions": {
+        "parser": "@typescript-eslint/parser"
+      },
+      // https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin
+      "rules": {
+        "@typescript-eslint/array-type": 1,
+        "@typescript-eslint/explicit-function-return-type": 1,
+        "@typescript-eslint/brace-style": 1,
+        "@typescript-eslint/comma-spacing": 1,
+        "@typescript-eslint/no-extra-parens": 1,
+        "@typescript-eslint/indent": [
+          "error",
+          2,
+          {
+            "SwitchCase": 1
+          }
+        ],
+        "@typescript-eslint/keyword-spacing": 1,
+        "@typescript-eslint/no-unused-vars": 1
+      }
+    },
+    {
+      "files": "./src/**/*.d.ts",
+      "parserOptions": {
+        "parser": "@typescript-eslint/parser"
+      },
+      "rules": {
+        "no-unused-vars": 0
+      }
+    }
+  ],
+  "rules": {
+    "array-bracket-spacing": 1,
+    "brace-style": 1,
+    "comma-spacing": 1,
+    "eqeqeq": 1,
+    "indent": [
+      "error",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
+    "keyword-spacing": 1,
+    "no-mixed-spaces-and-tabs": 1,
+    "no-undef": 1,
+    "no-unused-vars": 1,
+    "no-var": 1,
+    "object-shorthand": [
+      1,
+      "methods"
+    ],
+    "prefer-arrow-callback": 1,
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "semi": [
+      "error",
+      "always"
+    ],
+    "space-before-blocks": 1,
+    "space-infix-ops": 1
+  }
+}

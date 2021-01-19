@@ -1,28 +1,24 @@
+import { IDBPCursorWithValue } from 'idb';
 import Database from './database';
 
-export default class GenericStore {
-  /**
-   * Creates a new GenericStore
-   * @param {string} store - The store name 
-   */
-  constructor(store) {
+export default class Store<T> {
+  store: string;
+
+  constructor(store: string) {
     this.store = store;
   }
 
   /**
    * Clears the file store
-   * @returns {Promise.<void>>} Promise<void>
    */
-  async clear() {
+  async clear(): Promise<void> {
     await Database.use(idb => idb.clear(this.store));
   }
 
   /**
    * Deletes a file entry
-   * @param {Array.<string>} keys - The keys
-   * @returns {Promise.<void>>} Promise<void>
    */
-  async deleteAll(keys) {
+  async deleteAll(keys: string[]): Promise<void> {
     await Database.use(async idb => {
       const tx = idb.transaction(this.store, 'readwrite');
       const transactions = keys.map(key => tx.store.delete(key));
@@ -33,27 +29,24 @@ export default class GenericStore {
 
   /**
    * Returns a list of keys
-   * @returns {Promise.<Array.<string>>} Promise<string[]>
    */
-  async keys() {
+  async keys(): Promise<string[]> {
     return await Database.use(idb => idb.getAllKeys(this.store));
   }
 
   /**
    * Returns a list of objects
-   * @param {function(string, any):boolean} [predicate]
-   * @returns {Promise.<Array.<any>>} Promise<any[]>
    */
-  async list(predicate) {
+  async list(predicate?: (key: string, value: any) => boolean): Promise<T[]> {
     if (predicate === undefined) {
       return await Database.use(idb => idb.getAll(this.store));
     }
 
     return await Database.use(async idb => {
-      let cursor = await idb.transaction(this.store).store.openCursor();
-      const items = [];
+      let cursor: IDBPCursorWithValue | null = await idb.transaction(this.store).store.openCursor();
+      const items: T[] = [];
       while (cursor) {
-        if (predicate(cursor.key, cursor.value)) {
+        if (predicate(cursor.key as string, cursor.value)) {
           items.push(cursor.value);
         }
         cursor = await cursor.continue();
@@ -64,22 +57,18 @@ export default class GenericStore {
 
   /**
    * Returns a file metadata object
-   * @param {string} key - The metadata.key
-   * @returns {Promise.<any>} Promise<any>
    */
-  async read(key) {
+  async read(key: string): Promise<T> {
     return await Database.use(idb => idb.get(this.store, key));
   }
 
   /**
    * Writes a list of  items
-   * @param {Array.<any>} items - The items to write
-   * @returns {Promise.<void>} Promise<void>
    */
-  async writeAll(items) {
+  async writeAll(items: T[]): Promise<void> {
     await Database.use(async idb => {
       const tx = idb.transaction(this.store, 'readwrite');
-      const transactions = items.map(item => tx.store.put(item));
+      const transactions: Promise<any>[] = items.map(item => tx.store.put(item));
       transactions.push(tx.done);
       await Promise.all(transactions);
     });

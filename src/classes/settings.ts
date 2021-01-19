@@ -3,42 +3,48 @@ import Storage from './data/storage';
 
 const storage = new Storage();
 
-class StoredProperty {
-  constructor(name, defaultValue) {
+class StoredProperty<T> {
+  private name: string;
+  private defaultValue?: T;
+
+  constructor(name: string, defaultValue?: T) {
     this.name = name;
     this.defaultValue = defaultValue;
   }
 
-  /**
-   * @returns {Promise.<any>}
-   */
-  async get() {
-    const value = await storage.settings.get(this.name);
+  async get(): Promise<T | undefined> {
+    const value = await storage.settings.get(this.name) as T;
     return value !== undefined ? value : this.defaultValue;
   }
 
-  /**
-   * @param {any} [value]
-   * @returns {Promise.<void>}
-   */
-  async set(value) {
+  async set(value: T): Promise<void> {
     await storage.settings.set(this.name, value);
   }
 
-  /**
-   * @returns {Promise.<void>}
-   */
-  async delete() {
+  async delete(): Promise<void> {
     await storage.settings.delete(this.name);
   }
 }
 
-let settings = null;
+let settings: Settings | null = null;
 
 export default class Settings {
-  /**
-   * Constructor
-   */
+  autoName: StoredProperty<boolean>;
+  autoSave: StoredProperty<boolean>;
+  autoSync: StoredProperty<boolean>;
+  autoFocus: StoredProperty<boolean>;
+  foregroundSync: StoredProperty<boolean>;
+  storageService: StoredProperty<string>;
+  oauth: StoredProperty<OAuthToken>;
+  pkce: StoredProperty<PkceParameters>;
+  name: StoredProperty<string>;
+  email: StoredProperty<string>;
+  avatar: StoredProperty<string>;
+  cursor: StoredProperty<string>;
+  sortBy: StoredProperty<string>;
+  theme: StoredProperty<string>;
+  textEditor: StoredProperty<string>;
+
   constructor() {
     this.autoName = new StoredProperty(Constants.Settings.AutoName, true);
     this.autoSave = new StoredProperty(Constants.Settings.AutoSave, true);
@@ -57,10 +63,7 @@ export default class Settings {
     this.textEditor = new StoredProperty(Constants.Settings.TextEditor, Constants.TextEditor.Plain);
   }
 
-  /**
-   * @returns {Settings}
-   */
-  static instance() {
+  static instance(): Settings {
     if (settings === null) {
       settings = new Settings();
     }

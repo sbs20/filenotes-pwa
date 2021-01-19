@@ -115,7 +115,7 @@ export default {
           if (enabled) {
             this.syncStart();
           } else {
-            context.sync.isRequired().then(required => {
+            context.sync.required().then(required => {
               const msg = required ? 'Sync required' : 'Up to date';
               log.info(msg);
               this.openSnackbar(msg);
@@ -232,10 +232,10 @@ export default {
       const sync = context.sync;
       sync.on(Constants.Event.Sync.Progress, this.updateProgress);
       sync.execute().then(() => {
-        sync.off(Constants.Event.Sync.Progress);
+        sync.off(Constants.Event.Sync.Progress, this.updateProgress);
         this.syncFinish(true);
       }).catch(reason => {
-        sync.off(Constants.Event.Sync.Progress);
+        sync.off(Constants.Event.Sync.Progress, this.updateProgress);
         const msg = `Sync error: ${reason}`;
         log.error(msg);
         this.syncFinish(false);

@@ -38,7 +38,7 @@
 import Constants from '../classes/constants';
 import LocalProvider from '../classes/local-provider';
 import FilePath from '../classes/files/file-path';
-import FolderMetadata from '../classes/files/folder-metadata';
+import FileBuilder from '../classes/files/file-builder';
 import Logger from '../classes/logger';
 import MetadataComparator from '../classes/metadata-comparator';
 import Settings from '../classes/settings';
@@ -150,7 +150,7 @@ export default {
             const sorter = MetadataComparator.get(sortBy);
             entries.sort(sorter);
             if (this.current.key !== '') {
-              const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
+              const parent = FileBuilder.folder(FilePath.create(this.current.path).directory);
               parent.name = Constants.ParentDirectory;
               entries.splice(0, 0, parent);
             }
@@ -282,7 +282,7 @@ export default {
     },
 
     up() {
-      const parent = FolderMetadata.create(FilePath.create(this.current.path).directory);
+      const parent = FileBuilder.folder(FilePath.create(this.current.path).directory);
       this.open(parent);
     },
   }

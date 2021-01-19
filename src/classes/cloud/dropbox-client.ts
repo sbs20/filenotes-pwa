@@ -1,7 +1,7 @@
 import Convert from '../utils/convert';
 import FieldAdapter from '../utils/field-adapter';
 import extend from '../utils/extend';
-import { Dropbox } from 'dropbox';
+import { Dropbox, DropboxAuth, files } from 'dropbox';
 import { sha256Sync } from '../utils/sha256';
 
 const LONG_POLL_TIMEOUT = 30;
@@ -20,29 +20,34 @@ const MAP = {
 };
 
 export default class DropboxClient {
+  private client: Dropbox | any;
+  private options: DropboxClientOptions;
+  private polling: boolean;
+  private adapter: FieldAdapter<Metadata>;
+  private abortController: AbortController;
+  protected connected: boolean;
+  protected account: RemoteAccount;
+  cursor?: string;
+
   /**
    * Constructor
    * @param {ConfigureOptions} options - Options
    */
-  constructor(options) {
-    this.client = null;
-
-    /** @type {ConfigureOptions} */
+  constructor(options: DropboxClientOptions) {
     this.options = options;
-
-    /** @type {string} */
-    this.cursor = null;
     this.polling = false;
-    this.adapter = new FieldAdapter(MAP);
+    this.adapter = new FieldAdapter<Metadata>(MAP);
     this.connected = false;
     this.abortController = new AbortController();
-
-    /** @type {RemoteAccount} */
-    this.account = {};
+    this.account = {
+      avatar: '',
+      name: '',
+      email: ''
+    };
 
     this.client = new Dropbox({
       clientId: this.options.clientId,
-      fetch: (url, options) => {
+      fetch: (url: string, options: any):Promise<Response> => {
         this.abortController = new AbortController();
         options.signal = this.abortController.signal;
         return fetch(url, options);
@@ -50,29 +55,31 @@ export default class DropboxClient {
     });
   }
 
-  abort() {
+  abort():void {
     this.abortController.abort();
     this.polling = false;
   }
 
-  /**
-   * @param {string} value
-   */
-  set refreshToken(value) {
-    this.client.auth.setRefreshToken(value);
+  private get auth(): DropboxAuth | any {
+    const client = this.client as any;
+    return client.auth;
+  }
+
+  protected set refreshToken(value: string) {
+    this.auth.setRefreshToken(value);
   }
 
   /**
    * Returns the authentication parameters
-   * @returns {PkceParameters} The authentication parameters
    */
-  pkceStart() {
-    const url = this.client.auth.getAuthenticationUrl(
-      this.options.authUrl, null, 'code', 'offline', null, 'none', true);
+  protected pkceStart(): PkceParameters {
+    const auth = this.auth as any;
+    const url = this.auth.getAuthenticationUrl(
+      this.options.authUrl, undefined, 'code', 'offline', undefined, 'none', true);
     return {
-      challenge: this.client.auth.codeChallenge,
+      challenge: auth.codeChallenge,
       url: url,
-      verifier: this.client.auth.codeVerifier
+      verifier: auth.codeVerifier
     };
   }
 
@@ -81,16 +88,15 @@ export default class DropboxClient {
    * @param {PkceParameters} params The PKCE parameters
    * @returns {Promise.<OAuthToken>} The access token
    */
-  async pkceFinish(params) {
-    this.client.auth.codeChallenge = params.challenge;
-    this.client.auth.codeVerifier = params.verifier;
+  protected async pkceFinish(params: PkceParameters): Promise<OAuthToken | undefined> {
+    const auth = this.auth as any;
+    auth.codeChallenge = params.challenge;
+    auth.codeVerifier = params.verifier;
     if (params.code !== undefined) {
       delete this.account.oauth;
 
       try {
-        const response = await this.client.auth.getAccessTokenFromCode(
-          this.options.authUrl, params.code);
-        /** @type {OAuthToken} */
+        const response = await this.auth.getAccessTokenFromCode(this.options.authUrl, params.code);
         const token = response.result;
         this.refreshToken = token.refresh_token;
         return token;
@@ -103,10 +109,8 @@ export default class DropboxClient {
 
   /**
    * Attempts to connect and returns whether or not it was successful
-   * @param {ConfigureOptions} [options] - Options 
-   * @returns {Promise.<bool>}
    */
-  async connect() {
+  protected async connect(): Promise<boolean> {
     try {
       const response = await this.client.usersGetCurrentAccount();
       this.connected = true;
@@ -117,7 +121,11 @@ export default class DropboxClient {
       this.account.avatar = account.profile_photo_url;
 
     } catch (error) {
-      this.account = {};
+      this.account = {
+        avatar: '',
+        name: '',
+        email: ''
+      };
       this.connected = false;
     }
     return this.connected;
@@ -125,10 +133,8 @@ export default class DropboxClient {
 
   /**
    * Attempts to connect
-   * @param {OAuthToken} oauth
-   * @returns {Promise.<boolean>} Promise<boolean>
    */
-  async startFromToken(oauth) {
+  protected async startFromToken(oauth: OAuthToken): Promise<boolean> {
     if (oauth && oauth.refresh_token) {
       this.refreshToken = oauth.refresh_token;
       this.account.oauth = oauth;
@@ -144,27 +150,28 @@ export default class DropboxClient {
    * @param {string} path
    * @returns {Promise.<Metadata>}
    */
-  async delete(path) {
+  async delete(path: string): Promise<Metadata | undefined> {
     try {
       const response = await this.client.filesDeleteV2({ path: path });  
-      return this.adapter.apply(response.result.metadata);
+      return this.adapter.apply(response.result.metadata) as Metadata;
     } catch (exception) {
       // If it's already been deleted we can ignore it, otherwise, throw
       if (exception.error.indexOf('path_lookup/not_found') === -1) {
         throw exception;
       }
     }
+
+    return undefined;
   }
 
   /**
    * Returns a list of file metadata objects
-   * @returns {Promise.<Array.<Metadata>>}
    */
-  async list() {
-    const files = [];
+  async list(): Promise<Metadata[]> {
+    const files: Metadata[] = [];
     let hasMore = true;
 
-    const handleResult = (result) => {
+    const handleResult = (result: files.ListFolderResult):void => {
       result.entries
         .map(metadata => this.adapter.apply(metadata))
         .forEach(file => files.push(file));
@@ -183,7 +190,7 @@ export default class DropboxClient {
     }
 
     while (hasMore) {
-      const response = await this.client.filesListFolderContinue({ cursor: this.cursor });
+      const response = await this.client.filesListFolderContinue({ cursor: this.cursor as string });
       handleResult(response.result);
     }
 
@@ -192,9 +199,8 @@ export default class DropboxClient {
 
   /**
    * Returns a list of file metadata objects without updating the cursor
-   * @returns {Promise.<Array.<Metadata>>}
    */
-  async peek() {
+  async peek(): Promise<Metadata[]> {
     const cursor = this.cursor;
     const list = await this.list();
     this.cursor = cursor;
@@ -203,9 +209,8 @@ export default class DropboxClient {
 
   /**
    * Returns when there's an update
-   * @returns {Promise.<boolean>} changes
    */
-  async poll() {
+  async poll(): Promise<boolean> {
     if (this.polling) {
       throw new Error('Already polling');
     }
@@ -213,7 +218,7 @@ export default class DropboxClient {
     try {
       this.polling = true;
       const response = await this.client.filesListFolderLongpoll({
-        cursor: this.cursor,
+        cursor: this.cursor as string,
         timeout: LONG_POLL_TIMEOUT
       });
 
@@ -230,9 +235,8 @@ export default class DropboxClient {
 
   /**
    * Creates a directory
-   * @param {string} path
    */
-  async mkdir(path) {
+  async mkdir(path: string): Promise<void> {
     try {
       const response = await this.client.filesCreateFolderV2({ path: path });
       return response.result;
@@ -246,10 +250,8 @@ export default class DropboxClient {
 
   /**
    * Returns the file data as an ArrayBuffer
-   * @param {string} path
-   * @returns {Promise.<ArrayBuffer>} 
    */
-  async read(path) {
+  async read(path: string): Promise<ArrayBuffer> {
     const response = await this.client.filesDownload({ path: path });
     const buffer = await Convert.blobToArrayBuffer(response.result.fileBlob);
     return buffer;
@@ -257,11 +259,8 @@ export default class DropboxClient {
 
   /**
    * Writes a file to dropbox
-   * @param {Metadata} metadata 
-   * @param {ArrayBuffer} buffer
-   * @returns {Promise.<Metadata>}
    */
-  async write(metadata, buffer) {
+  async write(metadata: Metadata, buffer: ArrayBuffer): Promise<Metadata> {
     /** @type {import('dropbox').files.CommitInfo} */
     const mode = metadata.revision
       ? { '.tag': 'update', update: metadata.revision }
@@ -280,14 +279,11 @@ export default class DropboxClient {
 
   /**
    * Writes a file to dropbox
-   * @param {import('dropbox').files.CommitInfo} commitInfo 
-   * @returns {Promise.<Metadata>}
    */
-  async _write(commitInfo) {
+  private async _write(commitInfo: files.CommitInfo | any): Promise<Metadata> {
     const CHUNKING_THRESHOLD = 2 * 1024 * 1024;
 
-    /** @type {ArrayBuffer} */
-    const buffer = commitInfo.contents;
+    const buffer = commitInfo.contents as ArrayBuffer;
     
     if (buffer.byteLength < CHUNKING_THRESHOLD) {
       const response = await this.client.filesUpload(commitInfo);
@@ -305,7 +301,7 @@ export default class DropboxClient {
           const cursor = { session_id: sessionId, offset: offset };
           await this.client.filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
         } else {
-          delete commitInfo.contents;
+          commitInfo.contents = {};
           const response = await this.client.filesUploadSessionFinish({
             cursor: { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength },
             commit: commitInfo,
@@ -314,6 +310,8 @@ export default class DropboxClient {
         }
       }
     }
+
+    throw new Error('Should not get here');
   }
 
   /**
@@ -321,16 +319,16 @@ export default class DropboxClient {
    * @param {BufferLike} buffer - The byte array
    * @returns {string} - Hex encoded hash
    */
-  hash(buffer) {
+  hash(buffer: BufferLike): string {
     const BLOCK_SIZE = 4 * 1024 * 1024;
     if (!Buffer.isBuffer(buffer)) {
       buffer = Buffer.from(buffer);
     }
 
-    /** @type {Array.<ArrayBuffer>} */
-    const digests = [];
-    for (let offset = 0, length = 0; offset < buffer.length; offset += length) {
-      length = Math.min(buffer.length - offset, BLOCK_SIZE);
+    const digests: ArrayBuffer[] = [];
+    const bufferLength = (buffer as Buffer).length;
+    for (let offset = 0, length = 0; offset < bufferLength; offset += length) {
+      length = Math.min(bufferLength - offset, BLOCK_SIZE);
       const block = buffer.slice(offset, offset + length);
       const digest = sha256Sync(block);
       digests.push(digest);
