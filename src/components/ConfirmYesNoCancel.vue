@@ -8,7 +8,7 @@
         <v-spacer></v-spacer>
         <v-btn text @click.prevent="cancel">Cancel</v-btn>
         <v-btn color="error" text @click.prevent="no">No</v-btn>
-        <v-btn color="primary" text @click.prevent="yes">yes</v-btn>
+        <v-btn color="primary" text @click.prevent="yes">Yes</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
