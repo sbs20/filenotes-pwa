@@ -36,8 +36,8 @@ npx vue-pwa-asset-generator -a ./public/img/filenotes-512.png -o ./var/icons/
 * Fonts:
   * System fonts: https://www.granneman.com/webdev/coding/css/fonts-and-formatting/default-fonts
   * Font shifting, FOIT and FOUT: https://web.dev/preload-optional-fonts/
-  * Object url: https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#Example_Using_object_URLs_to_display_images
-  * Dropbox, using revisions: Dropbox sync: https://www.dropboxforum.com/t5/Discuss-Dropbox-Developer-API/Handling-of-local-and-remote-rev-differences/td-p/397757
+* Object url: https://developer.mozilla.org/en-US/docs/Web/API/File/Using_files_from_web_applications#Example_Using_object_URLs_to_display_images
+* Dropbox, using revisions: Dropbox sync: https://www.dropboxforum.com/t5/Discuss-Dropbox-Developer-API/Handling-of-local-and-remote-rev-differences/td-p/397757
 * Vue 2 -> 3 and Typescript: https://johnpapa.net/vue2-to-vue3/
 
 ## Things learnt
