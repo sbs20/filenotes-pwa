@@ -7,6 +7,7 @@
     </template>
     <image-editor v-if="type === 'image'" v-model="buffer"></image-editor>
     <audio-editor v-if="type === 'audio'" v-model="buffer"></audio-editor>
+    <todo-txt-editor v-if="type === 'todotxt'" v-model="buffer" @input="update"></todo-txt-editor>
     <div v-if="type === 'unknown'">Unknown file type</div>
   </div>
 </template>
@@ -20,6 +21,7 @@ import ImageEditor from './editors/ImageEditor';
 import HighlightTextEditor from './editors/HighlightTextEditor';
 import PlainTextEditor from './editors/PlainTextEditor';
 import PrismTextEditor from './editors/PrismTextEditor';
+import TodoTxtEditor from './editors/TodoTxtEditor';
 
 export default {
   name: 'FileEditor',
@@ -30,10 +32,11 @@ export default {
 
   components: {
     AudioEditor,
+    HighlightTextEditor,
     ImageEditor,
     PlainTextEditor,
     PrismTextEditor,
-    HighlightTextEditor
+    TodoTxtEditor
   },
 
   data() {
