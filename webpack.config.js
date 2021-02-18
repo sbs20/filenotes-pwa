@@ -15,5 +15,10 @@ module.exports = {
     loaders: {
       scss: 'style!css!sass'
     }
-  }
+  },
+
+  // Stop linting errors on symlinked (npm link) packages
+  resolve: {
+    symlinks: false,
+  },
 };

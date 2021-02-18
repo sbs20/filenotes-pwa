@@ -77,6 +77,9 @@ export default class FilePath {
       case 'mp3':
         return 'audio';
 
+      case 'todotxt':
+        return 'todotxt';
+
       default:
         return 'unknown';
     }
