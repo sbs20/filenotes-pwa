@@ -103,7 +103,6 @@ export default {
 
     update() {
       this.refresh();
-      console.log(this.taskList.stringify());
       this.$emit('input', Buffer.from(this.taskList.stringify()));
     }
   }
