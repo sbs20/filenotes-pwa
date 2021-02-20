@@ -78,6 +78,8 @@ export default class FilePath {
         return 'audio';
 
       case 'todotxt':
+      case 'todo':
+      case 'td':
         return 'todotxt';
 
       default:
