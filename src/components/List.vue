@@ -168,7 +168,7 @@ export default {
             const dir = `${this.current.path}/${value}`;
             fs.get(dir).then(existing => {
               if (existing !== undefined) {
-                console.log(`Directory '${dir}' already exists`);
+                log.debug(`Directory '${dir}' already exists`);
               } else {
                 fs.mkdir(dir).then(() => {
                   this.syncAuto();
@@ -206,9 +206,9 @@ export default {
           const destination = `${this.moveDialog.folder}/${this.moveDialog.entry.name}`;
           fs.get(destination).then(existing => {
             if (existing !== undefined) {
-              console.log(`Destination '${destination}' already exists`);
+              log.debug(`Destination '${destination}' already exists`);
             } else {
-              console.log(`move ${source} to ${destination}`);
+              log.debug(`move ${source} to ${destination}`);
               fs.move(source, destination).then(() => {
                 this.syncAuto();
                 this.refresh();
@@ -259,7 +259,7 @@ export default {
           const destination = `${this.current.path}/${value}`;
           fs.get(destination).then(existing => {
             if (existing !== undefined) {
-              console.log(`Destination '${destination}' already exists`);
+              log.debug(`Destination '${destination}' already exists`);
             } else {
               fs.move(source, destination).then(() => {
                 this.syncAuto();

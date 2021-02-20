@@ -366,7 +366,7 @@ export default {
           break;
 
         default:
-          console.log(value, event);
+          log.debug(value, event);
 
       }
     },
