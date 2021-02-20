@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { TaskList } from 'todotxt-ts';
+import { TaskList } from 'todo-txt-ts';
 import TodoTxtTask from './TodoTxtTask.vue';
 import Constants from '@/classes/constants';
 
@@ -89,9 +89,11 @@ export default {
     },
 
     refresh() {
-      this.taskList.items.sort((t1, t2) => {
-        return t1.stringify().localeCompare(t2.stringify());
-      });
+      this.taskList.sort(
+        'isComplete',
+        'priority',
+        { field: 'creationDate', direction: 'desc' },
+        'body');
     },
 
     remove(task) {

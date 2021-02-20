@@ -1,12 +1,12 @@
 <template>
-  <div class="d-flex flex-row" @click="$emit('open', task)">
+  <div class="d-flex flex-row">
     <div>
-      <v-checkbox @change="complete" v-model="task.isComplete" />
+      <v-checkbox v-on:click.stop @change="complete" v-model="task.isComplete" />
     </div>
     <div class="text-h5 pl-2" :style="{ color: priorityColor() }">
       ({{ task.priority }})
     </div>
-    <div class="pl-2" :style="{ 'text-decoration': task.isComplete ? 'line-through' : ''}">
+    <div class="task-body pl-2" @click="$emit('open', task)" :style="{ 'text-decoration': task.isComplete ? 'line-through' : ''}">
       <div class="text-h6">
         {{ task.body }}
         <span class="secondary">
@@ -19,7 +19,8 @@
           {{ Object.keys(task.fields).map(f => `${f}:${task.fields[f]}`).join(' ') }}
         </span>
       </div>
-      <div class="text-caption">Created: {{ date(task.creationDate) }}</div>
+      <div v-if="!task.isComplete && task.creationDate" class="text-caption">Created: {{ date(task.creationDate) }}</div>
+      <div v-if="task.isComplete && task.completionDate" class="text-caption">Completed: {{ date(task.completionDate) }}</div>
     </div>
     <div class="ml-auto"><v-icon @click="$emit('remove', task)">mdi-delete</v-icon></div>
   </div>  
@@ -73,6 +74,10 @@ export default {
 </script>
 
 <style scoped>
+.task-body {
+  cursor: pointer;
+}
+
 .v-input--selection-controls {
   margin-top: 0;
 }
