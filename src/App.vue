@@ -32,6 +32,7 @@
 <script>
 import Constants from './classes/constants';
 import Context from './classes/context';
+import EventBus from './classes/event-bus';
 import Logger from './classes/logger';
 import Poller from './classes/cloud/poller';
 import Settings from './classes/settings';
@@ -42,6 +43,7 @@ import Navigation from './components/Navigation';
 const log = Logger.get('App');
 const settings = Settings.instance();
 const context = Context.instance();
+const eventBus = EventBus.instance();
 const poller = new Poller(window, context, 500);
 
 export default {
@@ -72,10 +74,11 @@ export default {
   },
 
   created() {
-    this.$root.$on(Constants.Event.App.Reload, this.start);
-    this.$root.$on(Constants.Event.Snackbar, this.openSnackbar);
-    this.$root.$on(Constants.Event.Sync.Start, this.syncStart);
-    this.$root.$on(Constants.Event.Sync.Listen, this.syncListen);
+    eventBus.on(Constants.Event.App.Reload, this.start);
+    eventBus.on(Constants.Event.Snackbar, this.openSnackbar);
+    eventBus.on(Constants.Event.Sync.Start, this.syncStart);
+    eventBus.on(Constants.Event.Sync.Listen, this.syncListen);
+
     document.addEventListener('isUpdateAvailable', (available) => {
       if (available) {
         const msg = 'New version available. Refresh to install';
@@ -88,10 +91,10 @@ export default {
   },
 
   destroyed() {
-    this.$root.$off(Constants.Event.App.Reload, this.start);
-    this.$root.$off(Constants.Event.Snackbar, this.openSnackbar);
-    this.$root.$off(Constants.Event.Sync.Start, this.syncStart);
-    this.$root.$off(Constants.Event.Sync.Listen, this.syncListen);
+    eventBus.off(Constants.Event.App.Reload, this.start);
+    eventBus.off(Constants.Event.Snackbar, this.openSnackbar);
+    eventBus.off(Constants.Event.Sync.Start, this.syncStart);
+    eventBus.off(Constants.Event.Sync.Listen, this.syncListen);
   },
 
   methods: {
@@ -183,13 +186,13 @@ export default {
     syncFinish(success) {
       this.progress.show = false;
       this.progress.value = 0;
-      this.$root.$emit(Constants.Event.Sync.Finish);
+      eventBus.emit(Constants.Event.Sync.Finish);
       this.progress.status = success ? 'green' : 'red';
       setTimeout(() => this.progress.status = '', 2000);
 
       settings.autoSync.get().then(enabled => {
         if (enabled) {
-          this.$root.$emit(Constants.Event.Sync.Listen);
+          eventBus.emit(Constants.Event.Sync.Listen);
         }
       });
     },

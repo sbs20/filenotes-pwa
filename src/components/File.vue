@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import EventBus from '@/classes/event-bus';
 import Constants from '../classes/constants';
 import FileBuilder from '../classes/files/file-builder';
 import FilePath from '../classes/files/file-path';
@@ -229,7 +230,7 @@ export default {
 
     notify(msg) {
       log.info(msg);
-      this.$root.$emit(Constants.Event.Snackbar, msg);
+      EventBus.instance().emit(Constants.Event.Snackbar, msg);
     },
 
     /**
@@ -298,7 +299,7 @@ export default {
 
     sync() {
       if (this.autoSync && this.savedHash !== this.originalHash) {
-        this.$root.$emit(Constants.Event.Sync.Start);
+        EventBus.instance().emit(Constants.Event.Sync.Start);
       }
     }
   }
