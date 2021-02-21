@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="edit.show" aria-role="dialog" fullscreen v-on:keydown="_onKeys" aria-modal>
+    <v-dialog v-model="edit.show" v-on:keydown="_onKeys" aria-role="dialog"  aria-modal>
       <v-card>
         <v-card-title>Edit task</v-card-title>
         <v-card-text>
@@ -24,6 +24,7 @@
 import { TaskList } from 'todo-txt-ts';
 import TodoTxtTask from './TodoTxtTask.vue';
 import Constants from '@/classes/constants';
+import Application from '@/classes/application';
 
 export default {
   components: {TodoTxtTask},
@@ -54,8 +55,12 @@ export default {
   methods: {
     _onKeys(event) {
       if (event.keyCode === Constants.Keys.escape) {
-        event.preventDefault();
-        event.stopPropagation();
+        // We need to set this to false in the future otherwise the
+        // document handlers will see it immediately - even with
+        // $nextTick()
+        window.setTimeout(() => {
+          Application.isDialogActive = false;
+        }, 100);
       }
     },
 
@@ -65,12 +70,14 @@ export default {
         task: null,
         text: null
       };
+      Application.isDialogActive = this.edit.show;
     },
 
     editOk() {
       this.edit.task.load(this.edit.text);
       this.editCancel();
       this.update();
+      Application.isDialogActive = this.edit.show;
     },
 
     editOpen(task) {
@@ -79,6 +86,7 @@ export default {
         task: task,
         text: task.stringify()
       };
+      Application.isDialogActive = this.edit.show;
     },
 
     load() {
