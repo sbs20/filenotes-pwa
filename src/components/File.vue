@@ -24,6 +24,7 @@ import FilePath from '../classes/files/file-path';
 import LocalProvider from '../classes/local-provider';
 import Logger from '../classes/logger';
 import Settings from '../classes/settings';
+import Application from '@/classes/application';
 
 import ConfirmYesNoCancel from './ConfirmYesNoCancel';
 import FileEditor from './FileEditor';
@@ -119,7 +120,7 @@ export default {
 
   methods: {
     _onKeys(event) {
-      if (event.keyCode === Constants.Keys.escape) {
+      if (event.keyCode === Constants.Keys.escape && !Application.isDialogActive) {
         event.preventDefault();
         event.stopPropagation();
         this.close();
