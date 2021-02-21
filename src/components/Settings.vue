@@ -165,6 +165,7 @@ import SettingsSection from './SettingsSection';
 import SettingsItem from './SettingsItem';
 import Constants from '../classes/constants';
 import Context from '../classes/context';
+import EventBus from '../classes/event-bus';
 
 const log = Logger.get('Settings');
 const settings = Settings.instance();
@@ -259,7 +260,7 @@ export default {
 
     notify(msg) {
       log.info(msg);
-      this.$root.$emit(Constants.Event.Snackbar, msg);
+      EventBus.instance().emit(Constants.Event.Snackbar, msg);
     },
 
     close() {
@@ -372,7 +373,7 @@ export default {
     },
 
     appReload() {
-      this.$root.$emit(Constants.Event.App.Reload);
+      EventBus.instance().emit(Constants.Event.App.Reload);
     }
   }
 };

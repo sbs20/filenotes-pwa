@@ -42,6 +42,7 @@ import FileBuilder from '../classes/files/file-builder';
 import Logger from '../classes/logger';
 import MetadataComparator from '../classes/metadata-comparator';
 import Settings from '../classes/settings';
+import EventBus from '../classes/event-bus';
 
 import Folders from './Folders';
 import ListItem from './ListItem';
@@ -77,12 +78,12 @@ export default {
 
   created() {
     document.addEventListener('keydown', this._onKeys);
-    this.$root.$on(Constants.Event.Sync.Finish, this.refresh);
+    EventBus.instance().on(Constants.Event.Sync.Finish, this.refresh);
   },
 
   destroyed() {
     document.removeEventListener('keydown', this._onKeys);
-    this.$root.$off(Constants.Event.Sync.Finish, this.refresh);
+    EventBus.instance().off(Constants.Event.Sync.Finish, this.refresh);
   },
 
   data() {
@@ -272,7 +273,7 @@ export default {
     },
 
     sync() {
-      this.$root.$emit(Constants.Event.Sync.Start);
+      EventBus.instance().emit(Constants.Event.Sync.Start);
     },
 
     syncAuto() {
