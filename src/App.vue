@@ -13,7 +13,6 @@
       </div>
 
       <v-main>
-        <install></install>
         <v-container fluid>
           <transition name="fade" mode="out-in" :duration="150">
             <router-view></router-view>
@@ -37,7 +36,6 @@ import Logger from './classes/logger';
 import Poller from './classes/cloud/poller';
 import Settings from './classes/settings';
 
-import Install from './components/Install';
 import Navigation from './components/Navigation';
 
 const log = Logger.get('App');
@@ -50,7 +48,6 @@ export default {
   name: 'App',
 
   components: {
-    Install,
     Navigation
   },
 
