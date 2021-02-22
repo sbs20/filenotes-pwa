@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-dialog v-model="edit.show" v-on:keydown="_onKeys" aria-role="dialog"  aria-modal>
+    <v-dialog v-model="edit.show" v-on:keydown="_onKeys" fullscreen aria-role="dialog"  aria-modal>
       <v-card>
         <v-card-title>Edit task</v-card-title>
         <v-card-text>
