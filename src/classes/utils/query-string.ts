@@ -1,5 +1,5 @@
 export default {
-  parse(search: string): Dictionary<String | null | (string | null)[]> {
+  parse(search: string): IDictionary<String | null | (string | null)[]> {
     const obj = Object.create(null);
 
     if (typeof search !== 'string') {

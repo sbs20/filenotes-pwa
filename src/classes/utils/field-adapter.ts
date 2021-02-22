@@ -1,5 +1,5 @@
 
-function _apply(mapping: Dictionary<string>, input: any): any {
+function _apply(mapping: IDictionary<string>, input: any): any {
   return Object.keys(input).reduce<any>((output, key) => {
     if (key in mapping) {
       output[mapping[key]] = input[key];
@@ -9,10 +9,10 @@ function _apply(mapping: Dictionary<string>, input: any): any {
 }
 
 export default class FieldAdapter<T> {
-  from: Dictionary<string>;
-  to: Dictionary<string>;
+  from: IDictionary<string>;
+  to: IDictionary<string>;
 
-  constructor(mapping: Dictionary<string>) {
+  constructor(mapping: IDictionary<string>) {
     this.to = mapping;
     this.from = Object.keys(this.to).reduce<any>((acc, key) => {
       acc[this.to[key]] = key;

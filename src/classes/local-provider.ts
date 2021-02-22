@@ -11,7 +11,7 @@ export default class LocalProvider {
   /**
    * Gets an available filename in a given directory
    */
-  async new(directory: Metadata, name: string): Promise<string> {
+  async new(directory: IMetadata, name: string): Promise<string> {
     const existing = await this.list(directory, false);
     let candidate = name;
     let index = 0;
@@ -26,7 +26,7 @@ export default class LocalProvider {
   /**
    * Returns a metadata object
    */
-  async get(path: string): Promise<Metadata> {
+  async get(path: string): Promise<IMetadata> {
     if (path === '') {
       return FileBuilder.folder('');
     }
@@ -45,7 +45,7 @@ export default class LocalProvider {
   /**
    * Returns a list of file metadata objects
    */
-  async list(directory?: Metadata, recursive?: boolean): Promise<Metadata[]> {
+  async list(directory?: IMetadata, recursive?: boolean): Promise<IMetadata[]> {
     if (directory) {
       return await storage.fs.metadata.list((fileKey) => {
         const dirKey = directory.key + '/';
@@ -59,14 +59,14 @@ export default class LocalProvider {
   /**
    * Returns a list of file metadata objects
    */
-  async search(query: string | RegExp, directory?: Metadata, recursive?: boolean): Promise<Metadata[]> {
+  async search(query: string | RegExp, directory?: IMetadata, recursive?: boolean): Promise<IMetadata[]> {
     if (typeof query === 'string') {
       query = new RegExp(query, 'i');
     }
 
-    const index: Dictionary<Metadata> = {};
-    const searchable: Dictionary<boolean> = {};
-    const results: Metadata[] = [];
+    const index: IDictionary<IMetadata> = {};
+    const searchable: IDictionary<boolean> = {};
+    const results: IMetadata[] = [];
     (await this.list(directory, recursive)).forEach(m => {
       index[m.key] = m;
       if (m.name.match(query)) {
@@ -100,7 +100,7 @@ export default class LocalProvider {
   /**
    * Writes file data to disk
    */
-  async write(metadata: Metadata, data: ArrayBuffer): Promise<boolean> {
+  async write(metadata: IMetadata, data: ArrayBuffer): Promise<boolean> {
     if (metadata === undefined) {
       throw new Error('Metadata is undefined');
     }

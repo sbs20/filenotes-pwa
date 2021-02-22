@@ -5,9 +5,9 @@ import Store from './store';
 let storage: Storage | null = null;
 
 interface Filesystem {
-  metadata: Store<Metadata>;
-  content: Store<Content>;
-  delta: Store<Metadata>;
+  metadata: Store<IMetadata>;
+  content: Store<IContent>;
+  delta: Store<IMetadata>;
 }
 
 export default class Storage {
@@ -16,9 +16,9 @@ export default class Storage {
 
   constructor() {
     this.fs = {
-      metadata: new Store<Metadata>(STORE_FS_METADATA),
-      content: new Store<Content>(STORE_FS_CONTENT),
-      delta: new Store<Metadata>(STORE_FS_DELTA)  
+      metadata: new Store<IMetadata>(STORE_FS_METADATA),
+      content: new Store<IContent>(STORE_FS_CONTENT),
+      delta: new Store<IMetadata>(STORE_FS_DELTA)  
     };
     this.settings = new KeyValueStore(STORE_SETTINGS);
   }

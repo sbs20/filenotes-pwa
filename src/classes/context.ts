@@ -6,7 +6,7 @@ import SyncEngine from './sync-engine';
 let instance: Context | null = null;
 
 export default class Context {
-  private _remote: RemoteProvider | null;
+  private _remote: IRemoteProvider | null;
   private _sync: SyncEngine | null;
 
   constructor() {
@@ -38,7 +38,7 @@ export default class Context {
     return '';
   }
 
-  get remote(): RemoteProvider | null {
+  get remote(): IRemoteProvider | null {
     return this._remote;
   }
 
