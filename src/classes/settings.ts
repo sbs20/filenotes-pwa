@@ -35,8 +35,8 @@ export default class Settings {
   autoFocus: StoredProperty<boolean>;
   foregroundSync: StoredProperty<boolean>;
   storageService: StoredProperty<string>;
-  oauth: StoredProperty<OAuthToken>;
-  pkce: StoredProperty<PkceParameters>;
+  oauth: StoredProperty<IOAuthToken>;
+  pkce: StoredProperty<IPkceParameters>;
   name: StoredProperty<string>;
   email: StoredProperty<string>;
   avatar: StoredProperty<string>;

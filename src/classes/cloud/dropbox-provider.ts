@@ -7,7 +7,7 @@ import Settings from '../settings';
 const settings = Settings.instance();
 const log = Logger.get('DropboxProvider');
 
-export default class DropboxProvider extends DropboxClient implements RemoteProvider {
+export default class DropboxProvider extends DropboxClient implements IRemoteProvider {
   constructor() {
     super({
       clientId: Constants.ApplicationId,
@@ -28,7 +28,7 @@ export default class DropboxProvider extends DropboxClient implements RemoteProv
     this.connected = false;
   }
 
-  private async accountLoad(): Promise<RemoteAccount> {
+  private async accountLoad(): Promise<IRemoteAccount> {
     return {
       name: await settings.name.get(),
       email: await settings.email.get(),
@@ -39,10 +39,10 @@ export default class DropboxProvider extends DropboxClient implements RemoteProv
 
   /**
    * 
-   * @param {RemoteAccount} account 
+   * @param {IRemoteAccount} account 
    * @returns {Promise.<void>}
    */
-  private async accountSave(account: RemoteAccount): Promise<void> {
+  private async accountSave(account: IRemoteAccount): Promise<void> {
     await Promise.all([
       settings.name.set(account.name!),
       settings.email.set(account.email!),
@@ -54,9 +54,9 @@ export default class DropboxProvider extends DropboxClient implements RemoteProv
   /**
    * Attempts to connect
    */
-  protected async startFromToken(oauth?: OAuthToken | undefined): Promise<boolean> {
+  protected async startFromToken(oauth?: IOAuthToken | undefined): Promise<boolean> {
     oauth = oauth || await settings.oauth.get();
-    if (await super.startFromToken(oauth as OAuthToken)) {
+    if (await super.startFromToken(oauth as IOAuthToken)) {
       log.debug('Connected using stored access token');
       log.info(`Logged in as ${this.account.name} (${this.account.email})`);
       await this.accountSave(this.account);      
@@ -71,7 +71,7 @@ export default class DropboxProvider extends DropboxClient implements RemoteProv
   private async startFromQueryString(queryString: string): Promise<boolean> {
     const code = QueryString.parse(queryString).code as string;
     if (code) {
-      /** @type {PkceParameters} */
+      /** @type {IPkceParameters} */
       const pkceParams = await settings.pkce.get();
       if (pkceParams) {
         pkceParams.code = code;

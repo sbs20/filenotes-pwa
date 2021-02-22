@@ -1,4 +1,4 @@
-import EventEmitter from 'events';
+import { TinyEmitter } from 'tiny-emitter';
 import Constants from './constants';
 import FileBuilder from './files/file-builder';
 import Logger from './logger';
@@ -7,9 +7,9 @@ import Storage from './data/storage';
 const storage = Storage.instance();
 const log = Logger.get('SyncEngine');
 
-async function deltas(): Promise<Metadata[]> {
+async function deltas(): Promise<IMetadata[]> {
   const deltas = await storage.fs.delta.list();
-  const sorted: Metadata[] = [];
+  const sorted: IMetadata[] = [];
   deltas.filter(m => m.tag === 'deleted')
     .sort((m1, m2) => m2.key.length - m1.key.length)
     .forEach(m => sorted.push(m));
@@ -21,11 +21,11 @@ async function deltas(): Promise<Metadata[]> {
   return sorted;
 }
 
-export default class SyncEngine extends EventEmitter {
-  remote: RemoteProvider | null;
+export default class SyncEngine extends TinyEmitter {
+  remote: IRemoteProvider | null;
   private _active: boolean;
 
-  constructor(remote: RemoteProvider | null) {
+  constructor(remote: IRemoteProvider | null) {
     super();
     this.remote = remote;
     this._active = false;
@@ -34,7 +34,7 @@ export default class SyncEngine extends EventEmitter {
   /**
    * Applies a metadata to the local filesystem
    */
-  private async _applyLocal(metadata: Metadata): Promise<boolean> {
+  private async _applyLocal(metadata: IMetadata): Promise<boolean> {
     const local = await storage.fs.metadata.read(metadata.key);
     switch (metadata.tag) {
       case 'file': {
@@ -81,7 +81,7 @@ export default class SyncEngine extends EventEmitter {
   /**
    * Applies a metadata
    */
-  private async _applyRemote(metadata: Metadata): Promise<boolean> {
+  private async _applyRemote(metadata: IMetadata): Promise<boolean> {
     switch (metadata.tag) {
       case 'file': {
         const content = await storage.fs.content.read(metadata.key);

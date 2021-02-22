@@ -4,7 +4,7 @@ import FilePath from './file-path';
 
 export default class FileBuilder {
 
-  static path(metadata: Metadata, path: string): Metadata {
+  static path(metadata: IMetadata, path: string): IMetadata {
     const filepath = new FilePath(path);
     metadata.path = path;
     metadata.key = filepath.key;
@@ -12,14 +12,14 @@ export default class FileBuilder {
     return metadata;
   }
 
-  static data(metadata: Metadata, data: ArrayBuffer): Metadata {
+  static data(metadata: IMetadata, data: ArrayBuffer): IMetadata {
     metadata.modified = new Date().toISOString();
     metadata.size = data.byteLength;
     metadata.hash = Context.instance().hash(data);
     return metadata;
   }
 
-  static create(tag: Tag, path: string): Metadata {
+  static create(tag: Tag, path: string): IMetadata {
     return FileBuilder.path({
       tag: tag,
       path: '',
@@ -28,13 +28,13 @@ export default class FileBuilder {
     }, path);
   }
 
-  static file(path: string, data: ArrayBuffer): Metadata {
-    const metadata: Metadata = FileBuilder.create('file', path);
+  static file(path: string, data: ArrayBuffer): IMetadata {
+    const metadata: IMetadata = FileBuilder.create('file', path);
     return FileBuilder.data(metadata, data);
   }
 
-  static content(path: string, data: ArrayBuffer): Content {
-    const content: Content = {
+  static content(path: string, data: ArrayBuffer): IContent {
+    const content: IContent = {
       key: path.toLowerCase(),
       data: data
     };
@@ -46,11 +46,11 @@ export default class FileBuilder {
     return content;
   }
 
-  static deleted(path: string): Metadata {
+  static deleted(path: string): IMetadata {
     return FileBuilder.create('deleted', path);
   }
 
-  static folder(path: string): Metadata {
+  static folder(path: string): IMetadata {
     return FileBuilder.create('folder', path);
   }
 }

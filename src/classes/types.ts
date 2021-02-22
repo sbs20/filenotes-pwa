@@ -2,11 +2,11 @@ type FileType = 'audio'|'text'|'image'|'todotxt'|'unknown';
 type Tag = 'file'|'folder'|'deleted';
 type BufferLike = Uint8Array | ArrayBuffer | Buffer;
 
-interface Dictionary<T> {
+interface IDictionary<T> {
   [key: string]: T
 }
 
-interface OAuthToken {
+interface IOAuthToken {
   uid: string;
   access_token: string;
   expires_in: number;
@@ -16,26 +16,26 @@ interface OAuthToken {
   account_id: string;
 }
 
-interface PkceParameters {
+interface IPkceParameters {
   url?: string;
   challenge: string;
   verifier: string;
   code?: string;
 }
 
-interface DropboxClientOptions {
+interface IDropboxClientOptions {
   clientId: string;
   authUrl: string;
 }
 
-interface RemoteAccount {
+interface IRemoteAccount {
   name?: string;
   email?: string;
   avatar?: string;
-  oauth?: OAuthToken;
+  oauth?: IOAuthToken;
 }
 
-interface Metadata {
+interface IMetadata {
   tag: Tag;
   key: string;
   name: string;
@@ -48,24 +48,24 @@ interface Metadata {
   downloadable?: boolean;
 }
 
-interface Content {
+interface IContent {
   key: string;
   preview?: string;
   data: ArrayBuffer;
 }
 
-interface RemoteProvider {
+interface IRemoteProvider {
   cursor?: string;
   accountClear(): Promise<void>;
   authenticate(window: Window): Promise<boolean>;
   start(window: Window): Promise<boolean>;
   abort():void;
-  delete(path: string): Promise<Metadata | undefined>;
-  list(): Promise<Metadata[]>;
-  peek(): Promise<Metadata[]>;
+  delete(path: string): Promise<IMetadata | undefined>;
+  list(): Promise<IMetadata[]>;
+  peek(): Promise<IMetadata[]>;
   poll(): Promise<boolean>;
   mkdir(path: string): Promise<void>;
   read(path: string): Promise<ArrayBuffer>;
-  write(metadata: Metadata, buffer: ArrayBuffer): Promise<Metadata>;
+  write(metadata: IMetadata, buffer: ArrayBuffer): Promise<IMetadata>;
   hash(buffer: BufferLike): string;
 }

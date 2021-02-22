@@ -21,22 +21,22 @@ const MAP = {
 
 export default class DropboxClient {
   private client: Dropbox | any;
-  private options: DropboxClientOptions;
+  private options: IDropboxClientOptions;
   private polling: boolean;
-  private adapter: FieldAdapter<Metadata>;
+  private adapter: FieldAdapter<IMetadata>;
   private abortController: AbortController;
   protected connected: boolean;
-  protected account: RemoteAccount;
+  protected account: IRemoteAccount;
   cursor?: string;
 
   /**
    * Constructor
    * @param {ConfigureOptions} options - Options
    */
-  constructor(options: DropboxClientOptions) {
+  constructor(options: IDropboxClientOptions) {
     this.options = options;
     this.polling = false;
-    this.adapter = new FieldAdapter<Metadata>(MAP);
+    this.adapter = new FieldAdapter<IMetadata>(MAP);
     this.connected = false;
     this.abortController = new AbortController();
     this.account = {
@@ -72,7 +72,7 @@ export default class DropboxClient {
   /**
    * Returns the authentication parameters
    */
-  protected pkceStart(): PkceParameters {
+  protected pkceStart(): IPkceParameters {
     const auth = this.auth as any;
     const url = this.auth.getAuthenticationUrl(
       this.options.authUrl, undefined, 'code', 'offline', undefined, 'none', true);
@@ -85,10 +85,10 @@ export default class DropboxClient {
 
   /**
    * Continues the PKCE process
-   * @param {PkceParameters} params The PKCE parameters
-   * @returns {Promise.<OAuthToken>} The access token
+   * @param {IPkceParameters} params The PKCE parameters
+   * @returns {Promise.<IOAuthToken>} The access token
    */
-  protected async pkceFinish(params: PkceParameters): Promise<OAuthToken | undefined> {
+  protected async pkceFinish(params: IPkceParameters): Promise<IOAuthToken | undefined> {
     const auth = this.auth as any;
     auth.codeChallenge = params.challenge;
     auth.codeVerifier = params.verifier;
@@ -134,7 +134,7 @@ export default class DropboxClient {
   /**
    * Attempts to connect
    */
-  protected async startFromToken(oauth: OAuthToken): Promise<boolean> {
+  protected async startFromToken(oauth: IOAuthToken): Promise<boolean> {
     if (oauth && oauth.refresh_token) {
       this.refreshToken = oauth.refresh_token;
       this.account.oauth = oauth;
@@ -148,12 +148,12 @@ export default class DropboxClient {
   /**
    * Deletes a file or path
    * @param {string} path
-   * @returns {Promise.<Metadata>}
+   * @returns {Promise.<IMetadata>}
    */
-  async delete(path: string): Promise<Metadata | undefined> {
+  async delete(path: string): Promise<IMetadata | undefined> {
     try {
       const response = await this.client.filesDeleteV2({ path: path });  
-      return this.adapter.apply(response.result.metadata) as Metadata;
+      return this.adapter.apply(response.result.metadata) as IMetadata;
     } catch (exception) {
       // If it's already been deleted we can ignore it, otherwise, throw
       if (exception.error.indexOf('path_lookup/not_found') === -1) {
@@ -167,8 +167,8 @@ export default class DropboxClient {
   /**
    * Returns a list of file metadata objects
    */
-  async list(): Promise<Metadata[]> {
-    const files: Metadata[] = [];
+  async list(): Promise<IMetadata[]> {
+    const files: IMetadata[] = [];
     let hasMore = true;
 
     const handleResult = (result: files.ListFolderResult):void => {
@@ -200,7 +200,7 @@ export default class DropboxClient {
   /**
    * Returns a list of file metadata objects without updating the cursor
    */
-  async peek(): Promise<Metadata[]> {
+  async peek(): Promise<IMetadata[]> {
     const cursor = this.cursor;
     const list = await this.list();
     this.cursor = cursor;
@@ -260,7 +260,7 @@ export default class DropboxClient {
   /**
    * Writes a file to dropbox
    */
-  async write(metadata: Metadata, buffer: ArrayBuffer): Promise<Metadata> {
+  async write(metadata: IMetadata, buffer: ArrayBuffer): Promise<IMetadata> {
     /** @type {import('dropbox').files.CommitInfo} */
     const mode = metadata.revision
       ? { '.tag': 'update', update: metadata.revision }
@@ -280,7 +280,7 @@ export default class DropboxClient {
   /**
    * Writes a file to dropbox
    */
-  private async _write(commitInfo: files.CommitInfo | any): Promise<Metadata> {
+  private async _write(commitInfo: files.CommitInfo | any): Promise<IMetadata> {
     const CHUNKING_THRESHOLD = 2 * 1024 * 1024;
 
     const buffer = commitInfo.contents as ArrayBuffer;
