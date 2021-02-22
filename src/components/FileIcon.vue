@@ -25,6 +25,10 @@ export default {
           return 'microphone';
         case 'image':
           return 'image';
+        case 'pdf':
+          return 'file-pdf';
+        case 'todotxt':
+          return 'calendar-check';
         case 'text':
         default:
           return 'text';
