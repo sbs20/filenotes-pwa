@@ -5,7 +5,7 @@ import QueryString from '../utils/query-string';
 import Settings from '../settings';
 
 const settings = Settings.instance();
-const log = Logger.get('DropboxManager');
+const log = Logger.get('DropboxProvider');
 
 export default class DropboxProvider extends DropboxClient implements RemoteProvider {
   constructor() {

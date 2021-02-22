@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
+import Constants from '@/classes/constants';
 
 const Options = [
   {

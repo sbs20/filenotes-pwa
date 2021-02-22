@@ -18,12 +18,12 @@
 
 <script>
 import EventBus from '@/classes/event-bus';
-import Constants from '../classes/constants';
-import FileBuilder from '../classes/files/file-builder';
-import FilePath from '../classes/files/file-path';
-import LocalProvider from '../classes/local-provider';
-import Logger from '../classes/logger';
-import Settings from '../classes/settings';
+import Constants from '@/classes/constants';
+import FileBuilder from '@/classes/files/file-builder';
+import FilePath from '@/classes/files/file-path';
+import LocalProvider from '@/classes/local-provider';
+import Logger from '@/classes/logger';
+import Settings from '@/classes/settings';
 import Application from '@/classes/application';
 
 import ConfirmYesNoCancel from './ConfirmYesNoCancel';

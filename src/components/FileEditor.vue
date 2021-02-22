@@ -13,8 +13,8 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
-import Settings from '../classes/settings';
+import Constants from '@/classes/constants';
+import Settings from '@/classes/settings';
 
 import AudioEditor from './editors/AudioEditor';
 import ImageEditor from './editors/ImageEditor';

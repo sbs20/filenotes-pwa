@@ -11,9 +11,9 @@
 </template>
 
 <script>
-import FilePath from '../classes/files/file-path';
-import FileBuilder from '../classes/files/file-builder';
-import LocalProvider from '../classes/local-provider';
+import FilePath from '@/classes/files/file-path';
+import FileBuilder from '@/classes/files/file-builder';
+import LocalProvider from '@/classes/local-provider';
 
 export default {
   name: 'Folders',

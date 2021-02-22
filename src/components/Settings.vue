@@ -158,14 +158,15 @@
 </template>
 
 <script>
-import Logger from '../classes/logger';
-import Settings from '../classes/settings';
-import Storage from '../classes/data/storage';
+import Constants from '@/classes/constants';
+import Context from '@/classes/context';
+import EventBus from '@/classes/event-bus';
+import Logger from '@/classes/logger';
+import Settings from '@/classes/settings';
+import Storage from '@/classes/data/storage';
+
 import SettingsSection from './SettingsSection';
 import SettingsItem from './SettingsItem';
-import Constants from '../classes/constants';
-import Context from '../classes/context';
-import EventBus from '../classes/event-bus';
 
 const log = Logger.get('Settings');
 const settings = Settings.instance();

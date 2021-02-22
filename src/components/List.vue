@@ -35,14 +35,14 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
-import LocalProvider from '../classes/local-provider';
-import FilePath from '../classes/files/file-path';
-import FileBuilder from '../classes/files/file-builder';
-import Logger from '../classes/logger';
-import MetadataComparator from '../classes/metadata-comparator';
-import Settings from '../classes/settings';
-import EventBus from '../classes/event-bus';
+import Constants from '@/classes/constants';
+import LocalProvider from '@/classes/local-provider';
+import FilePath from '@/classes/files/file-path';
+import FileBuilder from '@/classes/files/file-builder';
+import Logger from '@/classes/logger';
+import MetadataComparator from '@/classes/metadata-comparator';
+import Settings from '@/classes/settings';
+import EventBus from '@/classes/event-bus';
 
 import Folders from './Folders';
 import ListItem from './ListItem';
