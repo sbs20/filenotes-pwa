@@ -17,7 +17,8 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
+import Constants from '@/classes/constants';
+
 export default {
   name: 'Prompt',
   data() {

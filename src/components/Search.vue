@@ -10,15 +10,15 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
-import LocalProvider from '../classes/local-provider';
-import Logger from '../classes/logger';
-import MetadataComparator from '../classes/metadata-comparator';
-import Settings from '../classes/settings';
+import Constants from '@/classes/constants';
+import LocalProvider from '@/classes/local-provider';
+import Logger from '@/classes/logger';
+import MetadataComparator from '@/classes/metadata-comparator';
+import Settings from '@/classes/settings';
 
 import ListItem from './ListItem';
 
-const log = Logger.get('List');
+const log = Logger.get('Search');
 const fs = LocalProvider.instance();
 const settings = Settings.instance();
 

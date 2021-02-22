@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import FilePath from '../classes/files/file-path';
+import FilePath from '@/classes/files/file-path';
 
 export default {
   name: 'FileIcon',

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="showAuthenticate" class="d-flex flex-row mt-4 justify-center">
+    <div v-if="showAuthenticate" class="d-flex flex-row mt-4 flex-wrap justify-center">
       <v-btn color="primary" @click="authenticate">Authenticate with Dropbox</v-btn>
       <v-btn color="secondary" @click="useDisconnected">Use disconnected</v-btn>
     </div>
@@ -71,9 +71,9 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
-import Context from '../classes/context';
-import Settings from '../classes/settings';
+import Constants from '@/classes/constants';
+import Context from '@/classes/context';
+import Settings from '@/classes/settings';
 
 const context = Context.instance();
 const settings = Settings.instance();

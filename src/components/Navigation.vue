@@ -79,8 +79,8 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
-import Settings from '../classes/settings';
+import Constants from '@/classes/constants';
+import Settings from '@/classes/settings';
 
 const settings = Settings.instance();
 

@@ -7,8 +7,8 @@
 </template>
 
 <script>
-import Constants from '../classes/constants';
-import Logger from '../classes/logger';
+import Constants from '@/classes/constants';
+import Logger from '@/classes/logger';
 
 export default {
   name: 'Console',

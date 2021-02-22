@@ -27,12 +27,13 @@
 </template>
 
 <script>
+import Constants from '@/classes/constants';
+
 import DateTime from './DateTime';
 import FileIcon from './FileIcon';
 import FileSize from './FileSize';
 import Flash from './Flash';
 import ListItemAction from './ListItemAction';
-import Constants from '../classes/constants';
 
 export default {
   name: 'ListItem',
