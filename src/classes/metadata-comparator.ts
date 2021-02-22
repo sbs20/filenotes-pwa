@@ -9,23 +9,18 @@ function byNameDescending(metadata1: IMetadata, metadata2: IMetadata): number {
 }
 
 function byFolderThenNameAscending(metadata1: IMetadata, metadata2: IMetadata): number {
-  return metadata1.tag !== metadata2.tag
-    ? -metadata1.tag.localeCompare(metadata2.tag)
-    : metadata1.key.localeCompare(metadata2.key);
+  return -metadata1.tag.localeCompare(metadata2.tag) || metadata1.key.localeCompare(metadata2.key);
 }
 
 function byFolderThenNameDescending(metadata1: IMetadata, metadata2: IMetadata): number {
-  return metadata1.tag !== metadata2.tag
-    ? -metadata1.tag.localeCompare(metadata2.tag)
-    : -metadata1.key.localeCompare(metadata2.key);
+  return -metadata1.tag.localeCompare(metadata2.tag) || -metadata1.key.localeCompare(metadata2.key);
 }
 
 function byFolderThenDateAscending(metadata1: IMetadata, metadata2: IMetadata): number {
-  return metadata1.tag !== metadata2.tag
-    ? -metadata1.tag.localeCompare(metadata2.tag)
-    : metadata1.modified && metadata2.modified
+  return -metadata1.tag.localeCompare(metadata2.tag)
+    || (metadata1.modified && metadata2.modified
       ? metadata1.modified.localeCompare(metadata2.modified)
-      : 0;
+      : 0);
 }
 
 function byFolderThenDateDescending(metadata1: IMetadata, metadata2: IMetadata): number {
@@ -33,11 +28,10 @@ function byFolderThenDateDescending(metadata1: IMetadata, metadata2: IMetadata):
 }
 
 function bySizeAscending(metadata1: IMetadata, metadata2: IMetadata): number {
-  return metadata1.tag !== metadata2.tag
-    ? -metadata1.tag.localeCompare(metadata2.tag)
-    : metadata1.size !== undefined && metadata2.size !== undefined
+  return -metadata1.tag.localeCompare(metadata2.tag)
+    || (metadata1.size !== undefined && metadata2.size !== undefined
       ? metadata1.size - metadata2.size
-      : 0;
+      : 0);
 }
 
 function bySizeDescending(metadata1: IMetadata, metadata2: IMetadata): number {
