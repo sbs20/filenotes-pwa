@@ -261,7 +261,6 @@ export default class DropboxClient {
    * Writes a file to dropbox
    */
   async write(metadata: IMetadata, buffer: ArrayBuffer): Promise<IMetadata> {
-    /** @type {import('dropbox').files.CommitInfo} */
     const mode = metadata.revision
       ? { '.tag': 'update', update: metadata.revision }
       : { '.tag': 'add'};
@@ -301,7 +300,7 @@ export default class DropboxClient {
           const cursor = { session_id: sessionId, offset: offset };
           await this.client.filesUploadSessionAppendV2({ cursor: cursor, close: false, contents: chunk });
         } else {
-          commitInfo.contents = {};
+          delete commitInfo.contents;
           const response = await this.client.filesUploadSessionFinish({
             cursor: { session_id: sessionId, offset: buffer.byteLength - chunk.byteLength },
             commit: commitInfo,
