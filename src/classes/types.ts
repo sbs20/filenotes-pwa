@@ -1,4 +1,4 @@
-type FileType = 'audio'|'text'|'image'|'todotxt'|'unknown';
+type FileType = 'audio'|'image'|'pdf'|'text'|'todotxt'|'unknown';
 type Tag = 'file'|'folder'|'deleted';
 type BufferLike = Uint8Array | ArrayBuffer | Buffer;
 

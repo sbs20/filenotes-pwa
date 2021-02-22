@@ -72,6 +72,9 @@ export default class FilePath {
       case 'png':
         return 'image';
 
+      case 'pdf':
+        return 'pdf';
+
       case 'aac':
       case 'wav':
       case 'mp3':
