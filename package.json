@@ -21,6 +21,7 @@
     "todo-txt-ts": "1.0.1",
     "vue": "^2.6.11",
     "vue-audio-visual": "^2.2.2",
+    "vue-pdf": "4.2.0",
     "vue-prism-editor": "1.2.2",
     "vue-router": "3.4.5",
     "vuetify": "2.3.18"

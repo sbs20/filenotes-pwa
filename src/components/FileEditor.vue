@@ -8,6 +8,7 @@
     <image-editor v-if="type === 'image'" v-model="buffer"></image-editor>
     <audio-editor v-if="type === 'audio'" v-model="buffer"></audio-editor>
     <todo-txt-editor v-if="type === 'todotxt'" v-model="buffer" @input="update"></todo-txt-editor>
+    <pdf-viewer v-if="type === 'pdf'" v-model="buffer"></pdf-viewer>
     <div v-if="type === 'unknown'">Unknown file type</div>
   </div>
 </template>
@@ -19,6 +20,7 @@ import Settings from '@/classes/settings';
 import AudioEditor from './editors/AudioEditor';
 import ImageEditor from './editors/ImageEditor';
 import HighlightTextEditor from './editors/HighlightTextEditor';
+import PdfViewer from './editors/PdfViewer';
 import PlainTextEditor from './editors/PlainTextEditor';
 import PrismTextEditor from './editors/PrismTextEditor';
 import TodoTxtEditor from './editors/TodoTxtEditor';
@@ -34,6 +36,7 @@ export default {
     AudioEditor,
     HighlightTextEditor,
     ImageEditor,
+    PdfViewer,
     PlainTextEditor,
     PrismTextEditor,
     TodoTxtEditor
