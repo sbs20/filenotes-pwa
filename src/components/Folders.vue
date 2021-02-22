@@ -36,6 +36,14 @@ export default {
     this.open(FileBuilder.folder(this.value));
   },
 
+  watch: {
+    value() {
+      if (this.value) {
+        this.open(FileBuilder.folder(this.value));
+      }
+    }
+  },
+
   methods: {
     /**
      * @param {Metadata} entry
