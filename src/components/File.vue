@@ -99,7 +99,7 @@ export default {
       metadata: {},
 
       /** @type {FileType} */
-      type: 'unknown',
+      type: undefined,
     };
   },
 
@@ -203,7 +203,7 @@ export default {
     load() {
       /** @type {string} */
       const path = this.$route.params.pathMatch;
-      this.type = 'unknown';
+      this.type = undefined;
       fs.get(path).then(metadata => {
         if (metadata === undefined) {
           this.perform('discard');
