@@ -107,12 +107,14 @@ export default class FilePath {
 
   static defaultExtension(type: FileType): string {
     switch (type) {
-      case 'text':
-        return 'txt';
       case 'audio':
         return 'mp3';
       case 'image':
         return 'jpg';
+      case 'text':
+        return 'txt';
+      case 'todotxt':
+        return 'td';
       default:
         return 'unknown';
     }

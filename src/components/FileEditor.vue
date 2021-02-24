@@ -10,6 +10,11 @@
     <todo-txt-editor v-if="type === 'todotxt'" v-model="buffer" @input="update"></todo-txt-editor>
     <pdf-viewer v-if="type === 'pdf'" v-model="buffer"></pdf-viewer>
     <div v-if="type === 'unknown'">Unknown file type</div>
+    <div v-if="type === undefined" class="text-center">
+      <v-progress-circular
+        indeterminate
+        color="primary" />
+    </div>
   </div>
 </template>
 

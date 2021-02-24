@@ -1,6 +1,6 @@
 <template>
   <div>
-    <list-new @directory="mkdir" @text="mktext"></list-new>
+    <list-new @directory="mkdir" @file="mkfile"></list-new>
 
     <div class="d-flex flex-row mb-4">
       <div class="text-h5" style="word-break: break-word;">{{ header }}</div>
@@ -182,11 +182,11 @@ export default {
       }
     },
 
-    mktext() {
+    mkfile(type) {
       if (this.current.tag === 'folder') {
         this.open({
           tag: 'file',
-          key: `${this.current.path}?type=text`
+          key: `${this.current.path}?type=${type}`
         });
       }
     },

@@ -11,10 +11,13 @@
       </v-btn>
     </template>
 
+    <v-btn fab small aria-role="listitem" @click="$emit('file', 'todotxt')">
+      <v-icon>mdi-calendar-check</v-icon>
+    </v-btn>
     <v-btn fab small aria-role="listitem" @click="$emit('directory')">
       <v-icon>mdi-folder-plus</v-icon>
     </v-btn>
-    <v-btn fab small color="primary" aria-role="listitem" @click="$emit('text')">
+    <v-btn fab small color="primary" aria-role="listitem" @click="$emit('file', 'text')">
       <v-icon>mdi-file-plus</v-icon>
     </v-btn>
     <!-- <b-dropdown-item aria-role="listitem">
