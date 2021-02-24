@@ -4,10 +4,10 @@
       <v-checkbox v-on:click.stop @change="complete" v-model="task.isComplete" />
     </div>
     <div class="text-h5 pl-2" :style="{ color: priorityColor() }">
-      ({{ task.priority }})
+      ({{ task.priority || '--' }})
     </div>
     <div class="task-body pl-2" @click="$emit('open', task)" :style="{ 'text-decoration': task.isComplete ? 'line-through' : ''}">
-      <div class="text-h6">
+      <div class="text-h6" style="word-break: break-word;">
         {{ task.body }}
         <span class="context mr-1">
           {{ task.contexts.map(p => `@${p}`).join(' ') }}
