@@ -7,7 +7,7 @@
       <file-icon class="pt-2" :value="value"></file-icon>
     </div>
     <div class="pl-2">
-      <div class="text-h6">{{ value.name }}&nbsp;</div>
+      <div class="text-h6">{{ showPath ? value.path : value.name }}&nbsp;</div>
       <div class="text-caption">
         <span v-if="value.tag === 'file'">
           <file-size v-model="value.size"></file-size> (<date-time v-model="value.modified"></date-time>)
@@ -49,6 +49,11 @@ export default {
   props: {
     /** @type {Metadata} */
     value: Object,
+
+    showPath: {
+      type: Boolean,
+      default: false
+    },
 
     showActions: {
       type: Boolean,

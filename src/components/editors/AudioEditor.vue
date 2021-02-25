@@ -1,7 +1,15 @@
 <template>
   <div>
-    <av-waveform v-if="src" canv-class="audio-canvas"
-      :audio-src="src" :canv-top="true" :audio-controls="false"></av-waveform>
+    <av-waveform v-if="src"
+      :audio-src="src"
+      :canv-top="true"
+      :audio-controls="false"
+      :canv-width="width"
+      canv-height="60"
+      played-line-color="#49a6D2"
+      noplayed-line-color="#1976D2"
+      playtime-slider-color="#808080"
+      playtime-slider-width="5"></av-waveform>
     <audio class="audio-control" v-if="src" controls :src="src"></audio>
   </div>
 </template>
@@ -23,7 +31,8 @@ export default {
 
   data() {
     return {
-      src: null
+      src: null,
+      width: window.innerWidth - 40
     };
   },
 
