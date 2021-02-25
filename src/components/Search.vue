@@ -3,7 +3,7 @@
     <v-text-field autofocus v-model="query" placeholder="Search..."></v-text-field>
 
     <div class="list-item" tabindex="1" v-for="entry in results" v-bind:key="entry.key">
-      <list-item :value="entry" @open="open" :show-actions="false"></list-item>
+      <list-item :showPath="true" :value="entry" @open="open" :show-actions="false"></list-item>
     </div>
   </div>
   
