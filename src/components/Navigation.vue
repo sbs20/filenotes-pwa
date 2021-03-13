@@ -69,7 +69,7 @@
       <template v-slot:append>
         <div class="d-flex flex-row pa-4 text-caption">
           <div class="ml-auto">
-            &copy; 2020 Sam Strachan
+            &copy; 2020-{{new Date().getFullYear()}} Sam Strachan
           </div>
         </div>
       </template>
