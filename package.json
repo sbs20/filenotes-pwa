@@ -1,6 +1,6 @@
 {
   "name": "filenotes-pwa",
-  "version": "0.8.6",
+  "version": "0.8.7",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -15,7 +15,7 @@
     "idb": "5.0.6",
     "luxon": "^1.25.0",
     "node-sass": "4.14.1",
-    "prismjs": "1.21.0",
+    "prismjs": "1.23.0",
     "register-service-worker": "^1.7.1",
     "tiny-emitter": "^2.1.0",
     "todo-txt-ts": "1.0.1",

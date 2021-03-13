@@ -64,7 +64,7 @@
     <div class="body-1 mt-4">
       This software is free to use and licensed under MIT. The source code is
       available on <a target="_blank" href="https://github.com/sbs20/filenotes-pwa">GitHub</a>.
-      Copyright &copy; 2020-present, Sam Strachan.
+      Copyright &copy; 2020-{{new Date().getFullYear()}}, Sam Strachan.
     </div>
 
   </div>

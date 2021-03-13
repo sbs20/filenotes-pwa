@@ -3,8 +3,8 @@
     <div>
       <v-checkbox v-on:click.stop @change="complete" v-model="task.isComplete" />
     </div>
-    <div class="text-h5 pl-2" :style="{ color: priorityColor() }">
-      ({{ task.priority || '--' }})
+    <div class="text-h6 pl-2" :style="{ color: priorityColor() }">
+      ({{ task.priority || '?' }})
     </div>
     <div class="task-body pl-2" @click="$emit('open', task)" :style="{ 'text-decoration': task.isComplete ? 'line-through' : ''}">
       <div class="text-h6" style="word-break: break-word;">
@@ -58,7 +58,7 @@ export default {
         case 'B':
           return '#ffbb00';
         case 'C':
-          return '#00ff00';
+          return '#00e000';
         case 'D':
           return '#4444ff';
         default:
